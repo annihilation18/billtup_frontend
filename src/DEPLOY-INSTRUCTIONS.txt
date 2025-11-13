@@ -1,0 +1,100 @@
+═══════════════════════════════════════════════════════════════════
+  🚀 DEPLOY EMAIL TEMPLATE UPDATES - QUICK START
+═══════════════════════════════════════════════════════════════════
+
+Your email templates are ready but NOT LIVE yet!
+The code is updated locally but needs to be deployed to Supabase.
+
+═══════════════════════════════════════════════════════════════════
+  STEP 1: RUN THE DEPLOYMENT SCRIPT
+═══════════════════════════════════════════════════════════════════
+
+Choose your operating system:
+
+┌─────────────────────────────────────────────────────────────────┐
+│  MAC / LINUX:                                                   │
+│                                                                 │
+│  ./deploy-backend.sh                                            │
+└─────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────┐
+│  WINDOWS:                                                       │
+│                                                                 │
+│  deploy-backend.bat                                             │
+└─────────────────────────────────────────────────────────────────┘
+
+The script will:
+  ✓ Check if Supabase CLI is installed
+  ✓ Find your backend function
+  ✓ Deploy it to Supabase
+  ✓ Show you the results
+
+═══════════════════════════════════════════════════════════════════
+  FIRST TIME DEPLOYING?
+═══════════════════════════════════════════════════════════════════
+
+If you've never deployed before, you'll need to:
+
+1. Install Supabase CLI:
+   npm install -g supabase
+
+2. Login to Supabase:
+   npx supabase login
+   (Opens browser to authenticate)
+
+3. Link your project:
+   npx supabase link --project-ref YOUR_PROJECT_REF
+   
+   Find YOUR_PROJECT_REF at:
+   https://supabase.com/dashboard/project/YOUR_PROJECT_REF
+                                          ^^^^^^^^^^^^^^^^
+                                          Copy this part
+
+4. Run deployment script again
+
+═══════════════════════════════════════════════════════════════════
+  STEP 2: TEST THE CHANGES
+═══════════════════════════════════════════════════════════════════
+
+After successful deployment (takes ~60 seconds):
+
+1. Open BilltUp in your browser
+2. Go to Settings → Custom Branding
+3. Verify your template selection (Modern, Classic, or Minimal)
+4. Create a test invoice
+5. Send it to your email
+6. CHECK YOUR INBOX! 📧
+
+The email will now match your brand preview exactly!
+
+═══════════════════════════════════════════════════════════════════
+  WHAT WILL CHANGE
+═══════════════════════════════════════════════════════════════════
+
+BEFORE (Current):
+  ❌ Blue table header layout
+  ❌ Shows business address at top
+  ❌ Doesn't use your brand colors
+  ❌ Doesn't match brand preview
+
+AFTER (Deployed):
+  ✅ Modern: Clean teal accent bar, no address
+  ✅ Classic: Colored header with address
+  ✅ Minimal: Ultra-clean, no address
+  ✅ Uses YOUR custom brand colors
+  ✅ Shows YOUR custom logo
+  ✅ Matches brand preview exactly
+
+═══════════════════════════════════════════════════════════════════
+  NEED HELP?
+═══════════════════════════════════════════════════════════════════
+
+The deployment script will guide you through any issues!
+
+Just run it and follow the on-screen instructions.
+
+For more details, see:
+  • README-DEPLOY-NOW.md (detailed guide)
+  • DEPLOY-EMAIL-TEMPLATES.md (troubleshooting)
+
+═══════════════════════════════════════════════════════════════════

@@ -1,0 +1,68 @@
+# GitHub Actions Workflow for BilltUp - Automatic Supabase Deployment
+# This workflow automatically deploys your Supabase Edge Functions when you push code to GitHub
+#
+# IMPORTANT: When you download this project, rename the "github" folder to ".github" 
+# (with a dot at the beginning). GitHub requires the folder to be named ".github"
+
+name: Deploy to Supabase
+
+# Trigger: This workflow runs when you push to main or master branch
+# You can also trigger it manually from the GitHub Actions tab
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:  # Allows manual triggering from GitHub UI
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout your code from the repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Step 2: Install Supabase CLI
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Step 3: Deploy the Supabase Edge Functions
+      # IMPORTANT: You need to set up GitHub Secrets for this to work:
+      # 
+      # 1. SUPABASE_ACCESS_TOKEN
+      #    - Go to: https://supabase.com/dashboard/account/tokens
+      #    - Click "Generate New Token"
+      #    - Copy the token
+      #    - In GitHub: Settings > Secrets and variables > Actions > New repository secret
+      #    - Name: SUPABASE_ACCESS_TOKEN
+      #    - Value: [paste your token]
+      #
+      # 2. SUPABASE_PROJECT_ID  
+      #    - Go to your Supabase project dashboard
+      #    - Settings > General > Reference ID
+      #    - Copy the Reference ID (looks like: abcdefghijklmnop)
+      #    - In GitHub: Settings > Secrets and variables > Actions > New repository secret
+      #    - Name: SUPABASE_PROJECT_ID
+      #    - Value: [paste your reference ID]
+      #
+      - name: Deploy Supabase Functions
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+        run: |
+          supabase link --project-ref $SUPABASE_PROJECT_ID
+          supabase functions deploy server
+
+      # Step 4: Success message
+      - name: Deployment Success
+        if: success()
+        run: echo "✅ Supabase functions deployed successfully!"
+
+      # Step 5: Failure message
+      - name: Deployment Failed
+        if: failure()
+        run: echo "❌ Supabase deployment failed. Check logs above."

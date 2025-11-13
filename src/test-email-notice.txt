@@ -1,0 +1,13 @@
+PDF Notice Added Successfully!
+
+The invoice emails now include:
+✅ Professional PDF attachment (generated with PDFKit)
+✅ Plain text mention of PDF attachment
+✅ HTML email with embedded images
+
+The PDF includes:
+- Custom branding (colors from business settings)
+- All invoice details (items, totals, tax)
+- Business information
+- Professional formatting
+- Payment status badge
