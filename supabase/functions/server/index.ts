@@ -346,12 +346,12 @@ async function checkAuth(c: any) {
 }
 
 // Health check endpoint
-app.get("/make-server-dce439b6/health", (c) => {
+app.get("/health", (c) => {
     return c.json({ status: "ok" });
 });
 
 // Email configuration diagnostic endpoint
-app.get("/make-server-dce439b6/email/check-config", async (c) => {
+app.get("/email/check-config", async (c) => {
     try {
         console.log('📧 Email Configuration Diagnostic Check');
 
@@ -443,7 +443,7 @@ function shouldResetMonthlyCounter(monthStart: string, monthEnd: string): boolea
 }
 
 // Sign up endpoint
-app.post("/make-server-dce439b6/auth/signup", async (c) => {
+app.post("/auth/signup", async (c) => {
     try {
         const body = await c.req.json();
         const { email, password, businessName } = body;
@@ -507,7 +507,7 @@ app.post("/make-server-dce439b6/auth/signup", async (c) => {
 });
 
 // Test endpoint for auth routes
-app.get("/make-server-dce439b6/auth/test", (c) => {
+app.get("/auth/test", (c) => {
     console.log('✅ Auth test endpoint hit!');
     return c.json({
         message: "Auth routes are working!",
@@ -520,7 +520,7 @@ app.get("/make-server-dce439b6/auth/test", (c) => {
 });
 
 // Password reset request endpoint
-app.post("/make-server-dce439b6/auth/request-password-reset", async (c) => {
+app.post("/auth/request-password-reset", async (c) => {
     console.log('');
     console.log('╔════════════════════════════════════════════════════════════════╗');
     console.log('║         PASSWORD RESET REQUEST RECEIVED                       ║');
@@ -749,7 +749,7 @@ app.post("/make-server-dce439b6/auth/request-password-reset", async (c) => {
 });
 
 // Password reset verification and update endpoint
-app.post("/make-server-dce439b6/auth/reset-password", async (c) => {
+app.post("/auth/reset-password", async (c) => {
     try {
         const body = await c.req.json();
         const { token, newPassword } = body;
@@ -817,7 +817,7 @@ app.post("/make-server-dce439b6/auth/reset-password", async (c) => {
 // ==================== BUSINESS ROUTES ====================
 
 // Save business data
-app.post("/make-server-dce439b6/business", async (c) => {
+app.post("/business", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -839,7 +839,7 @@ app.post("/make-server-dce439b6/business", async (c) => {
 });
 
 // Get business data
-app.get("/make-server-dce439b6/business", async (c) => {
+app.get("/business", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -893,7 +893,7 @@ app.patch("/make-server-dce439b6/business", async (c) => {
 });
 
 // Upload business logo
-app.post("/make-server-dce439b6/business/logo", async (c) => {
+app.post("/business/logo", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -946,7 +946,7 @@ app.post("/make-server-dce439b6/business/logo", async (c) => {
 // ==================== SUBSCRIPTION ROUTES ====================
 
 // Get subscription status with trial tracking
-app.get("/make-server-dce439b6/subscription/status", async (c) => {
+app.get("/subscription/status", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1014,7 +1014,7 @@ app.get("/make-server-dce439b6/subscription/status", async (c) => {
 });
 
 // Cancel subscription
-app.post("/make-server-dce439b6/subscription/cancel", async (c) => {
+app.post("/subscription/cancel", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1118,7 +1118,7 @@ app.post("/make-server-dce439b6/subscription/cancel", async (c) => {
 // ==================== ACCOUNT DELETION ROUTE ====================
 
 // Delete account and archive data for BilltUp records
-app.post("/make-server-dce439b6/account/delete", async (c) => {
+app.post("/account/delete", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1228,7 +1228,7 @@ app.post("/make-server-dce439b6/account/delete", async (c) => {
 // ==================== STRIPE CONNECT ROUTES ====================
 
 // Get Stripe OAuth connect URL
-app.get("/make-server-dce439b6/stripe/oauth-url", async (c) => {
+app.get("/stripe/oauth-url", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1278,7 +1278,7 @@ app.get("/make-server-dce439b6/stripe/oauth-url", async (c) => {
 });
 
 // Handle Stripe OAuth callback
-app.post("/make-server-dce439b6/stripe/oauth-callback", async (c) => {
+app.post("/stripe/oauth-callback", async (c) => {
     try {
         const { code, state } = await c.req.json();
 
@@ -1351,7 +1351,7 @@ app.post("/make-server-dce439b6/stripe/oauth-callback", async (c) => {
 });
 
 // Get Stripe Connect account status
-app.get("/make-server-dce439b6/stripe/account-status", async (c) => {
+app.get("/stripe/account-status", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1406,7 +1406,7 @@ app.get("/make-server-dce439b6/stripe/account-status", async (c) => {
 });
 
 // Refresh Stripe Connect onboarding link (if expired)
-app.post("/make-server-dce439b6/stripe/refresh-onboarding", async (c) => {
+app.post("/stripe/refresh-onboarding", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1442,7 +1442,7 @@ app.post("/make-server-dce439b6/stripe/refresh-onboarding", async (c) => {
 });
 
 // Disconnect Stripe Connect account
-app.post("/make-server-dce439b6/stripe/disconnect", async (c) => {
+app.post("/stripe/disconnect", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1482,7 +1482,7 @@ app.post("/make-server-dce439b6/stripe/disconnect", async (c) => {
 });
 
 // Calculate fees for a transaction (utility endpoint)
-app.post("/make-server-dce439b6/stripe/calculate-fees", async (c) => {
+app.post("/stripe/calculate-fees", async (c) => {
     try {
         const { amount } = await c.req.json();
 
@@ -1531,7 +1531,7 @@ app.post("/make-server-dce439b6/stripe/calculate-fees", async (c) => {
 // ==================== INVOICE ROUTES ====================
 
 // Create invoice
-app.post("/make-server-dce439b6/invoices", async (c) => {
+app.post("/invoices", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1594,7 +1594,7 @@ app.post("/make-server-dce439b6/invoices", async (c) => {
 });
 
 // Get all invoices (with pagination to prevent data dumps)
-app.get("/make-server-dce439b6/invoices", async (c) => {
+app.get("/invoices", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1628,7 +1628,7 @@ app.get("/make-server-dce439b6/invoices", async (c) => {
 });
 
 // Get single invoice
-app.get("/make-server-dce439b6/invoices/:id", async (c) => {
+app.get("/invoices/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1802,7 +1802,7 @@ app.patch("/make-server-dce439b6/invoices/:id/signature", async (c) => {
 });
 
 // Delete invoice
-app.delete("/make-server-dce439b6/invoices/:id", async (c) => {
+app.delete("/invoices/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1837,7 +1837,7 @@ app.delete("/make-server-dce439b6/invoices/:id", async (c) => {
 // ==================== CUSTOMER ROUTES ====================
 
 // Create customer
-app.post("/make-server-dce439b6/customers", async (c) => {
+app.post("/customers", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1868,7 +1868,7 @@ app.post("/make-server-dce439b6/customers", async (c) => {
 });
 
 // Get all customers (with pagination to prevent data dumps)
-app.get("/make-server-dce439b6/customers", async (c) => {
+app.get("/customers", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1902,7 +1902,7 @@ app.get("/make-server-dce439b6/customers", async (c) => {
 });
 
 // Get customer by ID
-app.get("/make-server-dce439b6/customers/:id", async (c) => {
+app.get("/customers/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1960,7 +1960,7 @@ app.patch("/make-server-dce439b6/customers/:id", async (c) => {
 });
 
 // Delete customer
-app.delete("/make-server-dce439b6/customers/:id", async (c) => {
+app.delete("/customers/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1989,7 +1989,7 @@ app.delete("/make-server-dce439b6/customers/:id", async (c) => {
 // ==================== PAYMENT ROUTES ====================
 
 // Create payment intent with Stripe Connect
-app.post("/make-server-dce439b6/payments/create-intent", async (c) => {
+app.post("/payments/create-intent", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2055,7 +2055,7 @@ app.post("/make-server-dce439b6/payments/create-intent", async (c) => {
 });
 
 // Confirm payment (card entry)
-app.post("/make-server-dce439b6/payments/confirm", async (c) => {
+app.post("/payments/confirm", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2088,7 +2088,7 @@ app.post("/make-server-dce439b6/payments/confirm", async (c) => {
 });
 
 // Process NFC payment (simulated)
-app.post("/make-server-dce439b6/payments/nfc", async (c) => {
+app.post("/payments/nfc", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2117,7 +2117,7 @@ app.post("/make-server-dce439b6/payments/nfc", async (c) => {
 });
 
 // Refund payment
-app.post("/make-server-dce439b6/payments/refund", async (c) => {
+app.post("/payments/refund", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2394,7 +2394,7 @@ async function generateInvoicePDFBuffer(invoiceData: any, businessData: any): Pr
 }
 
 // Generate and send invoice PDF via email
-app.post("/make-server-dce439b6/invoices/send-email", async (c) => {
+app.post("/invoices/send-email", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2607,7 +2607,7 @@ ${businessData.address || ''}
 // ==================== EMAIL CONFIGURATION ROUTES ====================
 
 // Update email configuration (stored in KV store)
-app.post("/make-server-dce439b6/email-config", async (c) => {
+app.post("/email-config", async (c) => {
     try {
         const { emailHost, emailPort, emailUser, emailPassword } = await c.req.json();
 
@@ -2670,7 +2670,7 @@ app.post("/make-server-dce439b6/email-config", async (c) => {
 });
 
 // Get current email configuration (without exposing password)
-app.get("/make-server-dce439b6/email-config", async (c) => {
+app.get("/email-config", async (c) => {
     try {
         const config = await kv.get('email_config');
 
@@ -2700,7 +2700,7 @@ app.get("/make-server-dce439b6/email-config", async (c) => {
 // ==================== WEBHOOK ROUTES ====================
 
 // Stripe webhook handler (for production use)
-app.post("/make-server-dce439b6/webhooks/stripe", async (c) => {
+app.post("/webhooks/stripe", async (c) => {
     try {
         const body = await c.req.text();
         const signature = c.req.header('stripe-signature');
@@ -2770,7 +2770,7 @@ function generateInvoicePDF(invoiceData: any, businessData: any): string {
 // ==================== ANALYTICS ROUTES ====================
 
 // Get sales summary (monthly and YTD)
-app.get("/make-server-dce439b6/analytics/sales", async (c) => {
+app.get("/analytics/sales", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2836,7 +2836,7 @@ app.get("/make-server-dce439b6/analytics/sales", async (c) => {
 });
 
 // Get revenue chart data
-app.get("/make-server-dce439b6/analytics/revenue-chart", async (c) => {
+app.get("/analytics/revenue-chart", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2953,7 +2953,7 @@ app.get("/make-server-dce439b6/analytics/revenue-chart", async (c) => {
 });
 
 // Get monthly invoice count (based on account anniversary billing cycle)
-app.get("/make-server-dce439b6/analytics/monthly-invoice-count", async (c) => {
+app.get("/analytics/monthly-invoice-count", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -3014,7 +3014,7 @@ app.get("/make-server-dce439b6/analytics/monthly-invoice-count", async (c) => {
 // ==================== USER DATA ROUTES (GDPR Compliance) ====================
 
 // Export all user data (GDPR Right to Access)
-app.get("/make-server-dce439b6/user/export", async (c) => {
+app.get("/user/export", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -3047,7 +3047,7 @@ app.get("/make-server-dce439b6/user/export", async (c) => {
 });
 
 // Delete user account and all data (GDPR Right to Erasure)
-app.delete("/make-server-dce439b6/user/account", async (c) => {
+app.delete("/user/account", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
