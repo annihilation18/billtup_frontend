@@ -1,19 +1,8 @@
 # GitHub Actions Workflow for BilltUp - Automatic Supabase Deployment
 # This workflow automatically deploys your Supabase Edge Functions when you push code to GitHub
 #
-# ⚠️ CRITICAL SETUP AFTER DOWNLOADING FROM FIGMA MAKE:
-# 
-# REQUIRED:
-# 1. Rename "github" folder to ".github" (with a dot)
-#    Command: mv github .github
-#
-# OPTIONAL (handled automatically by workflow):
-# 2. This workflow automatically converts .tsx files to .ts during deployment
-#    You can keep your files as .tsx - the workflow handles the conversion
-#
-# 3. Read GITHUB_ACTIONS_SETUP.md for complete setup instructions
-#
-# Note: GitHub requires ".github" folder name. Supabase requires .ts extensions.
+# IMPORTANT: When you download this project, rename the "github" folder to ".github" 
+# (with a dot at the beginning). GitHub requires the folder to be named ".github"
 
 name: Deploy to Supabase
 
@@ -40,23 +29,6 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: latest
-
-      # Step 2.5: Rename .tsx files to .ts for Supabase deployment
-      - name: Prepare function files for deployment
-        run: |
-          cd supabase/functions/server/
-          if [ -f "index.tsx" ]; then
-            cp index.tsx index.ts
-            echo "✅ Created index.ts from index.tsx"
-          fi
-          if [ -f "kv_store.tsx" ]; then
-            cp kv_store.tsx kv_store.ts
-            echo "✅ Created kv_store.ts from kv_store.tsx"
-          fi
-          # Update import in index.ts to use .ts extension
-          sed -i 's/from "\.\/kv_store\.tsx"/from ".\/kv_store.ts"/g' index.ts || sed -i '' 's/from "\.\/kv_store\.tsx"/from ".\/kv_store.ts"/g' index.ts
-          ls -la
-          cd ../../..
 
       # Step 3: Deploy the Supabase Edge Functions
       # IMPORTANT: You need to set up GitHub Secrets for this to work:
