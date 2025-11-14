@@ -11,7 +11,7 @@ export function generateModernTemplate(
 ): string {
   const { customer, customerEmail, lineItems, subtotal, tax, total, number, date, signature } = invoiceData;
   const { businessName, phone } = businessData;
-  
+
   let itemsHtml = '';
   if (lineItems && lineItems.length > 0) {
     itemsHtml = lineItems.map((item: any) => `
@@ -22,7 +22,7 @@ export function generateModernTemplate(
       </div>
     `).join('');
   }
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -134,7 +134,7 @@ export function generateClassicTemplate(
 ): string {
   const { customer, customerEmail, lineItems, subtotal, tax, total, number, date, signature } = invoiceData;
   const { businessName, email, phone, address } = businessData;
-  
+
   let itemsHtml = '';
   if (lineItems && lineItems.length > 0) {
     itemsHtml = lineItems.map((item: any) => `
@@ -145,7 +145,7 @@ export function generateClassicTemplate(
       </tr>
     `).join('');
   }
-  
+
   return `
     <!DOCTYPE html>
     <html>
@@ -272,7 +272,7 @@ export function generateMinimalTemplate(
 ): string {
   const { customer, customerEmail, lineItems, subtotal, tax, total, number, date, signature } = invoiceData;
   const { businessName, phone } = businessData;
-  
+
   let itemsHtml = '';
   if (lineItems && lineItems.length > 0) {
     itemsHtml = lineItems.map((item: any) => `
@@ -285,7 +285,7 @@ export function generateMinimalTemplate(
       </div>
     `).join('');
   }
-  
+
   return `
     <!DOCTYPE html>
     <html>

@@ -513,8 +513,8 @@ app.get("/auth/test", (c) => {
         message: "Auth routes are working!",
         timestamp: new Date().toISOString(),
         availableEndpoints: [
-            "POST /make-server-dce439b6/auth/request-password-reset",
-            "POST /make-server-dce439b6/auth/reset-password"
+            "POST /auth/request-password-reset",
+            "POST /auth/reset-password"
         ]
     });
 });
@@ -861,7 +861,7 @@ app.get("/business", async (c) => {
 });
 
 // Update business data
-app.patch("/make-server-dce439b6/business", async (c) => {
+app.patch("/business", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1652,7 +1652,7 @@ app.get("/invoices/:id", async (c) => {
 });
 
 // Update invoice status
-app.patch("/make-server-dce439b6/invoices/:id", async (c) => {
+app.patch("/invoices/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1763,7 +1763,7 @@ app.patch("/make-server-dce439b6/invoices/:id", async (c) => {
 });
 
 // Update invoice signature
-app.patch("/make-server-dce439b6/invoices/:id/signature", async (c) => {
+app.patch("/invoices/:id/signature", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -1926,7 +1926,7 @@ app.get("/customers/:id", async (c) => {
 });
 
 // Update customer
-app.patch("/make-server-dce439b6/customers/:id", async (c) => {
+app.patch("/customers/:id", async (c) => {
     const auth = await checkAuth(c);
     if ('error' in auth) {
         return c.json({ error: auth.error }, auth.status);
@@ -2072,7 +2072,7 @@ app.post("/payments/confirm", async (c) => {
         // Confirm the payment
         const paymentIntent = await stripe.paymentIntents.confirm(paymentIntentId, {
             payment_method: paymentMethodId,
-            return_url: `${supabaseUrl}/functions/v1/make-server-dce439b6/payments/return`
+            return_url: `${supabaseUrl}/functions/v1/server/payments/return`
         });
 
         console.log('Payment confirmed:', paymentIntent.id, 'for user:', userId);
