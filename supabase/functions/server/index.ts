@@ -3096,4 +3096,5 @@ app.delete("/user/account", async (c) => {
     }
 });
 
+// Start the Hono server
 Deno.serve(app.fetch);
