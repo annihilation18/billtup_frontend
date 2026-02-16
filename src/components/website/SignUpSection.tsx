@@ -454,7 +454,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                       {formData.billingCycle === 'annual' && (
                         <div className="text-xs text-green-600 mt-1">$4.17/month</div>
                       )}
-                      <div className="text-xs text-gray-600 mt-2">Up to 25 invoices</div>
+                      <div className="text-xs text-gray-600 mt-2">Up to 50 invoices</div>
                     </button>
                     <button
                       type="button"
