@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BilltUp Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .success { color: #10b981; }
+        .error { color: #ef4444; }
+        .info { color: #3b82f6; }
+        h1 { color: #1E3A8A; }
+        pre {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 BilltUp Debug Test Page</h1>
+    
+    <div class="test-box">
+        <h2>✅ Browser Test</h2>
+        <p class="success">If you can see this page, your browser is working!</p>
+        <p><strong>Current Time:</strong> <span id="time"></span></p>
+        <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+    </div>
+
+    <div class="test-box">
+        <h2>📝 Console Test</h2>
+        <p class="info">Open your browser console (F12) and you should see test messages below:</p>
+        <pre id="consoleOutput">Check browser console for output...</pre>
+    </div>
+
+    <div class="test-box">
+        <h2>🔍 Environment Check</h2>
+        <p><strong>Window Object:</strong> <span id="windowCheck"></span></p>
+        <p><strong>Console Available:</strong> <span id="consoleCheck"></span></p>
+        <p><strong>Fetch Available:</strong> <span id="fetchCheck"></span></p>
+    </div>
+
+    <div class="test-box">
+        <h2>📋 Next Steps</h2>
+        <ol>
+            <li>If you see this page, the static file server is working</li>
+            <li>Check the browser console (F12) for any error messages</li>
+            <li>Make sure you're accessing the app at the correct URL (usually http://localhost:3000 or similar)</li>
+            <li>If you get "connection refused", the dev server isn't running - check your terminal</li>
+        </ol>
+    </div>
+
+    <script>
+        // Immediate console test
+        console.log("================================================================================");
+        console.log("🚀 TEST PAGE LOADED - TIMESTAMP:", new Date().toISOString());
+        console.log("================================================================================");
+        console.log("[Test] If you can see this, console logging is working!");
+        console.log("[Test] Browser:", navigator.userAgent);
+        console.error("[Test] This is a test error - it should appear in red");
+        console.warn("[Test] This is a test warning - it should appear in yellow");
+        
+        // Update page
+        document.getElementById('time').textContent = new Date().toLocaleString();
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        
+        // Environment checks
+        document.getElementById('windowCheck').textContent = typeof window !== 'undefined' ? '✅ Available' : '❌ Not Available';
+        document.getElementById('windowCheck').className = typeof window !== 'undefined' ? 'success' : 'error';
+        
+        document.getElementById('consoleCheck').textContent = typeof console !== 'undefined' ? '✅ Available' : '❌ Not Available';
+        document.getElementById('consoleCheck').className = typeof console !== 'undefined' ? 'success' : 'error';
+        
+        document.getElementById('fetchCheck').textContent = typeof fetch !== 'undefined' ? '✅ Available' : '❌ Not Available';
+        document.getElementById('fetchCheck').className = typeof fetch !== 'undefined' ? 'success' : 'error';
+        
+        // Test fetch (will fail if no server, but that's ok)
+        console.log("[Test] Testing fetch API...");
+        fetch('/test.html')
+            .then(() => {
+                console.log("[Test] ✅ Fetch API works!");
+            })
+            .catch(err => {
+                console.error("[Test] ❌ Fetch failed:", err);
+            });
+    </script>
+</body>
+</html>
