@@ -107,7 +107,8 @@ export function TermsSection() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">Basic Plan: $4.99/month</p>
                 <ul className="list-disc pl-6 space-y-1 text-sm">
-                  <li>Up to 25 invoices per month</li>
+                  <li>Up to 50 invoices per month</li>
+                  <li>Up to 100 customers</li>
                   <li>Basic invoice templates</li>
                   <li>Email support</li>
                 </ul>
@@ -138,40 +139,23 @@ export function TermsSection() {
           {/* 5. Transaction Fees */}
           <section>
             <h2 className="text-2xl text-gray-900 mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              5. Transaction Fees (Stripe Payment Processing)
+              5. Transaction Fees (Payment Processing)
             </h2>
             <div className="space-y-4 text-gray-700 leading-relaxed">
               <p>
-                When you choose to accept credit card payments through our integrated Stripe payment processing feature, transaction fees will apply to each successful payment. Payment processing is completely optional, and you may use BilltUp for invoicing without enabling payment processing.
+                When you choose to accept payments through our integrated payment processing feature (via Stripe or Square), transaction fees will apply to each successful payment. Payment processing is completely optional, and you may use BilltUp for invoicing without enabling payment processing.
               </p>
 
-              <div className="bg-gradient-to-br from-blue-50 to-cyan-50 border border-blue-200 p-6 rounded-lg">
-                <p className="font-semibold mb-3 text-gray-900">Transaction Fee Breakdown:</p>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center pb-2 border-b border-blue-200">
-                    <span>BilltUp Platform Fee:</span>
-                    <span className="font-mono font-semibold">0.6% + $0.20</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center pb-2 border-b border-blue-200">
-                    <span>Stripe Processing Fee:</span>
-                    <span className="font-mono font-semibold">2.9% + $0.30</span>
-                  </div>
-                  
-                  <div className="flex justify-between items-center pt-2 text-lg">
-                    <span className="font-semibold text-gray-900">Total per Transaction:</span>
-                    <span className="font-mono font-bold text-[#1E3A8A]">3.5% + $0.50</span>
-                  </div>
-                </div>
-              </div>
+              <p>
+                Transaction fees vary by payment method and processor. Fees are competitive with industry-standard rates and include both the payment processor's fee and a small platform fee. You can review current fee rates within the app before enabling payments.
+              </p>
 
               <p>
                 Transaction fees are automatically deducted from each payment before funds are deposited to your connected bank account. Fees are non-refundable, even if you later issue a refund to your customer.
               </p>
 
               <p>
-                Disputed payments or chargebacks may result in additional fees as determined by Stripe's terms of service. You are responsible for all chargeback fees and any negative balance in your account.
+                Disputed payments or chargebacks may result in additional fees as determined by your payment processor's terms of service. You are responsible for all chargeback fees and any negative balance in your account.
               </p>
             </div>
           </section>
@@ -272,13 +256,13 @@ export function TermsSection() {
             </h2>
             <div className="space-y-3 text-gray-700 leading-relaxed">
               <p>
-                The Service integrates with third-party services, including but not limited to Stripe for payment processing. Your use of these third-party services is subject to their respective terms of service and privacy policies.
+                The Service integrates with third-party services, including but not limited to Stripe and Square for payment processing. Your use of these third-party services is subject to their respective terms of service and privacy policies.
               </p>
               <p>
                 We are not responsible for the actions, content, or policies of third-party services. You agree that BilltUp shall not be liable for any damages or losses caused by your use of any third-party services.
               </p>
               <p>
-                To use Stripe payment processing features, you must create a Stripe account and agree to Stripe's terms of service. You authorize us to share necessary information with Stripe to facilitate payment processing.
+                To use payment processing features, you must create an account with your chosen payment processor (Stripe or Square) and agree to their terms of service. You authorize us to share necessary information with your payment processor to facilitate payment processing.
               </p>
             </div>
           </section>

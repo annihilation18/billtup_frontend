@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 export function SecuritySection() {
   const securityFeatures = [
     { icon: Lock, title: 'Bank-Level Encryption', description: 'All data is encrypted in transit using TLS 1.3 and at rest using AES-256 encryption.' },
-    { icon: Shield, title: 'PCI DSS Compliant', description: 'If you enable payments, we are fully PCI DSS compliant through our integration with Stripe, a certified payment processor.' },
+    { icon: Shield, title: 'PCI DSS Compliant', description: 'If you enable payments, we are fully PCI DSS compliant through our integrations with Stripe and Square, both certified payment processors.' },
     { icon: Server, title: 'Secure Infrastructure', description: 'Hosted on enterprise-grade servers with 99.9% uptime and automatic backups.' },
     { icon: Eye, title: 'Privacy Protection', description: 'We never sell your data and only use it to provide our services.' },
   ];

@@ -221,7 +221,7 @@ export function AppMockup({ type }: AppMockupProps) {
 
         {/* Security Note */}
         <p className="text-xs text-gray-500 text-center mt-3">
-          Secured by Stripe • PCI Compliant
+          Secure Payments • PCI Compliant
         </p>
       </div>
     );

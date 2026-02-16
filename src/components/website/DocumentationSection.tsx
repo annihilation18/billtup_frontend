@@ -51,7 +51,7 @@ export function DocumentationSection() {
 
 **Step 1: Create Your Account**
 Sign up for BilltUp using your business email. Start with a 14-day free trial—no credit card required. You'll be asked to choose a plan:
-- Basic ($4.99/month): Core invoicing features, up to 25 invoices/month
+- Basic ($4.99/month): Core invoicing features, up to 50 invoices/month
 - Premium ($9.99/month): Unlimited invoices, advanced reporting, priority support
 
 **Step 2: Set Up Your Business Profile**
@@ -68,12 +68,12 @@ From the dashboard, click "+ New Invoice":
 - Review calculated subtotal, tax, and total
 - Save as draft or send to customer
 
-**Optional: Enable Stripe Payments**
+**Optional: Enable Online Payments**
 To accept online card payments:
-- Connect your Stripe account in Settings
-- Transaction fees: 3.5% + $0.50 (includes Stripe fee + platform fee)
+- Connect your Stripe or Square account in Settings
+- Competitive transaction fees vary by payment method
 - Customers can pay directly from invoice emails
-- Money deposits to your Stripe account automatically
+- Money deposits to your connected bank account automatically
 
 That's it! Your invoices are automatically saved to the cloud and accessible from any device.`,
         mockup: 'dashboard',
@@ -134,11 +134,11 @@ All data is saved automatically to your secure cloud database—no manual saving
 - Includes customer signature if captured
 
 **4. Process Payment (Optional)**
-If you have Stripe connected:
+If you have a payment processor connected (Stripe or Square):
 - Choose payment method: Card or NFC/Tap to Pay
 - For card: Enter cardholder name, card number, expiry, CVV
-- For NFC: Simulate contactless payment (production uses NFC hardware)
-- Payment processes through Stripe Payment Intent API
+- For NFC: Use contactless payment via compatible hardware
+- Payment processes securely through your connected processor
 - Both you and customer receive instant confirmation
 
 **5. Save & Email**
@@ -230,70 +230,52 @@ Double-check all details and click "Proceed to Payment" to send to your customer
     'payments': [
       {
         title: 'How Payment Processing Works',
-        content: `BilltUp offers optional payment processing through Stripe:
+        content: `BilltUp offers optional payment processing through Stripe or Square:
 
 **For You:**
 - You can use BilltUp as an invoicing-only tool (no payment processing)
-- Or optionally connect your own Stripe account to accept online payments
+- Or optionally connect your Stripe or Square account to accept online payments
 - Enable/disable payment features in Settings at any time
 - Complete control over your payment settings
 
 **If You Enable Payments:**
 1. Your customer clicks the payment link on their invoice
 2. They enter their card details (credit/debit card or Apple Pay/Google Pay)
-3. Payment is processed securely through Stripe
-4. Money goes directly to your Stripe account
+3. Payment is processed securely through your connected processor
+4. Money goes directly to your connected bank account
 5. Both you and your customer receive instant email confirmation
 
 **Transaction Fees (when payments enabled):**
-- 3.5% + $0.50 per transaction
-
-This includes:
-- Stripe processing fee: 2.9% + $0.30
-- BilltUp platform fee: 0.6% + $0.20
-
-**Example:** On a $500 invoice, you pay $18.00 in fees and receive $482.00.
+Transaction fees vary by payment method and processor. Fees are competitive with industry-standard rates. For example, online card payments start at 3.5% + $0.50, while in-person payments can be as low as 3.2% + $0.35.
 
 If you don't enable payments, you only pay your monthly subscription ($4.99 or $9.99).`,
         mockup: 'payment',
       },
       {
-        title: 'Stripe Integration Setup',
-        content: `Connect your Stripe account to accept online payments:
+        title: 'Payment Processor Setup',
+        content: `Connect your Stripe or Square account to accept online payments:
 
-**Step 1: Create Stripe Account**
-Visit https://dashboard.stripe.com and create a free account
-- Use the same email as your BilltUp account
+**Step 1: Create a Payment Processor Account**
+Sign up for a free account with Stripe (stripe.com) or Square (squareup.com):
 - Complete business verification
 - Add your bank account for payouts
 
-**Step 2: Get API Keys**
-Navigate to Developers → API Keys in Stripe Dashboard
-- Copy your Secret Key (starts with sk_test_ or sk_live_)
-- Keep this secure—never share it publicly
-
-**Step 3: Connect to BilltUp**
+**Step 2: Connect to BilltUp**
 In BilltUp Settings → Payment Settings:
-- Paste your Stripe Secret Key
-- Click "Connect Stripe Account"
-- Test with a sample payment
+- Choose your payment processor (Stripe or Square)
+- Follow the on-screen instructions to connect your account
+- Test with a sample payment to verify everything works
 
-**Step 4: Configure Payouts**
-In Stripe Dashboard → Balance → Payouts:
+**Step 3: Configure Payouts**
+In your payment processor's dashboard:
 - Add your bank account details
 - Set payout schedule (daily, weekly, or monthly)
-- Stripe automatically deposits payments to your bank
+- Payments are automatically deposited to your bank
 
 **Important Notes:**
 - Bank account details in BilltUp are for invoice display only
-- Actual payouts are configured entirely in Stripe Dashboard
-- Use test mode (sk_test_) during development
-- Switch to live mode (sk_live_) when ready for real payments
-
-**Test Cards (for testing):**
-- Success: 4242 4242 4242 4242
-- Declined: 4000 0000 0000 0002
-- Use any future expiry date and any CVV`,
+- Actual payouts are configured in your payment processor's dashboard
+- Use test mode during development, switch to live mode when ready for real payments`,
         mockup: 'payment',
       },
       {
@@ -315,7 +297,7 @@ In Stripe Dashboard → Balance → Payouts:
 
 **Important Notes:**
 - Refunds are processed to the original payment method
-- Platform fees are not refunded
+- Transaction fees are not refunded
 - Customer will receive email notification
 - Refund appears in your sales analytics`,
       },

@@ -33,7 +33,7 @@ export function PrivacySection() {
           <h2 className="text-2xl text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>3. Information Sharing</h2>
           <p className="text-gray-700">
             We do not share your personal information with third parties except as described in this policy. We may share information with service providers 
-            who perform services on our behalf, such as payment processing (Stripe, only if you enable online payments), email delivery, and hosting services.
+            who perform services on our behalf, such as payment processing (Stripe or Square, only if you enable online payments), email delivery, and hosting services.
           </p>
 
           <h2 className="text-2xl text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>4. Data Security</h2>

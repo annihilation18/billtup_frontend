@@ -257,7 +257,7 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
                 </li>
                 <li className="flex items-start gap-3" style={{ fontFamily: 'Inter, sans-serif' }}>
                   <span className="text-green-300 mt-1">✓</span>
-                  <span>Built-in Stripe payments—accept cards instantly</span>
+                  <span>Built-in Stripe & Square payments—accept cards instantly</span>
                 </li>
               </ul>
             </Card>

@@ -14,7 +14,7 @@ export function PricingPreview({ onNavigate }: PricingPreviewProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-[#1E3A8A]/10 rounded-full px-4 py-2 mb-4">
             <Zap className="w-4 h-4 text-[#1E3A8A]" />
-            <span className="text-sm text-[#1E3A8A]">Simple & Transparent</span>
+            <span className="text-sm text-[#1E3A8A]">Simple Pricing</span>
           </div>
           
           <h2 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -55,9 +55,9 @@ export function PricingPreview({ onNavigate }: PricingPreviewProps) {
 
             <ul className="space-y-3 mb-6">
               {[
-                'Up to 25 invoices/month',
-                'Up to 50 customers',
-                'Optional payment processing',
+                'Up to 50 invoices/month',
+                'Up to 100 customers',
+                'Stripe & Square payments',
                 'Email support',
               ].map((feature, i) => (
                 <li key={i} className="flex items-start gap-2">
@@ -134,14 +134,16 @@ export function PricingPreview({ onNavigate }: PricingPreviewProps) {
             <div className="flex items-center justify-center gap-2 mb-3">
               <CreditCard className="w-5 h-5 text-[#1E3A8A]" />
               <h4 className="text-lg text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                Simple Transaction Fees
+                Transaction Fees
               </h4>
             </div>
             <p className="text-gray-600 mb-2">
-              When you enable payment processing: <strong className="text-[#1E3A8A]">3.5% + $0.50</strong> per transaction
+              Competitive transaction fees when you enable Stripe or Square payments.
             </p>
             <p className="text-sm text-gray-500">
-              Example: $100 invoice = $4.00 fee → <span className="text-[#14B8A6] font-semibold">$96.00 to you</span>
+              Fees vary by payment method — see{' '}
+              <button onClick={() => onNavigate?.('pricing')} className="text-[#14B8A6] hover:underline">full pricing</button>{' '}
+              for details.
             </p>
           </div>
         </div>

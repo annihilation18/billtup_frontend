@@ -33,7 +33,7 @@ export function FeaturesSection({ onNavigate }: FeaturesSectionProps) {
     {
       icon: CreditCard,
       title: 'Instant Payments',
-      description: 'Optionally accept credit cards, debit cards, and digital payments. Enable Stripe integration to get paid faster with secure online payment processing.',
+      description: 'Optionally accept credit cards, debit cards, and digital payments. Connect Stripe or Square to get paid faster with secure payment processing.',
       color: 'from-[#14B8A6] to-[#F59E0B]'
     },
     {
@@ -68,8 +68,8 @@ export function FeaturesSection({ onNavigate }: FeaturesSectionProps) {
     },
     {
       icon: DollarSign,
-      title: 'Transparent Pricing',
-      description: 'Simple subscription pricing starting at $4.99/month. Optional payment processing available at 3.5% + $0.50 per transaction.',
+      title: 'Simple Pricing',
+      description: 'Straightforward subscription pricing starting at $4.99/month. Optional payment processing with competitive transaction fees that vary by payment method.',
       color: 'from-[#F59E0B] to-[#1E3A8A]'
     },
     {

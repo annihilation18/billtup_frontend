@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 export function RoadmapSection() {
   const roadmapItems = [
     { status: 'completed', title: 'Invoice Management', description: 'Create, send, and track invoices', icon: CheckCircle2, color: 'text-green-600' },
-    { status: 'completed', title: 'Payment Processing', description: 'Optional online payments via Stripe integration', icon: CheckCircle2, color: 'text-green-600' },
+    { status: 'completed', title: 'Payment Processing', description: 'Optional online payments via Stripe and Square', icon: CheckCircle2, color: 'text-green-600' },
     { status: 'completed', title: 'Mobile Apps', description: 'Native iOS and Android applications', icon: CheckCircle2, color: 'text-green-600' },
     { status: 'in-progress', title: 'Recurring Invoices', description: 'Automate subscription billing', icon: Clock, color: 'text-blue-600' },
     { status: 'planned', title: 'Team Collaboration', description: 'Multi-user accounts with role permissions', icon: Lightbulb, color: 'text-gray-400' },

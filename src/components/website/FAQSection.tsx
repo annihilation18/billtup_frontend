@@ -15,16 +15,16 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
       category: 'Getting Started',
       questions: [
         {
-          question: 'Do I need a Stripe account to use BilltUp?',
-          answer: 'No! BilltUp can be used as a simple invoicing tool without any payment processing. If you want to accept online payments through your invoices, you can optionally connect your own Stripe account. This is completely optional - many users simply use BilltUp to create and send professional invoices.',
+          question: 'Do I need a payment processor to use BilltUp?',
+          answer: 'No! BilltUp can be used as a simple invoicing tool without any payment processing. If you want to accept online payments through your invoices, you can optionally connect Stripe or Square. This is completely optional - many users simply use BilltUp to create and send professional invoices.',
         },
         {
           question: 'Is there a monthly subscription fee?',
-          answer: 'Yes! BilltUp offers two subscription plans: Basic ($4.99/month or $49.99/year) with up to 25 invoices per month, and Premium ($9.99/month or $99.99/year) with unlimited invoices and priority support. If you choose to accept online payments, there\'s also a 3.5% + $0.50 transaction fee on successful payments. Choose the plan that fits your business needs!',
+          answer: 'Yes! BilltUp offers two subscription plans: Basic ($4.99/month or $49.99/year) with up to 50 invoices per month, and Premium ($9.99/month or $99.99/year) with unlimited invoices and priority support. If you choose to accept online payments, competitive transaction fees also apply and vary by payment method. Choose the plan that fits your business needs!',
         },
         {
           question: 'How long does it take to get started?',
-          answer: 'You can create your account and send your first invoice in under 5 minutes. Simply sign up with your email, add your business information, and you\'re ready to start invoicing. If you want to accept online payments, you can optionally connect your Stripe account later. We\'ve designed the onboarding process to be as smooth as possible.',
+          answer: 'You can create your account and send your first invoice in under 5 minutes. Simply sign up with your email, add your business information, and you\'re ready to start invoicing. If you want to accept online payments, you can connect Stripe or Square later. We\'ve designed the onboarding process to be as smooth as possible.',
         },
         {
           question: 'What types of businesses is BilltUp designed for?',
@@ -37,19 +37,19 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
       questions: [
         {
           question: 'What payment methods do you accept?',
-          answer: 'If you choose to enable online payments, customers can pay using all major credit cards (Visa, Mastercard, American Express, Discover), debit cards, and digital wallets like Apple Pay and Google Pay. All payments are processed securely through Stripe. You can also use BilltUp as an invoicing-only tool and collect payments through your own preferred methods.',
+          answer: 'If you choose to enable online payments, customers can pay using all major credit cards (Visa, Mastercard, American Express, Discover), debit cards, and digital wallets like Apple Pay and Google Pay. Payments are processed securely through Stripe or Square, depending on which processor you connect. You can also use BilltUp as an invoicing-only tool and collect payments through your own preferred methods.',
         },
         {
           question: 'How much are the fees?',
-          answer: 'BilltUp charges a monthly subscription (Basic: $4.99/month or Premium: $9.99/month). If you choose to accept online payments through Stripe, there\'s also a 3.5% + $0.50 transaction fee which includes Stripe\'s processing fee (2.9% + $0.30) and our platform fee (0.6% + $0.20). If you only use BilltUp for invoicing without online payments, you only pay the monthly subscription.',
+          answer: 'BilltUp charges a monthly subscription (Basic: $4.99/month or Premium: $9.99/month). If you choose to accept online payments, transaction fees apply and vary by payment method. For example, online card payments start at 3.5% + $0.50, while in-person payments can be as low as 3.2% + $0.35. If you only use BilltUp for invoicing without online payments, you only pay the monthly subscription.',
         },
         {
           question: 'When do I receive my money?',
-          answer: 'If you enable online payments, payments are processed through your Stripe account. Stripe\'s first payout typically takes 7 to 14 business days due to a one-time security and verification process. After the first payout, funds usually arrive in your bank account 1 to 2 business days after they are initiated. For instant payouts (if enabled), funds can be available within 30 minutes via an eligible debit card. If you\'re using BilltUp as invoicing-only, you collect payments directly from your customers through your preferred method.',
+          answer: 'If you enable online payments, funds are deposited to your bank account through your connected payment processor (Stripe or Square). The first payout typically takes 7 to 14 business days due to a one-time verification process. After that, funds usually arrive in 1 to 2 business days. Instant payouts may also be available depending on your processor and account type. If you\'re using BilltUp as invoicing-only, you collect payments directly from your customers through your preferred method.',
         },
         {
           question: 'Are there any refund fees?',
-          answer: 'For online payments processed through Stripe: when you process a refund, the original payment is returned to your customer, but the transaction fee (3.5% + $0.50) is not refunded. This is standard practice as processing costs have already been incurred.',
+          answer: 'When you process a refund, the original payment is returned to your customer, but the transaction fee is not refunded. This is standard practice as processing costs have already been incurred.',
         },
         {
           question: 'Is there a minimum or maximum invoice amount?',
@@ -87,11 +87,11 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
       questions: [
         {
           question: 'Is my data secure?',
-          answer: 'Yes! We take security seriously. All data is encrypted in transit and at rest. We use bank-level security measures. If you choose to enable online payments, customer payment information is processed through Stripe (a PCI-compliant processor) and never stored on our servers.',
+          answer: 'Yes! We take security seriously. All data is encrypted in transit and at rest. We use bank-level security measures. If you choose to enable online payments, customer payment information is processed through your connected payment processor (Stripe or Square) and never stored on our servers.',
         },
         {
           question: 'What happens to customer payment information?',
-          answer: 'If you enable online payments, customer payment information is processed directly by Stripe, one of the world\'s most trusted payment processors. We never see or store credit card numbers. All payment data is handled according to PCI DSS standards.',
+          answer: 'If you enable online payments, customer payment information is processed directly by your connected payment processor (Stripe or Square). We never see or store credit card numbers. All payment data is handled according to PCI DSS standards.',
         },
         {
           question: 'Can I delete my account and data?',

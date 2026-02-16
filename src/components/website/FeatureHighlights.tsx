@@ -29,7 +29,7 @@ export function FeatureHighlights({ onNavigate }: FeatureHighlightsProps) {
     {
       icon: CreditCard,
       title: 'Optional Payment Processing',
-      description: 'Enable Stripe integration to accept cards and get paid instantly, or keep it simple with invoice-only mode.',
+      description: 'Connect Stripe or Square to accept cards and get paid instantly, or keep it simple with invoice-only mode.',
       color: 'from-[#14B8A6] to-[#F59E0B]'
     },
     {

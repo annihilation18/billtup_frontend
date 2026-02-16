@@ -216,7 +216,7 @@ const guideSections: GuideSection[] = [
       {
         title: "Collect Payment",
         description:
-          "Accept credit card payments securely through Stripe",
+          "Accept credit card payments securely through Stripe or Square",
         mockup: <PaymentScreenMockup />,
         details: [
           "From Invoice Builder or Invoice Detail, tap 'Proceed to Payment'",
@@ -224,7 +224,7 @@ const guideSections: GuideSection[] = [
           "  • Invoice number",
           "  • Customer name",
           "  • Total amount to collect",
-          "Secure payment form powered by Stripe:",
+          "Secure payment form powered by your connected processor:",
           "  • Card number field",
           "  • Expiration date (MM/YY)",
           "  • CVC security code",
@@ -233,13 +233,13 @@ const guideSections: GuideSection[] = [
           "Hand device to customer OR share screen for remote payment",
           "Customer enters their card details",
           "Tap 'Pay Now' to process the payment",
-          "Payment processes instantly through Stripe",
+          "Payment processes instantly through your connected processor",
         ],
         tips: [
-          "Card data never touches your device - processed directly by Stripe",
-          "Transaction fee: 3.5% + $0.50 per transaction",
+          "Card data never touches your device - processed directly by your payment provider",
+          "Transaction fees vary by payment method and processor",
           "Funds deposited to your bank account within 2-7 days",
-          "You must connect Stripe in Settings before accepting payments",
+          "You must connect Stripe or Square in Settings before accepting payments",
         ],
       },
       {
@@ -319,11 +319,11 @@ const guideSections: GuideSection[] = [
           "  • Toggle 'Charge Tax' on/off",
           "  • Set default tax rate percentage",
           "  • Tax automatically calculated on invoices",
-          "Stripe Connect (Payment Settings):",
+          "Payment Settings (Stripe or Square):",
           "  • View connection status",
-          "  • Connect your Stripe account to accept payments",
+          "  • Connect your Stripe or Square account to accept payments",
           "  • One-time setup required before accepting payments",
-          "  • Access Stripe dashboard for payment reports",
+          "  • Access your payment processor dashboard for reports",
           "Email Settings:",
           "  • Configure email delivery (uses default SMTP)",
           "  • Test email sending functionality",
@@ -335,7 +335,7 @@ const guideSections: GuideSection[] = [
         tips: [
           "Changes to business info update all future invoices",
           "Logo should be square (PNG or JPG), minimum 200x200 pixels",
-          "Stripe setup only needed once - follow on-screen instructions",
+          "Payment processor setup only needed once - follow on-screen instructions",
         ],
       },
     ],
@@ -418,7 +418,7 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
                   Accept Payments
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  Secure credit card processing through Stripe
+                  Secure credit card processing through Stripe or Square
                 </p>
               </div>
 
@@ -619,20 +619,15 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-blue-200/50 dark:border-blue-800/50">
-                    <span className="text-sm text-muted-foreground">Platform fee</span>
-                    <span className="text-sm font-mono text-foreground">0.6% + $0.20</span>
+                    <span className="text-sm text-muted-foreground">Online card payments</span>
+                    <span className="text-sm font-mono text-foreground">as low as 3.5% + $0.50</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-blue-200/50 dark:border-blue-800/50">
-                    <span className="text-sm text-muted-foreground">Stripe processing</span>
-                    <span className="text-sm font-mono text-foreground">2.9% + $0.30</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 bg-[#1E3A8A]/10 dark:bg-[#1E3A8A]/20 rounded-lg px-3">
-                    <span className="text-sm font-medium text-foreground">Total per transaction</span>
-                    <span className="text-sm font-mono font-medium text-[#1E3A8A]">3.5% + $0.50</span>
+                    <span className="text-sm text-muted-foreground">In-person payments</span>
+                    <span className="text-sm font-mono text-foreground">as low as 3.2% + $0.35</span>
                   </div>
                   <div className="mt-4 p-3 bg-white dark:bg-gray-950 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs text-muted-foreground mb-1">Example calculation:</p>
-                    <p className="text-sm text-foreground">$100 invoice → $3.50 fee → <strong className="text-[#14B8A6]">$96.50 to you</strong></p>
+                    <p className="text-xs text-muted-foreground">Fees vary by payment method and processor (Stripe or Square). No fees if you use BilltUp for invoicing only.</p>
                   </div>
                 </div>
               </div>
@@ -672,7 +667,7 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
-                    <span className="text-sm text-foreground">Payment info processed by Stripe only</span>
+                    <span className="text-sm text-foreground">Payment info processed by your payment provider only</span>
                   </div>
                   <div className="flex items-start gap-3 py-2">
                     <div className="w-5 h-5 bg-[#14B8A6] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">

@@ -21,15 +21,14 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
       color: 'from-[#14B8A6] to-[#1E3A8A]',
       icon: Zap,
       features: [
-        'Up to 25 invoices per month',
-        'Up to 50 customers',
-        'Optional payment processing',
+        'Up to 50 invoices per month',
+        'Up to 100 customers',
+        'Optional Stripe or Square payments',
         'Automatic PDF receipts via email',
         'Basic customer management',
         'Add your business logo',
         'Mobile & web access',
         'Email support',
-        'Transaction fee: 3.5% + $0.50 (if payments enabled)',
       ],
       cta: 'Start Basic Plan',
       popular: false,
@@ -45,7 +44,7 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
       features: [
         'Unlimited invoices',
         'Unlimited customers',
-        'Optional payment processing',
+        'Optional Stripe or Square payments',
         'Automatic PDF receipts via email',
         'Advanced customer management',
         'Sales analytics & reports',
@@ -53,7 +52,6 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
         'Custom invoice templates & branding',
         'Mobile & web access',
         'Priority email support',
-        'Transaction fee: 3.5% + $0.50 (if payments enabled)',
       ],
       cta: 'Start Premium Plan',
       popular: true,
@@ -67,7 +65,7 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-[#14B8A6]/10 rounded-full px-4 py-2 mb-4">
             <Zap className="w-4 h-4 text-[#14B8A6]" />
-            <span className="text-sm text-[#14B8A6]">Simple & Transparent</span>
+            <span className="text-sm text-[#14B8A6]">Simple Pricing</span>
           </div>
           
           <h2 className="text-3xl sm:text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
@@ -204,22 +202,18 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
                 Transaction Fees
               </h4>
             </div>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-blue-200/50">
-                <span className="text-sm text-gray-600">Platform fee</span>
-                <span className="text-sm font-mono text-gray-900">0.6% + $0.20</span>
+            <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+              When you enable payment processing through Stripe or Square, a small transaction fee applies.
+              Fees vary by payment method and processor.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="p-3 bg-white rounded-lg border border-blue-200">
+                <p className="text-xs text-gray-500 mb-1">Online payments</p>
+                <p className="text-sm font-mono text-gray-900">as low as 3.5% + $0.50</p>
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-blue-200/50">
-                <span className="text-sm text-gray-600">Stripe processing</span>
-                <span className="text-sm font-mono text-gray-900">2.9% + $0.30</span>
-              </div>
-              <div className="flex justify-between items-center py-2 bg-[#1E3A8A]/10 rounded-lg px-3">
-                <span className="text-sm text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Total per transaction</span>
-                <span className="text-sm font-mono text-[#1E3A8A]" style={{ fontFamily: 'Poppins, sans-serif' }}>3.5% + $0.50</span>
-              </div>
-              <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
-                <p className="text-xs text-gray-600 mb-1">Example calculation:</p>
-                <p className="text-sm text-gray-900">$100 invoice → $4.00 fee → <strong className="text-[#14B8A6]">$96.00 to you</strong></p>
+              <div className="p-3 bg-white rounded-lg border border-blue-200">
+                <p className="text-xs text-gray-500 mb-1">In-person payments</p>
+                <p className="text-sm font-mono text-gray-900">as low as 3.2% + $0.35</p>
               </div>
             </div>
           </div>
