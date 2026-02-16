@@ -20,7 +20,7 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
         },
         {
           question: 'Is there a monthly subscription fee?',
-          answer: 'Yes! BilltUp offers two subscription plans: Basic ($4.99/month or $49.99/year) with up to 50 invoices per month, and Premium ($9.99/month or $99.99/year) with unlimited invoices and priority support. If you choose to accept online payments, competitive transaction fees also apply and vary by payment method. Choose the plan that fits your business needs!',
+          answer: 'Yes! BilltUp offers two subscription plans: Basic ($4.99/month or $49.99/year) with up to 10 invoices per month, and Premium ($9.99/month or $99.99/year) with unlimited invoices and priority support. If you choose to accept online payments, competitive transaction fees also apply and vary by payment method. Choose the plan that fits your business needs!',
         },
         {
           question: 'How long does it take to get started?',

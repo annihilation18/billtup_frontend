@@ -107,8 +107,8 @@ export function TermsSection() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">Basic Plan: $4.99/month</p>
                 <ul className="list-disc pl-6 space-y-1 text-sm">
-                  <li>Up to 50 invoices per month</li>
-                  <li>Up to 100 customers</li>
+                  <li>Up to 10 invoices per month</li>
+                  <li>Up to 10 customers</li>
                   <li>Basic invoice templates</li>
                   <li>Email support</li>
                 </ul>

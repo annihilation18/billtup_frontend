@@ -173,7 +173,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       name: 'Basic',
       price: '$4.99',
       features: [
-        'Up to 50 invoices/month',
+        'Up to 10 invoices/month',
         'Basic customer management',
         'Email support',
         'PDF invoice generation',
@@ -564,7 +564,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
             <ul className="space-y-2 text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
-                Limited to 50 invoices/month
+                Limited to 10 invoices/month
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600" />

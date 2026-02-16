@@ -21,8 +21,8 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
       color: 'from-[#14B8A6] to-[#1E3A8A]',
       icon: Zap,
       features: [
-        'Up to 50 invoices per month',
-        'Up to 100 customers',
+        'Up to 10 invoices per month',
+        'Up to 10 customers',
         'Optional Stripe or Square payments',
         'Automatic PDF receipts via email',
         'Basic customer management',
