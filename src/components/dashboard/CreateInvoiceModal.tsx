@@ -18,7 +18,7 @@ import {
   X
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
-import { createInvoice, fetchCustomers } from '../../utils/dashboard-api';
+import { createInvoice, fetchCustomers, fetchInvoices } from '../../utils/dashboard-api';
 
 interface LineItem {
   description: string;
@@ -52,7 +52,7 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
   useEffect(() => {
     if (open) {
       loadCustomers();
-      generateInvoiceNumber();
+      loadNextInvoiceNumber();
       // Set date to today and due date to 30 days from now by default
       const today = new Date().toISOString().split('T')[0];
       const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -70,10 +70,19 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
     }
   };
 
-  const generateInvoiceNumber = () => {
-    const timestamp = Date.now();
-    const random = Math.floor(Math.random() * 1000);
-    setInvoiceNumber(`INV-${timestamp}-${random}`);
+  const loadNextInvoiceNumber = async () => {
+    try {
+      const invoices = await fetchInvoices();
+      const existing = Array.isArray(invoices) ? invoices : [];
+      let maxNum = 0;
+      for (const inv of existing) {
+        const match = String(inv.number || '').match(/^INV-(\d+)$/);
+        if (match) maxNum = Math.max(maxNum, parseInt(match[1], 10));
+      }
+      setInvoiceNumber(`INV-${String(maxNum + 1).padStart(3, '0')}`);
+    } catch {
+      setInvoiceNumber(`INV-${String(1).padStart(3, '0')}`);
+    }
   };
 
   const handleLineItemChange = (index: number, field: keyof LineItem, value: string | number) => {
