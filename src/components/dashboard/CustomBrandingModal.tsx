@@ -133,6 +133,30 @@ export function CustomBrandingModal({
         return;
       }
 
+      // If logo is a base64 data URL, upload to S3 first
+      let logoUrl = customLogo;
+      if (customLogo && customLogo.startsWith('data:')) {
+        const logoResponse = await fetch(
+          `${API_CONFIG.baseUrl}/business/logo`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`,
+            },
+            body: JSON.stringify({ logoData: customLogo, fileName: 'logo.png' }),
+          }
+        );
+
+        if (!logoResponse.ok) {
+          const errData = await logoResponse.json().catch(() => ({}));
+          throw new Error(errData.error || 'Failed to upload logo');
+        }
+
+        const logoResult = await logoResponse.json();
+        logoUrl = logoResult.logoUrl;
+      }
+
       const response = await fetch(
         `${API_CONFIG.baseUrl}/business`,
         {
@@ -145,7 +169,7 @@ export function CustomBrandingModal({
             brandColor,
             accentColor,
             invoiceTemplate,
-            customLogo,
+            customLogo: logoUrl,
           }),
         }
       );
