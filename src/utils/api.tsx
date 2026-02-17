@@ -1,5 +1,6 @@
 import { getIdToken, signIn as cognitoSignIn, signOut as cognitoSignOut, getSession, getUserEmail, getUserId } from './auth/cognito';
 import { API_CONFIG } from './config';
+import { captureError } from './errorReporter';
 
 const BASE_URL = API_CONFIG.baseUrl;
 
@@ -42,7 +43,11 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
         error: error,
         endpoint: endpoint
       });
-      throw new Error(error.error || `HTTP ${response.status}: ${response.statusText}`);
+      const err = new Error(error.error || `HTTP ${response.status}: ${response.statusText}`);
+      if (response.status >= 500) {
+        captureError(err, { endpoint, method: options.method || 'GET', statusCode: response.status });
+      }
+      throw err;
     }
 
     const data = await response.json();
@@ -77,7 +82,11 @@ export const authApi = {
       if (!response.ok) {
         const error = await response.json();
         console.error('[Auth API] Sign up failed:', error);
-        throw new Error(error.error || 'Sign up failed');
+        const err = new Error(error.error || 'Sign up failed');
+        if (response.status >= 500) {
+          captureError(err, { endpoint: '/auth/signup', method: 'POST', statusCode: response.status });
+        }
+        throw err;
       }
 
       console.log('[Auth API] User created, signing in...');

@@ -1,5 +1,6 @@
 import { getIdToken } from './auth/cognito';
 import { API_CONFIG } from './config';
+import { captureError } from './errorReporter';
 
 type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year';
 
@@ -90,7 +91,11 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
     if (response.status !== 404) {
       console.error(`API Error [${endpoint}]:`, errorText);
     }
-    throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+    const err = new Error(`API call failed: ${response.status} ${response.statusText}`);
+    if (response.status >= 500) {
+      captureError(err, { endpoint, statusCode: response.status });
+    }
+    throw err;
   }
 
   return response.json();

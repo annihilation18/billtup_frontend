@@ -24,8 +24,9 @@ import { MobileAppSection } from './components/website/MobileAppSection';
 import { BilltUpLogoExport } from './components/BilltUpLogoExport';
 import ResetPassword from './reset-password';
 import { Toaster } from './components/ui/sonner';
-import { getSession, signOut as cognitoSignOut } from './utils/auth/cognito';
+import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
+import { setErrorUser, clearErrorUser } from './utils/errorReporter';
 
 export type SectionType = 
   | 'home' 
@@ -87,6 +88,7 @@ export default function App() {
           // Default to basic if profile fetch fails
         }
 
+        setErrorUser(session.user.id, session.user.email);
         setUserPlan(plan);
         setCurrentSection('dashboard');
       } catch {
@@ -140,11 +142,13 @@ export default function App() {
   }, [currentSection]);
 
   const handleSignIn = (plan: 'basic' | 'premium' = 'basic') => {
+    setErrorUser(getUserId(), getUserEmail());
     setUserPlan(plan);
     setCurrentSection('dashboard');
   };
 
   const handleSignOut = async () => {
+    clearErrorUser();
     await cognitoSignOut();
     setCurrentSection('home');
   };
