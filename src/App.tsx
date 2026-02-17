@@ -27,6 +27,7 @@ import { Toaster } from './components/ui/sonner';
 import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
 import { setErrorUser, clearErrorUser } from './utils/errorReporter';
+import { sessionTimeout } from './utils/sessionTimeout';
 
 export type SectionType = 
   | 'home' 
@@ -136,6 +137,22 @@ export default function App() {
     setFavicon();
   }, []);
 
+  // Session inactivity timeout -- start when on dashboard, stop otherwise
+  useEffect(() => {
+    if (currentSection === 'dashboard') {
+      sessionTimeout.start(async () => {
+        clearErrorUser();
+        await cognitoSignOut();
+        setCurrentSection('signin');
+      });
+    } else {
+      sessionTimeout.stop();
+    }
+    return () => {
+      sessionTimeout.stop();
+    };
+  }, [currentSection]);
+
   // Scroll to top whenever section changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -148,6 +165,8 @@ export default function App() {
   };
 
   const handleSignOut = async () => {
+    sessionTimeout.stop();
+    sessionTimeout.clear();
     clearErrorUser();
     await cognitoSignOut();
     setCurrentSection('home');
