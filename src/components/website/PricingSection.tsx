@@ -203,19 +203,10 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
               </h4>
             </div>
             <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
-              When you enable payment processing through Stripe or Square, a small transaction fee applies.
-              Fees vary by payment method and processor.
+              When you enable payment processing through Stripe or Square, transaction fees apply.
+              Fees vary based on payment method (card, ACH, digital wallet, etc.) and processor.
+              You can compare rates for each method in your payment settings.
             </p>
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div className="p-3 bg-white rounded-lg border border-blue-200">
-                <p className="text-xs text-gray-500 mb-1">Online payments</p>
-                <p className="text-sm font-mono text-gray-900">as low as 3.5% + $0.50</p>
-              </div>
-              <div className="p-3 bg-white rounded-lg border border-blue-200">
-                <p className="text-xs text-gray-500 mb-1">In-person payments</p>
-                <p className="text-sm font-mono text-gray-900">as low as 3.2% + $0.35</p>
-              </div>
-            </div>
           </div>
         </div>
 

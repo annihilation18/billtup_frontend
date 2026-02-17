@@ -41,7 +41,7 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
         },
         {
           question: 'How much are the fees?',
-          answer: 'BilltUp charges a monthly subscription (Basic: $4.99/month or Premium: $9.99/month). If you choose to accept online payments, transaction fees apply and vary by payment method. For example, online card payments start at 3.5% + $0.50, while in-person payments can be as low as 3.2% + $0.35. If you only use BilltUp for invoicing without online payments, you only pay the monthly subscription.',
+          answer: 'BilltUp charges a monthly subscription (Basic: $4.99/month or Premium: $9.99/month). If you choose to accept online payments, transaction fees apply and vary based on payment method (e.g., card, ACH, digital wallet) and processor. You can compare rates in your payment settings. If you only use BilltUp for invoicing without online payments, you only pay the monthly subscription.',
         },
         {
           question: 'When do I receive my money?',

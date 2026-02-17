@@ -246,7 +246,7 @@ Double-check all details and click "Proceed to Payment" to send to your customer
 5. Both you and your customer receive instant email confirmation
 
 **Transaction Fees (when payments enabled):**
-Transaction fees vary by payment method and processor. Fees are competitive with industry-standard rates. For example, online card payments start at 3.5% + $0.50, while in-person payments can be as low as 3.2% + $0.35.
+Transaction fees vary based on payment method (e.g., card, ACH, digital wallet) and processor. See our pricing page for current rates.
 
 If you don't enable payments, you only pay your monthly subscription ($4.99 or $9.99).`,
         mockup: 'payment',

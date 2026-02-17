@@ -147,7 +147,7 @@ export function TermsSection() {
               </p>
 
               <p>
-                Transaction fees vary by payment method and processor. Fees are competitive with industry-standard rates and include both the payment processor's fee and a small platform fee. You can review current fee rates within the app before enabling payments.
+                Transaction fees vary by payment method (e.g., card, ACH, digital wallet) and processor. You can review current fee rates on our pricing page or within the app before enabling payments.
               </p>
 
               <p>

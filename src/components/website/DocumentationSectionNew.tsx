@@ -618,16 +618,8 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
                   </h4>
                 </div>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-blue-200/50 dark:border-blue-800/50">
-                    <span className="text-sm text-muted-foreground">Online card payments</span>
-                    <span className="text-sm font-mono text-foreground">as low as 3.5% + $0.50</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-blue-200/50 dark:border-blue-800/50">
-                    <span className="text-sm text-muted-foreground">In-person payments</span>
-                    <span className="text-sm font-mono text-foreground">as low as 3.2% + $0.35</span>
-                  </div>
-                  <div className="mt-4 p-3 bg-white dark:bg-gray-950 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <p className="text-xs text-muted-foreground">Fees vary by payment method and processor (Stripe or Square). No fees if you use BilltUp for invoicing only.</p>
+                  <div className="mt-2 p-3 bg-white dark:bg-gray-950 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <p className="text-sm text-muted-foreground">Fees vary based on payment method (card, ACH, digital wallet, etc.) and processor (Stripe or Square). No fees if you use BilltUp for invoicing only. See our <button onClick={() => onNavigate?.('pricing')} className="text-[#14B8A6] hover:underline">pricing page</button> for details.</p>
                   </div>
                 </div>
               </div>

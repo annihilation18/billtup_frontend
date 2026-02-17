@@ -24,6 +24,8 @@ import { MobileAppSection } from './components/website/MobileAppSection';
 import { BilltUpLogoExport } from './components/BilltUpLogoExport';
 import ResetPassword from './reset-password';
 import { Toaster } from './components/ui/sonner';
+import { getSession, signOut as cognitoSignOut } from './utils/auth/cognito';
+import { API_CONFIG } from './utils/config';
 
 export type SectionType = 
   | 'home' 
@@ -51,14 +53,46 @@ export default function App() {
   const [userPlan, setUserPlan] = useState<'basic' | 'premium'>('basic');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
 
-  // Check for reset password token in URL on mount
+  // Check for reset password token or existing session on mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token') || urlParams.get('reset-token');
-    
+
     if (token) {
       setCurrentSection('reset-password');
+      return;
     }
+
+    // Restore session from stored tokens
+    (async () => {
+      try {
+        const session = await getSession();
+        if (!session) return;
+
+        // Fetch user plan from business profile
+        let plan: 'basic' | 'premium' = 'basic';
+        try {
+          const response = await fetch(`${API_CONFIG.baseUrl}/business`, {
+            headers: {
+              'Authorization': `Bearer ${session.idToken}`,
+              'Content-Type': 'application/json',
+            },
+          });
+          if (response.ok) {
+            const businessData = await response.json();
+            const userPlanType = businessData?.planType || businessData?.plan || 'basic';
+            plan = userPlanType === 'premium' ? 'premium' : 'basic';
+          }
+        } catch {
+          // Default to basic if profile fetch fails
+        }
+
+        setUserPlan(plan);
+        setCurrentSection('dashboard');
+      } catch {
+        // No valid session, stay on landing page
+      }
+    })();
   }, []);
 
   // Set favicon
@@ -110,7 +144,8 @@ export default function App() {
     setCurrentSection('dashboard');
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await cognitoSignOut();
     setCurrentSection('home');
   };
 
