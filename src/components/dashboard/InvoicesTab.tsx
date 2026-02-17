@@ -333,6 +333,7 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
       {deletingInvoice && (
         <DeleteInvoiceModal
           invoice={deletingInvoice}
+          open={true}
           onClose={() => setDeletingInvoice(null)}
           onDeleted={() => {
             setDeletingInvoice(null);
