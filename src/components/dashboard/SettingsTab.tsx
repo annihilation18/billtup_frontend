@@ -88,7 +88,7 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       subtitle: 'Lifetime value & insights',
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      premiumOnly: true,
+      premium: true,
     },
     {
       id: 'payment',
@@ -110,10 +110,9 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       id: 'branding',
       icon: Palette,
       title: 'Custom Branding',
-      subtitle: 'Logo & color scheme',
+      subtitle: 'Logo, colors & invoice templates',
       color: 'text-orange-600',
       bgColor: 'bg-orange-100',
-      premiumOnly: true,
     },
   ];
 
@@ -152,29 +151,24 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       {/* Settings Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {settingsCards.map((card) => {
-          const isLocked = card.premiumOnly && !isPremium;
           return (
             <Card
               key={card.id}
-              onClick={() => !isLocked && setActiveModal(card.id)}
-              className={`p-6 border-gray-200 hover:shadow-md transition-all ${
-                isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-[#1E3A8A]'
-              }`}
+              onClick={() => setActiveModal(card.id)}
+              className="p-6 border-gray-200 hover:shadow-md transition-all cursor-pointer hover:border-[#1E3A8A]"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 rounded-lg ${card.bgColor} flex items-center justify-center`}>
                   <card.icon className={`w-6 h-6 ${card.color}`} />
                 </div>
-                {!isLocked && (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                )}
+                <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
                     {card.title}
                   </h3>
-                  {card.premiumOnly && (
+                  {card.premium && (
                     <span className="px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-xs rounded-full">
                       Premium
                     </span>
