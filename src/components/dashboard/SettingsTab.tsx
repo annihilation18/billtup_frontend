@@ -212,6 +212,7 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         onClose={() => setActiveModal(null)}
         businessProfile={businessProfile}
         onDataUpdated={loadData}
+        userPlan={userPlan}
       />
       <CommunicationModal
         open={activeModal === 'communication'}
