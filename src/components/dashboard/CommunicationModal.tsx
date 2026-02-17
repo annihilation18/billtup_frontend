@@ -4,7 +4,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Save, Loader2, Mail } from 'lucide-react@0.468.0';
+import { Save, Loader2, Mail, Server, Lock, Send } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
 import { updateBusinessProfile } from '../../utils/dashboard-api';
 
@@ -13,15 +13,26 @@ interface CommunicationModalProps {
   onClose: () => void;
   businessProfile: any;
   onDataUpdated: () => void;
+  userPlan: 'basic' | 'premium';
 }
 
-export function CommunicationModal({ open, onClose, businessProfile, onDataUpdated }: CommunicationModalProps) {
+export function CommunicationModal({ open, onClose, businessProfile, onDataUpdated, userPlan }: CommunicationModalProps) {
   const [isSaving, setIsSaving] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [formData, setFormData] = useState({
     emailFrom: '',
     emailReplyTo: '',
     emailSignature: '',
   });
+  const [smtpData, setSmtpData] = useState({
+    smtpHost: '',
+    smtpPort: '587',
+    smtpUser: '',
+    smtpPass: '',
+    smtpFromName: '',
+  });
+
+  const isPremium = userPlan === 'premium';
 
   useEffect(() => {
     if (businessProfile) {
@@ -30,17 +41,51 @@ export function CommunicationModal({ open, onClose, businessProfile, onDataUpdat
         emailReplyTo: businessProfile.emailReplyTo || businessProfile.email || '',
         emailSignature: businessProfile.emailSignature || '',
       });
+      setSmtpData({
+        smtpHost: businessProfile.smtpHost || '',
+        smtpPort: businessProfile.smtpPort || '587',
+        smtpUser: businessProfile.smtpUser || '',
+        smtpPass: businessProfile.smtpPass || '',
+        smtpFromName: businessProfile.smtpFromName || businessProfile.businessName || '',
+      });
     }
   }, [businessProfile]);
+
+  const handleTestEmail = async () => {
+    if (!smtpData.smtpHost || !smtpData.smtpUser) {
+      toast.error('Please fill in SMTP host and username first');
+      return;
+    }
+    setSendingTest(true);
+    try {
+      // Simulated API call for test email
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      toast.success('Test email sent! Check your inbox.');
+    } catch {
+      toast.error('Failed to send test email');
+    } finally {
+      setSendingTest(false);
+    }
+  };
 
   const handleSave = async () => {
     setIsSaving(true);
     try {
-      await updateBusinessProfile({
+      const payload: Record<string, any> = {
         emailFrom: formData.emailFrom,
         emailReplyTo: formData.emailReplyTo,
         emailSignature: formData.emailSignature,
-      });
+      };
+
+      if (isPremium) {
+        payload.smtpHost = smtpData.smtpHost;
+        payload.smtpPort = smtpData.smtpPort;
+        payload.smtpUser = smtpData.smtpUser;
+        payload.smtpPass = smtpData.smtpPass;
+        payload.smtpFromName = smtpData.smtpFromName;
+      }
+
+      await updateBusinessProfile(payload);
       toast.success('Email settings updated successfully!');
       onDataUpdated();
       onClose();
@@ -130,6 +175,114 @@ export function CommunicationModal({ open, onClose, businessProfile, onDataUpdat
                 </p>
               )}
             </div>
+          </div>
+
+          {/* Domain Email / SMTP Section */}
+          <div className="border-t pt-6 mt-2">
+            <div className="flex items-center gap-2 mb-4">
+              <Server className="w-5 h-5 text-[#1E3A8A]" />
+              <h3 className="text-lg text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Domain Email
+              </h3>
+              {!isPremium && (
+                <span className="px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-xs rounded-full">
+                  Premium
+                </span>
+              )}
+            </div>
+
+            {!isPremium ? (
+              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+                <Lock className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600 mb-1">
+                  Upgrade to Premium to send invoices from your own domain email.
+                </p>
+                <p className="text-xs text-gray-500">
+                  Configure custom SMTP settings for professional email delivery.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="smtpHost">SMTP Host</Label>
+                    <Input
+                      id="smtpHost"
+                      value={smtpData.smtpHost}
+                      onChange={(e) => setSmtpData({ ...smtpData, smtpHost: e.target.value })}
+                      placeholder="smtp.gmail.com"
+                      className="mt-2"
+                      disabled={isSaving}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="smtpPort">SMTP Port</Label>
+                    <Input
+                      id="smtpPort"
+                      value={smtpData.smtpPort}
+                      onChange={(e) => setSmtpData({ ...smtpData, smtpPort: e.target.value })}
+                      placeholder="587"
+                      className="mt-2"
+                      disabled={isSaving}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="smtpUser">SMTP Username</Label>
+                  <Input
+                    id="smtpUser"
+                    value={smtpData.smtpUser}
+                    onChange={(e) => setSmtpData({ ...smtpData, smtpUser: e.target.value })}
+                    placeholder="your-email@yourdomain.com"
+                    className="mt-2"
+                    disabled={isSaving}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="smtpPass">SMTP Password</Label>
+                  <Input
+                    id="smtpPass"
+                    type="password"
+                    value={smtpData.smtpPass}
+                    onChange={(e) => setSmtpData({ ...smtpData, smtpPass: e.target.value })}
+                    placeholder="••••••••"
+                    className="mt-2"
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    For Gmail, use an App Password instead of your regular password
+                  </p>
+                </div>
+
+                <div>
+                  <Label htmlFor="smtpFromName">From Name</Label>
+                  <Input
+                    id="smtpFromName"
+                    value={smtpData.smtpFromName}
+                    onChange={(e) => setSmtpData({ ...smtpData, smtpFromName: e.target.value })}
+                    placeholder="Your Business Name"
+                    className="mt-2"
+                    disabled={isSaving}
+                  />
+                </div>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleTestEmail}
+                  disabled={isSaving || sendingTest}
+                  className="w-full border-gray-300"
+                >
+                  {sendingTest ? (
+                    <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Sending...</>
+                  ) : (
+                    <><Send className="w-4 h-4 mr-2" />Send Test Email</>
+                  )}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 

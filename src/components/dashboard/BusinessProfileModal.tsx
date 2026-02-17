@@ -4,7 +4,8 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Save, Loader2, Upload, X, Palette, Eye, FileText } from 'lucide-react@0.468.0';
+import { Switch } from '../ui/switch';
+import { Save, Loader2, Upload, X, Palette, Eye, FileText, Receipt } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
 import { updateBusinessProfile } from '../../utils/dashboard-api';
 import { getIdToken } from '../../utils/auth/cognito';
@@ -49,6 +50,10 @@ export function BusinessProfileModal({ open, onClose, businessProfile, onDataUpd
     description: '',
   });
 
+  // Tax settings state
+  const [chargeTax, setChargeTax] = useState(false);
+  const [defaultTaxRate, setDefaultTaxRate] = useState('');
+
   // Branding state
   const [brandColor, setBrandColor] = useState('#1E3A8A');
   const [accentColor, setAccentColor] = useState('#14B8A6');
@@ -72,6 +77,8 @@ export function BusinessProfileModal({ open, onClose, businessProfile, onDataUpd
         website: businessProfile.website || '',
         description: businessProfile.description || '',
       });
+      setChargeTax(businessProfile.chargeTax || false);
+      setDefaultTaxRate(businessProfile.defaultTaxRate || '');
       setBrandColor(businessProfile.brandColor || '#1E3A8A');
       setAccentColor(businessProfile.accentColor || '#14B8A6');
       setInvoiceTemplate(businessProfile.invoiceTemplate || 'modern');
@@ -150,9 +157,11 @@ export function BusinessProfileModal({ open, onClose, businessProfile, onDataUpd
         logoPath = logoResult.path;
       }
 
-      // Build update payload with basic info + branding
+      // Build update payload with basic info + tax + branding
       const updatePayload: Record<string, any> = {
         ...formData,
+        chargeTax,
+        defaultTaxRate: chargeTax ? defaultTaxRate : '',
       };
 
       if (isPremium) {
@@ -267,6 +276,56 @@ export function BusinessProfileModal({ open, onClose, businessProfile, onDataUpd
               className="mt-2"
               disabled={isSaving}
             />
+          </div>
+
+          {/* Tax Settings Section */}
+          <div className="border-t pt-6 mt-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Receipt className="w-5 h-5 text-[#1E3A8A]" />
+              <h3 className="text-lg text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Tax Settings
+              </h3>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex-1">
+                  <Label htmlFor="chargeTax" className="text-sm font-medium cursor-pointer">
+                    Charge Tax on Invoices
+                  </Label>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Enable to automatically add tax to new invoices
+                  </p>
+                </div>
+                <Switch
+                  id="chargeTax"
+                  checked={chargeTax}
+                  onCheckedChange={setChargeTax}
+                  disabled={isSaving}
+                />
+              </div>
+
+              {chargeTax && (
+                <div>
+                  <Label htmlFor="defaultTaxRate">Default Tax Rate (%)</Label>
+                  <Input
+                    id="defaultTaxRate"
+                    type="number"
+                    min="0"
+                    max="100"
+                    step="0.01"
+                    value={defaultTaxRate}
+                    onChange={(e) => setDefaultTaxRate(e.target.value)}
+                    placeholder="e.g. 8.25"
+                    className="mt-2"
+                    disabled={isSaving}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This rate will be applied by default on new invoices
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Branding Section */}

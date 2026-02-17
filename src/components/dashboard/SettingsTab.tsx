@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { 
-  User, 
-  Building2, 
-  Mail, 
-  TrendingUp, 
-  CreditCard, 
+import {
+  User,
+  Building2,
+  Mail,
+  TrendingUp,
+  CreditCard,
   Settings2,
   ChevronRight,
   Loader2,
-  Palette
+  HelpCircle,
+  ExternalLink
 } from 'lucide-react@0.468.0';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
 import { AccountSettingsModal } from './AccountSettingsModal';
 import { BusinessProfileModal } from './BusinessProfileModal';
@@ -19,7 +21,6 @@ import { CommunicationModal } from './CommunicationModal';
 import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
 import { PreferencesModal } from './PreferencesModal';
-import { CustomBrandingModal } from './CustomBrandingModal';
 
 interface SettingsTabProps {
   userPlan: 'basic' | 'premium';
@@ -107,12 +108,12 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       bgColor: 'bg-gray-100',
     },
     {
-      id: 'branding',
-      icon: Palette,
-      title: 'Custom Branding',
-      subtitle: 'Logo, colors & invoice templates',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
+      id: 'help',
+      icon: HelpCircle,
+      title: 'Help & Support',
+      subtitle: 'Contact support & documentation',
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-100',
     },
   ];
 
@@ -219,6 +220,7 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         onClose={() => setActiveModal(null)}
         businessProfile={businessProfile}
         onDataUpdated={loadData}
+        userPlan={userPlan}
       />
       <CustomerAnalyticsModal
         open={activeModal === 'analytics'}
@@ -236,13 +238,57 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         userProfile={userProfile}
         onDataUpdated={loadData}
       />
-      <CustomBrandingModal
-        open={activeModal === 'branding'}
-        onClose={() => setActiveModal(null)}
-        businessProfile={businessProfile}
-        onDataUpdated={loadData}
-        userPlan={userPlan}
-      />
+      <Dialog open={activeModal === 'help'} onOpenChange={() => setActiveModal(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-[#1E3A8A]" />
+              <span style={{ fontFamily: 'Poppins, sans-serif' }}>Help & Support</span>
+            </DialogTitle>
+            <DialogDescription>
+              Get help with your BilltUp account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Contact Support</h4>
+              <p className="text-sm text-gray-600">
+                Email us at{' '}
+                <a href="mailto:support@billtup.com" className="text-[#1E3A8A] hover:underline font-medium">
+                  support@billtup.com
+                </a>
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Help Center</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Browse documentation, FAQs, and guides.
+              </p>
+              <a
+                href="https://billtup.com/help"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-sm text-[#1E3A8A] hover:underline font-medium"
+              >
+                Visit Help Center
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">App Information</h4>
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>Version: 1.0.0</p>
+                <p>Plan: <span className="font-medium capitalize">{userPlan}</span></p>
+              </div>
+            </div>
+          </div>
+          <div className="pt-2 border-t">
+            <Button variant="outline" onClick={() => setActiveModal(null)} className="w-full">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
