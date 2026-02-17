@@ -326,6 +326,7 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
         <InvoiceViewModal
           invoice={viewingInvoice}
           onClose={() => setViewingInvoice(null)}
+          onUpdate={() => loadData()}
         />
       )}
 
@@ -336,8 +337,8 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
           open={true}
           onClose={() => setDeletingInvoice(null)}
           onDeleted={() => {
+            setInvoices(prev => prev.filter(inv => inv.id !== deletingInvoice.id));
             setDeletingInvoice(null);
-            loadData();
           }}
         />
       )}
