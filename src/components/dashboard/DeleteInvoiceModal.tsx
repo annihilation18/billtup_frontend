@@ -1,4 +1,14 @@
+import { useState } from 'react';
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react@0.468.0';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+} from '../ui/dialog';
+import { Button } from '../ui/button';
 import { toast } from '../ui/sonner';
 import { deleteInvoice } from '../../utils/dashboard-api';
 
