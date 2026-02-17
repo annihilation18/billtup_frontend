@@ -11,7 +11,8 @@ import {
   ChevronRight,
   Loader2,
   HelpCircle,
-  ExternalLink
+  ExternalLink,
+  Bell
 } from 'lucide-react@0.468.0';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
@@ -21,6 +22,7 @@ import { CommunicationModal } from './CommunicationModal';
 import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
 import { PreferencesModal } from './PreferencesModal';
+import { EmailNotificationsModal } from './EmailNotificationsModal';
 
 interface SettingsTabProps {
   userPlan: 'basic' | 'premium';
@@ -100,10 +102,18 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       bgColor: 'bg-purple-100',
     },
     {
+      id: 'notifications',
+      icon: Bell,
+      title: 'Email Notifications',
+      subtitle: 'Choose which emails you receive',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100',
+    },
+    {
       id: 'preferences',
       icon: Settings2,
       title: 'Preferences',
-      subtitle: 'Security & notification preferences',
+      subtitle: 'Security settings',
       color: 'text-gray-600',
       bgColor: 'bg-gray-100',
     },
@@ -230,6 +240,12 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       <PaymentSettingsModal
         open={activeModal === 'payment'}
         onClose={() => setActiveModal(null)}
+        onDataUpdated={loadData}
+      />
+      <EmailNotificationsModal
+        open={activeModal === 'notifications'}
+        onClose={() => setActiveModal(null)}
+        userProfile={userProfile}
         onDataUpdated={loadData}
       />
       <PreferencesModal
