@@ -1,0 +1,26 @@
+name: Enforce Promotion Flow
+
+on:
+  pull_request:
+    branches: [stg, main]
+
+jobs:
+  validate-source:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check promotion flow (dev -> stg -> main)
+        run: |
+          TARGET="${{ github.base_ref }}"
+          SOURCE="${{ github.head_ref }}"
+
+          if [ "$TARGET" = "stg" ] && [ "$SOURCE" != "dev" ]; then
+            echo "::error::PRs to stg must come from dev. Got: $SOURCE"
+            exit 1
+          fi
+
+          if [ "$TARGET" = "main" ] && [ "$SOURCE" != "stg" ]; then
+            echo "::error::PRs to main must come from stg. Got: $SOURCE"
+            exit 1
+          fi
+
+          echo "Promotion flow OK: $SOURCE -> $TARGET"
