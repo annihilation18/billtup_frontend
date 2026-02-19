@@ -6,6 +6,7 @@ import { Textarea } from '../ui/textarea';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { toast } from 'sonner@2.0.3';
+import { API_BASE_URL } from '../../utils/auth/config';
 
 export function ContactSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -28,21 +29,22 @@ export function ContactSection() {
     setIsSubmitting(true);
 
     try {
-      // Here you would typically send the message to your backend
-      // For now, we'll simulate a successful submission
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      toast.success('Message sent successfully! We\'ll get back to you soon.');
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
+      const response = await fetch(`${API_BASE_URL}/billtup-api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
       });
-    } catch (error) {
-      toast.error('Failed to send message. Please try again.');
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send message');
+      }
+
+      toast.success('Message sent successfully! We\'ll get back to you soon.');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +110,7 @@ export function ContactSection() {
                 <Label htmlFor="contact-message">Message</Label>
                 <Textarea 
                   id="contact-message" 
-                  placeholder="Tell us more...\" 
+                  placeholder="Tell us more..."
                   rows={5}
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
