@@ -24,6 +24,8 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
   const [stripeConnected, setStripeConnected] = useState(false);
   const [squareConnected, setSquareConnected] = useState(false);
   const [activeProvider, setActiveProvider] = useState<string>('stripe');
+  const [squareApplicationId, setSquareApplicationId] = useState<string>('');
+  const [squareLocationId, setSquareLocationId] = useState<string>('');
   const [providersLoading, setProvidersLoading] = useState(true);
 
   useEffect(() => {
@@ -33,6 +35,8 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
         .then(([stripeResult, squareResult, providerResult]) => {
           setStripeConnected(stripeResult.connected && stripeResult.chargesEnabled);
           setSquareConnected(squareResult.connected && squareResult.active);
+          setSquareApplicationId(squareResult.applicationId || '');
+          setSquareLocationId(squareResult.locationId || '');
           setActiveProvider(providerResult.provider || 'stripe');
         })
         .catch((error) => {
@@ -265,6 +269,8 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
                 stripeConnected={stripeConnected}
                 squareConnected={squareConnected}
                 activeProvider={activeProvider}
+                squareApplicationId={squareApplicationId}
+                squareLocationId={squareLocationId}
               />
             )}
             <RefundModal invoice={invoice} onUpdate={onUpdate} />

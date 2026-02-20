@@ -663,7 +663,12 @@ export async function fetchStripeStatus(): Promise<{ connected: boolean; charges
   }
 }
 
-export async function fetchSquareStatus(): Promise<{ connected: boolean; active: boolean }> {
+export async function fetchSquareStatus(): Promise<{
+  connected: boolean;
+  active: boolean;
+  applicationId?: string;
+  locationId?: string;
+}> {
   try {
     const result = await apiCall('/square/account-status');
     return result;
@@ -691,4 +696,32 @@ export async function setActiveProvider(provider: string): Promise<{ success: bo
   } catch (error) {
     throw error;
   }
+}
+
+// Payment Processing APIs
+export async function createPaymentIntent(amount: number, invoiceId?: string, customerEmail?: string): Promise<{
+  clientSecret: string;
+  paymentIntentId: string;
+}> {
+  return apiCall('/payments/create-intent', {
+    method: 'POST',
+    body: JSON.stringify({ amount, invoiceId, customerEmail }),
+  });
+}
+
+export async function createSquarePayment(
+  amount: number,
+  sourceId: string,
+  invoiceId?: string,
+  customerEmail?: string,
+): Promise<{
+  success: boolean;
+  paymentId: string;
+  status: string;
+  receiptUrl?: string;
+}> {
+  return apiCall('/square/create-payment', {
+    method: 'POST',
+    body: JSON.stringify({ amount, sourceId, invoiceId, customerEmail }),
+  });
 }
