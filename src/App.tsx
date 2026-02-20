@@ -54,8 +54,9 @@ function AuthGuard({
   authChecked: boolean;
   children: React.ReactNode;
 }) {
+  const location = useLocation();
   if (!authChecked) return null;
-  if (!isAuthenticated) return <Navigate to="/signin" replace />;
+  if (!isAuthenticated) return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
   return <>{children}</>;
 }
 
@@ -206,7 +207,8 @@ export default function App() {
     setErrorUser(getUserId(), getUserEmail());
     setUserPlan(plan);
     setIsAuthenticated(true);
-    navigate('/dashboard', { replace: true });
+    const redirectTo = location.state?.from || '/dashboard';
+    navigate(redirectTo, { replace: true });
   };
 
   const handleSignOut = async () => {
