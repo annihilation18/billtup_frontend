@@ -652,3 +652,43 @@ export async function fetchBillingCycleUsage(): Promise<{ used: number; limit: n
     return { used: 0, limit: 50 };
   }
 }
+
+// Payment Provider Status APIs
+export async function fetchStripeStatus(): Promise<{ connected: boolean; chargesEnabled: boolean }> {
+  try {
+    const result = await apiCall('/stripe/account-status');
+    return result;
+  } catch (error) {
+    return { connected: false, chargesEnabled: false };
+  }
+}
+
+export async function fetchSquareStatus(): Promise<{ connected: boolean; active: boolean }> {
+  try {
+    const result = await apiCall('/square/account-status');
+    return result;
+  } catch (error) {
+    return { connected: false, active: false };
+  }
+}
+
+export async function fetchActiveProvider(): Promise<{ provider: string }> {
+  try {
+    const result = await apiCall('/payment-provider/active');
+    return result;
+  } catch (error) {
+    return { provider: 'stripe' };
+  }
+}
+
+export async function setActiveProvider(provider: string): Promise<{ success: boolean; provider: string }> {
+  try {
+    const result = await apiCall('/payment-provider/set', {
+      method: 'POST',
+      body: JSON.stringify({ provider }),
+    });
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}

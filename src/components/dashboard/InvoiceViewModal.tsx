@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, Clock, XCircle, Send, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { fetchBusinessProfile } from '../../utils/dashboard-api';
+import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider } from '../../utils/dashboard-api';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
 import { EditInvoiceModal } from './EditInvoiceModal';
 import { TakePaymentModal } from './TakePaymentModal';
@@ -21,6 +21,28 @@ interface InvoiceViewModalProps {
 export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: InvoiceViewModalProps) {
   const [customerEmail, setCustomerEmail] = useState(invoice?.customerEmail || '');
   const [isSending, setIsSending] = useState(false);
+  const [stripeConnected, setStripeConnected] = useState(false);
+  const [squareConnected, setSquareConnected] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string>('stripe');
+  const [providersLoading, setProvidersLoading] = useState(true);
+
+  useEffect(() => {
+    if (open && invoice?.status !== 'paid') {
+      setProvidersLoading(true);
+      Promise.all([fetchStripeStatus(), fetchSquareStatus(), fetchActiveProvider()])
+        .then(([stripeResult, squareResult, providerResult]) => {
+          setStripeConnected(stripeResult.connected && stripeResult.chargesEnabled);
+          setSquareConnected(squareResult.connected && squareResult.active);
+          setActiveProvider(providerResult.provider || 'stripe');
+        })
+        .catch((error) => {
+          console.error('Error fetching provider status:', error);
+        })
+        .finally(() => setProvidersLoading(false));
+    } else {
+      setProvidersLoading(false);
+    }
+  }, [open, invoice?.status]);
 
   const handleActionComplete = () => {
     if (onUpdate) {
@@ -236,7 +258,15 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
           <div className="flex flex-wrap gap-2 mt-4">
             <EditInvoiceModal invoice={invoice} onUpdate={onUpdate} />
             <DeleteInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-            <TakePaymentModal invoice={invoice} onUpdate={onUpdate} />
+            {!providersLoading && (stripeConnected || squareConnected) && (
+              <TakePaymentModal
+                invoice={invoice}
+                onUpdate={onUpdate}
+                stripeConnected={stripeConnected}
+                squareConnected={squareConnected}
+                activeProvider={activeProvider}
+              />
+            )}
             <RefundModal invoice={invoice} onUpdate={onUpdate} />
           </div>
         </div>
