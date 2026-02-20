@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { DashboardSection } from './components/dashboard/DashboardSection';
 import { WebsiteHeader } from './components/website/WebsiteHeader';
@@ -67,6 +67,7 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const hasVisitedDashboard = useRef(false);
 
   // Derive current section from pathname (used by WebsiteHeader and other components)
   const currentSection = pathToSection(location.pathname);
@@ -178,9 +179,20 @@ export default function App() {
     };
   }, [location.pathname, navigate]);
 
-  // Show logout confirmation when authenticated user navigates to home page
+  // Track dashboard visits; show logout confirmation when authenticated user
+  // navigates back to any public page from the dashboard
   useEffect(() => {
-    if (isAuthenticated && authChecked && location.pathname === '/') {
+    if (location.pathname.startsWith('/dashboard')) {
+      hasVisitedDashboard.current = true;
+      return;
+    }
+    if (
+      isAuthenticated &&
+      authChecked &&
+      hasVisitedDashboard.current &&
+      !location.pathname.startsWith('/dashboard') &&
+      location.pathname !== '/reset-password'
+    ) {
       setShowLogoutConfirm(true);
     }
   }, [isAuthenticated, authChecked, location.pathname]);
@@ -194,7 +206,7 @@ export default function App() {
     setErrorUser(getUserId(), getUserEmail());
     setUserPlan(plan);
     setIsAuthenticated(true);
-    navigate('/dashboard');
+    navigate('/dashboard', { replace: true });
   };
 
   const handleSignOut = async () => {
