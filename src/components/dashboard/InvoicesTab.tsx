@@ -206,31 +206,91 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
         </div>
       </Card>
 
+      {/* Mobile Invoice Cards */}
+      <div className="sm:hidden space-y-3">
+        {loading ? (
+          <Card className="p-4 border-gray-200 flex justify-center">
+            <Loader2 className="w-5 h-5 animate-spin" />
+          </Card>
+        ) : filteredInvoices.length > 0 ? (
+          filteredInvoices.map((invoice) => (
+            <Card key={invoice.id} className="p-4 border-gray-200">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <p className="text-sm font-medium text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
+                    {invoice.number || invoice.id}
+                  </p>
+                  <p className="text-sm text-gray-600 mt-0.5">{invoice.customer}</p>
+                </div>
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${getStatusColor(invoice.status)}`}>
+                  {getStatusIcon(invoice.status)}
+                  {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+                </span>
+              </div>
+              <p className="text-lg font-semibold text-gray-900 mb-2" style={{ fontFamily: 'Roboto Mono, monospace' }}>
+                ${(invoice.total || 0).toFixed(2)}
+              </p>
+              <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
+                <span>
+                  {invoice.date
+                    ? new Date(invoice.date).toLocaleDateString()
+                    : invoice.createdAt
+                      ? new Date(invoice.createdAt).toLocaleDateString()
+                      : 'N/A'}
+                </span>
+                <span>Due: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  className="h-8 px-3 text-xs border-gray-300 flex-1"
+                  onClick={() => setViewingInvoice(invoice)}
+                >
+                  <Eye className="w-3 h-3 mr-1" />
+                  View
+                </Button>
+                <button
+                  className="p-1.5 hover:bg-red-50 rounded transition-colors"
+                  onClick={() => setDeletingInvoice(invoice)}
+                  title="Delete invoice"
+                >
+                  <Trash2 className="w-4 h-4 text-red-600" />
+                </button>
+              </div>
+            </Card>
+          ))
+        ) : (
+          <Card className="p-4 border-gray-200 text-center text-gray-500 text-sm">
+            No invoices found
+          </Card>
+        )}
+      </div>
+
       {/* Invoices Table */}
-      <Card className="border-gray-200 overflow-hidden">
+      <Card className="border-gray-200 overflow-hidden hidden sm:block">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
               <tr>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Invoice
                 </th>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Customer
                 </th>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Amount
                 </th>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Due Date
                 </th>
-                <th className="px-6 py-3 text-right text-xs text-gray-600 uppercase tracking-wider">
+                <th className="px-3 sm:px-6 py-3 text-right text-xs text-gray-600 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -245,26 +305,26 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
               ) : filteredInvoices.length > 0 ? (
                 filteredInvoices.map((invoice) => (
                   <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
                         {invoice.number || invoice.id}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900">{invoice.customer}</span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
                         ${(invoice.total || 0).toFixed(2)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs ${getStatusColor(invoice.status)}`}>
                         {getStatusIcon(invoice.status)}
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
                         {invoice.date 
                           ? new Date(invoice.date).toLocaleDateString()
@@ -274,12 +334,12 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                         }
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
                         {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button 
                           variant="outline" 

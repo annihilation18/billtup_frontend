@@ -109,7 +109,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>Invoice Details</DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
@@ -231,15 +231,11 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
           </div>
 
           {/* Actions */}
-          <div className="flex justify-between items-center mt-4">
-            <div className="space-x-2">
-              <EditInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-              <DeleteInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-            </div>
-            <div className="space-x-2">
-              <TakePaymentModal invoice={invoice} onUpdate={onUpdate} />
-              <RefundModal invoice={invoice} onUpdate={onUpdate} />
-            </div>
+          <div className="flex flex-wrap gap-2 mt-4">
+            <EditInvoiceModal invoice={invoice} onUpdate={onUpdate} />
+            <DeleteInvoiceModal invoice={invoice} onUpdate={onUpdate} />
+            <TakePaymentModal invoice={invoice} onUpdate={onUpdate} />
+            <RefundModal invoice={invoice} onUpdate={onUpdate} />
           </div>
         </div>
       </DialogContent>
