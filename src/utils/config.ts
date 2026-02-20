@@ -14,8 +14,9 @@ export const API_CONFIG = {
 
 // Stripe Configuration
 // Note: Stripe publishable key is safe to expose in frontend
+// Must match the same Stripe account as the backend STRIPE_SECRET_KEY
 export const STRIPE_CONFIG = {
-  publishableKey: 'pk_test_51QUnWrAEhJsFVtrcPnA4DPd5xGQEY5IqeJ1LdGHEHYU9pKQIHtXqSxLlxAuNpTFDpEvIjqMn3wQDaWqTOcEF0vZg00cMgE0Uxx'
+  publishableKey: 'pk_test_51SVdOlPYCWVRWhBnz8f27PeXbzMnes1yBs5jf97pszPZ3JiJfsANtsf6QSXkG9NNhUozRpMgJAYy4e5TYrebnXZG00mdgh8am6'
 } as const;
 
 // App Configuration
