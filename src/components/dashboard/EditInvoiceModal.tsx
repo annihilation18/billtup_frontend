@@ -34,6 +34,8 @@ interface EditInvoiceModalProps {
 
 export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
   const [open, setOpen] = useState(false);
+
+  if (invoice.status !== 'pending') return null;
   const [isUpdating, setIsUpdating] = useState(false);
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
