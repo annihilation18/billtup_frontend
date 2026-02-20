@@ -233,13 +233,19 @@ export default function App() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel
-            onClick={() => navigate('/dashboard')}
+            onClick={() => {
+              setShowLogoutConfirm(false);
+              navigate('/dashboard');
+            }}
           >
             Back to Dashboard
           </AlertDialogCancel>
           <AlertDialogAction
             className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
-            onClick={() => handleSignOut()}
+            onClick={() => {
+              setShowLogoutConfirm(false);
+              handleSignOut();
+            }}
           >
             Log Out
           </AlertDialogAction>
