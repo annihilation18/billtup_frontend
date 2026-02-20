@@ -31,6 +31,16 @@ import { setErrorUser, clearErrorUser } from './utils/errorReporter';
 import { sessionTimeout } from './utils/sessionTimeout';
 import { sectionToPath, pathToSection } from './utils/routes';
 import type { SectionType } from './utils/routes';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from './components/ui/alert-dialog';
 
 // Re-export so existing imports from '../../App' keep working
 export type { SectionType } from './utils/routes';
@@ -56,6 +66,7 @@ export default function App() {
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   // Derive current section from pathname (used by WebsiteHeader and other components)
   const currentSection = pathToSection(location.pathname);
@@ -167,6 +178,13 @@ export default function App() {
     };
   }, [location.pathname, navigate]);
 
+  // Show logout confirmation when authenticated user navigates to home page
+  useEffect(() => {
+    if (isAuthenticated && authChecked && location.pathname === '/') {
+      setShowLogoutConfirm(true);
+    }
+  }, [isAuthenticated, authChecked, location.pathname]);
+
   // Scroll to top whenever pathname changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -201,6 +219,34 @@ export default function App() {
   };
 
   return (
+    <>
+    {/* Logout confirmation when authenticated user visits home page */}
+    <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Leave Dashboard?
+          </AlertDialogTitle>
+          <AlertDialogDescription style={{ fontFamily: 'Inter, sans-serif' }}>
+            You're currently logged in. Would you like to log out or return to your dashboard?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel
+            onClick={() => navigate('/dashboard')}
+          >
+            Back to Dashboard
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
+            onClick={() => handleSignOut()}
+          >
+            Log Out
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
     <Routes>
       {/* Reset password — no header/footer */}
       <Route
@@ -294,5 +340,6 @@ export default function App() {
         }
       />
     </Routes>
+    </>
   );
 }
