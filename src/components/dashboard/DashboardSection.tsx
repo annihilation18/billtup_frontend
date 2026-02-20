@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Users, 
-  FileText, 
-  Settings, 
+import { useState, useEffect, useCallback } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Users,
+  FileText,
+  Settings,
   TrendingUp,
   RefreshCw,
   Crown,
@@ -24,6 +25,8 @@ import { OverviewTab } from './OverviewTab';
 import { BilltUpLogo } from '../BilltUpLogo';
 import { UserMenu } from './UserMenu';
 import { fetchTrialStatus } from '../../utils/dashboard-api';
+import { pathToTab, tabToPath } from '../../utils/routes';
+import type { DashboardTab } from '../../utils/routes';
 
 interface DashboardSectionProps {
   userPlan: 'basic' | 'premium';
@@ -32,7 +35,12 @@ interface DashboardSectionProps {
 }
 
 export function DashboardSection({ userPlan, onSignOut, onPlanChange }: DashboardSectionProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'customers' | 'invoices' | 'analytics' | 'settings'>('overview');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const activeTab = pathToTab(location.pathname);
+  const setActiveTab = useCallback((tab: DashboardTab) => {
+    navigate(tabToPath(tab));
+  }, [navigate]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [trialStatus, setTrialStatus] = useState<{

@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { DashboardSection } from './components/dashboard/DashboardSection';
 import { WebsiteHeader } from './components/website/WebsiteHeader';
 import { HeroSection } from './components/website/HeroSection';
@@ -28,48 +29,56 @@ import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from '
 import { API_CONFIG } from './utils/config';
 import { setErrorUser, clearErrorUser } from './utils/errorReporter';
 import { sessionTimeout } from './utils/sessionTimeout';
+import { sectionToPath, pathToSection } from './utils/routes';
+import type { SectionType } from './utils/routes';
 
-export type SectionType = 
-  | 'home' 
-  | 'features' 
-  | 'pricing' 
-  | 'docs' 
-  | 'faq' 
-  | 'signup' 
-  | 'signin' 
-  | 'dashboard'
-  | 'integrations'
-  | 'about'
-  | 'contact'
-  | 'privacy'
-  | 'terms'
-  | 'security'
-  | 'roadmap'
-  | 'changelog'
-  | 'help'
-  | 'reset-password'
-  | 'logo-export';
+// Re-export so existing imports from '../../App' keep working
+export type { SectionType } from './utils/routes';
+
+function AuthGuard({
+  isAuthenticated,
+  authChecked,
+  children,
+}: {
+  isAuthenticated: boolean;
+  authChecked: boolean;
+  children: React.ReactNode;
+}) {
+  if (!authChecked) return null;
+  if (!isAuthenticated) return <Navigate to="/signin" replace />;
+  return <>{children}</>;
+}
 
 export default function App() {
-  const [currentSection, setCurrentSection] = useState<SectionType>('home');
+  const location = useLocation();
+  const navigate = useNavigate();
   const [userPlan, setUserPlan] = useState<'basic' | 'premium'>('basic');
   const [selectedPlan, setSelectedPlan] = useState<'basic' | 'premium'>('basic');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
 
-  // Check for reset password token or existing session on mount
+  // Derive current section from pathname (used by WebsiteHeader and other components)
+  const currentSection = pathToSection(location.pathname);
+
+  const navigateTo = useCallback((section: SectionType) => {
+    navigate(sectionToPath(section));
+  }, [navigate]);
+
+  // Check session on mount; auto-redirect to dashboard only from public pages
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get('token') || urlParams.get('reset-token');
-
-    if (token) {
-      setCurrentSection('reset-password');
+    // Reset-password doesn't need a session check
+    if (location.pathname === '/reset-password') {
+      setAuthChecked(true);
       return;
     }
 
-    // Restore session from stored tokens
     (async () => {
       try {
         const session = await getSession();
-        if (!session) return;
+        if (!session) {
+          setAuthChecked(true);
+          return;
+        }
 
         // Fetch user plan from business profile
         let plan: 'basic' | 'premium' = 'basic';
@@ -91,17 +100,24 @@ export default function App() {
 
         setErrorUser(session.user.id, session.user.email);
         setUserPlan(plan);
-        setCurrentSection('dashboard');
+        setIsAuthenticated(true);
+
+        // Only auto-redirect to dashboard from public pages
+        if (!location.pathname.startsWith('/dashboard')) {
+          navigate('/dashboard', { replace: true });
+        }
       } catch {
-        // No valid session, stay on landing page
+        // No valid session
+      } finally {
+        setAuthChecked(true);
       }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Set favicon
   useEffect(() => {
     const setFavicon = () => {
-      // Create SVG favicon with BilltUp brand colors
       const svg = `
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
           <defs>
@@ -116,34 +132,32 @@ export default function App() {
           <path d="M28 24h-4v16h4V24z M40 24h-8v4h8v-4z M40 32h-8v4h8v-4z M40 40h-8v4h8v-4z" fill="url(#grad)"/>
         </svg>
       `.trim();
-      
+
       const encodedSvg = `data:image/svg+xml,${encodeURIComponent(svg)}`;
-      
-      // Remove existing favicons
+
       const existingFavicons = document.querySelectorAll('link[rel*="icon"]');
       existingFavicons.forEach(favicon => favicon.remove());
-      
-      // Add new favicon
+
       const link = document.createElement('link');
       link.rel = 'icon';
       link.type = 'image/svg+xml';
       link.href = encodedSvg;
       document.head.appendChild(link);
-      
-      // Set title
+
       document.title = 'BilltUp - Modern Invoicing for Service Businesses';
     };
-    
+
     setFavicon();
   }, []);
 
   // Session inactivity timeout -- start when on dashboard, stop otherwise
   useEffect(() => {
-    if (currentSection === 'dashboard') {
+    if (location.pathname.startsWith('/dashboard')) {
       sessionTimeout.start(async () => {
         clearErrorUser();
         await cognitoSignOut();
-        setCurrentSection('signin');
+        setIsAuthenticated(false);
+        navigate('/signin');
       });
     } else {
       sessionTimeout.stop();
@@ -151,17 +165,18 @@ export default function App() {
     return () => {
       sessionTimeout.stop();
     };
-  }, [currentSection]);
+  }, [location.pathname, navigate]);
 
-  // Scroll to top whenever section changes
+  // Scroll to top whenever pathname changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [currentSection]);
+  }, [location.pathname]);
 
   const handleSignIn = (plan: 'basic' | 'premium' = 'basic') => {
     setErrorUser(getUserId(), getUserEmail());
     setUserPlan(plan);
-    setCurrentSection('dashboard');
+    setIsAuthenticated(true);
+    navigate('/dashboard');
   };
 
   const handleSignOut = async () => {
@@ -169,7 +184,8 @@ export default function App() {
     sessionTimeout.clear();
     clearErrorUser();
     await cognitoSignOut();
-    setCurrentSection('home');
+    setIsAuthenticated(false);
+    navigate('/');
   };
 
   const handlePlanChange = (newPlan: 'basic' | 'premium') => {
@@ -181,67 +197,102 @@ export default function App() {
     if (plan) {
       setSelectedPlan(plan);
     }
-    setCurrentSection(section);
+    navigateTo(section);
   };
 
-  // If authenticated, show dashboard
-  if (currentSection === 'dashboard') {
-    return <DashboardSection userPlan={userPlan} onSignOut={handleSignOut} onPlanChange={handlePlanChange} />;
-  }
-
-  // If on reset password page, show without header/footer
-  if (currentSection === 'reset-password') {
-    return (
-      <>
-        <ResetPassword onBackToSignIn={() => setCurrentSection('signin')} />
-        <Toaster />
-      </>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-white">
-      {/* Skip to main content link for keyboard navigation */}
-      <a
-        href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-md focus:shadow-lg focus:ring-2 focus:ring-ring"
-      >
-        Skip to main content
-      </a>
-
-      <WebsiteHeader currentSection={currentSection} onNavigate={setCurrentSection} />
-      
-      <main id="main-content" role="main">
-        {currentSection === 'home' && (
+    <Routes>
+      {/* Reset password — no header/footer */}
+      <Route
+        path="/reset-password"
+        element={
           <>
-            <HeroSection onGetStarted={() => setCurrentSection('signup')} />
-            <FeatureHighlights onNavigate={handleNavigateWithPlan} />
-            <MobileAppSection />
-            <PricingPreview onNavigate={handleNavigateWithPlan} />
+            <ResetPassword onBackToSignIn={() => navigate('/signin')} />
+            <Toaster />
           </>
-        )}
-        
-        {currentSection === 'features' && <FeaturesSection onNavigate={setCurrentSection} />}
-        {currentSection === 'pricing' && <PricingSection onNavigate={handleNavigateWithPlan} />}
-        {currentSection === 'docs' && <DocumentationSectionNew onNavigate={setCurrentSection} />}
-        {currentSection === 'faq' && <FAQSection onNavigate={setCurrentSection} />}
-        {currentSection === 'signup' && <SignUpSection onNavigateToSignIn={() => setCurrentSection('signin')} onNavigate={setCurrentSection} initialPlan={selectedPlan} />}
-        {currentSection === 'signin' && <SignInSection onNavigateToSignUp={() => setCurrentSection('signup')} onSignIn={handleSignIn} />}
-        {currentSection === 'integrations' && <IntegrationsSection />}
-        {currentSection === 'roadmap' && <RoadmapSection />}
-        {currentSection === 'changelog' && <ChangelogSection />}
-        {currentSection === 'help' && <HelpCenterSection onNavigate={setCurrentSection} />}
-        {currentSection === 'about' && <AboutSection onNavigate={setCurrentSection} />}
-        {currentSection === 'contact' && <ContactSection />}
-        {currentSection === 'privacy' && <PrivacySection />}
-        {currentSection === 'terms' && <TermsSection />}
-        {currentSection === 'security' && <SecuritySection />}
-        {currentSection === 'mobile-app' && <MobileAppSection />}
-        {currentSection === 'logo-export' && <BilltUpLogoExport />}
-      </main>
-      
-      <WebsiteFooter onNavigate={setCurrentSection} />
-      <Toaster />
-    </div>
+        }
+      />
+
+      {/* Dashboard — auth-guarded, no website header/footer */}
+      <Route
+        path="/dashboard/*"
+        element={
+          <AuthGuard isAuthenticated={isAuthenticated} authChecked={authChecked}>
+            <DashboardSection userPlan={userPlan} onSignOut={handleSignOut} onPlanChange={handlePlanChange} />
+          </AuthGuard>
+        }
+      />
+
+      {/* Public pages — with website header and footer */}
+      <Route
+        path="/*"
+        element={
+          <div className="min-h-screen bg-white">
+            <a
+              href="#main-content"
+              className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-md focus:shadow-lg focus:ring-2 focus:ring-ring"
+            >
+              Skip to main content
+            </a>
+
+            <WebsiteHeader currentSection={currentSection} onNavigate={navigateTo} />
+
+            <main id="main-content" role="main">
+              <Routes>
+                <Route
+                  path="/"
+                  element={
+                    <>
+                      <HeroSection onGetStarted={() => navigate('/signup')} />
+                      <FeatureHighlights onNavigate={handleNavigateWithPlan} />
+                      <MobileAppSection />
+                      <PricingPreview onNavigate={handleNavigateWithPlan} />
+                    </>
+                  }
+                />
+                <Route path="/features" element={<FeaturesSection onNavigate={navigateTo} />} />
+                <Route path="/pricing" element={<PricingSection onNavigate={handleNavigateWithPlan} />} />
+                <Route path="/docs" element={<DocumentationSectionNew onNavigate={navigateTo} />} />
+                <Route path="/faq" element={<FAQSection onNavigate={navigateTo} />} />
+                <Route
+                  path="/signup"
+                  element={
+                    <SignUpSection
+                      onNavigateToSignIn={() => navigate('/signin')}
+                      onNavigate={navigateTo}
+                      initialPlan={selectedPlan}
+                    />
+                  }
+                />
+                <Route
+                  path="/signin"
+                  element={
+                    <SignInSection
+                      onNavigateToSignUp={() => navigate('/signup')}
+                      onSignIn={handleSignIn}
+                    />
+                  }
+                />
+                <Route path="/integrations" element={<IntegrationsSection />} />
+                <Route path="/roadmap" element={<RoadmapSection />} />
+                <Route path="/changelog" element={<ChangelogSection />} />
+                <Route path="/help" element={<HelpCenterSection onNavigate={navigateTo} />} />
+                <Route path="/about" element={<AboutSection onNavigate={navigateTo} />} />
+                <Route path="/contact" element={<ContactSection />} />
+                <Route path="/privacy" element={<PrivacySection />} />
+                <Route path="/terms" element={<TermsSection />} />
+                <Route path="/security" element={<SecuritySection />} />
+                <Route path="/logo-export" element={<BilltUpLogoExport />} />
+                {/* Catch-all redirects to home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </main>
+
+            <WebsiteFooter onNavigate={navigateTo} />
+            <Toaster />
+          </div>
+        }
+      />
+    </Routes>
   );
 }
