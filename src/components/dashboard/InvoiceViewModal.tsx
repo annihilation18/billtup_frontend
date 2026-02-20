@@ -5,6 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
+import { fetchBusinessProfile } from '../../utils/dashboard-api';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
 import { EditInvoiceModal } from './EditInvoiceModal';
 import { TakePaymentModal } from './TakePaymentModal';
@@ -39,6 +40,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
       const { API_CONFIG } = await import('../../utils/config');
       const { getIdToken } = await import('../../utils/auth/cognito');
       const token = await getIdToken();
+      const businessData = await fetchBusinessProfile() || {};
       const response = await fetch(
         `${API_CONFIG.baseUrl}/invoices/send-email`,
         {
@@ -50,7 +52,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
           body: JSON.stringify({
             invoiceData: invoice,
             customerEmail,
-            businessData: {}, // Optional business data can be added
+            businessData,
           }),
         }
       );
