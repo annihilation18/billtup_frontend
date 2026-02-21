@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Switch } from '../ui/switch';
 import { CreditCard, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react@0.468.0';
-import { fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, setActiveProvider as setActiveProviderApi } from '../../utils/dashboard-api';
+import { fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, setActiveProvider as setActiveProviderApi, getStripeOAuthUrl, getSquareOAuthUrl, disconnectStripe, disconnectSquare } from '../../utils/dashboard-api';
 import { toast } from 'sonner@2.0.3';
 
 interface PaymentSettingsModalProps {
@@ -53,6 +53,15 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
   const switchProvider = async (newProvider: PaymentProvider) => {
     if (newProvider === activeProvider || switching) return;
 
+    if (newProvider === 'stripe' && !stripeConnected) {
+      toast.error('Connect Stripe before switching to it');
+      return;
+    }
+    if (newProvider === 'square' && !squareConnected) {
+      toast.error('Connect Square before switching to it');
+      return;
+    }
+
     try {
       setSwitching(true);
       const data = await setActiveProviderApi(newProvider);
@@ -68,12 +77,71 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
     }
   };
 
-  const handleConnectStripe = () => {
-    toast.info('To connect Stripe, open the BilltUp mobile app and go to Settings > Payment Settings.');
+  const [connecting, setConnecting] = useState<'stripe' | 'square' | null>(null);
+  const [disconnecting, setDisconnecting] = useState<'stripe' | 'square' | null>(null);
+
+  const handleConnectStripe = async () => {
+    try {
+      setConnecting('stripe');
+      const { url } = await getStripeOAuthUrl();
+      // Redirect to Stripe OAuth — callback will return to /dashboard/oauth/stripe/callback
+      const callbackUrl = `${window.location.origin}/dashboard/oauth/stripe/callback`;
+      window.location.href = `${url}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    } catch (error: any) {
+      console.error('Error getting Stripe OAuth URL:', error);
+      toast.error(error.message || 'Failed to start Stripe connection');
+      setConnecting(null);
+    }
   };
 
-  const handleConnectSquare = () => {
-    toast.info('To connect Square, open the BilltUp mobile app and go to Settings > Payment Settings.');
+  const handleConnectSquare = async () => {
+    try {
+      setConnecting('square');
+      const { url } = await getSquareOAuthUrl();
+      // Redirect to Square OAuth — callback will return to /dashboard/oauth/square/callback
+      const callbackUrl = `${window.location.origin}/dashboard/oauth/square/callback`;
+      window.location.href = `${url}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    } catch (error: any) {
+      console.error('Error getting Square OAuth URL:', error);
+      toast.error(error.message || 'Failed to start Square connection');
+      setConnecting(null);
+    }
+  };
+
+  const handleDisconnectStripe = async () => {
+    try {
+      setDisconnecting('stripe');
+      await disconnectStripe();
+      setStripeConnected(false);
+      if (activeProvider === 'stripe') {
+        setActiveProvider('square');
+      }
+      toast.success('Stripe account disconnected');
+      onDataUpdated();
+    } catch (error: any) {
+      console.error('Error disconnecting Stripe:', error);
+      toast.error(error.message || 'Failed to disconnect Stripe');
+    } finally {
+      setDisconnecting(null);
+    }
+  };
+
+  const handleDisconnectSquare = async () => {
+    try {
+      setDisconnecting('square');
+      await disconnectSquare();
+      setSquareConnected(false);
+      if (activeProvider === 'square') {
+        setActiveProvider('stripe');
+      }
+      toast.success('Square account disconnected');
+      onDataUpdated();
+    } catch (error: any) {
+      console.error('Error disconnecting Square:', error);
+      toast.error(error.message || 'Failed to disconnect Square');
+    } finally {
+      setDisconnecting(null);
+    }
   };
 
   const handleNfcToggle = (enabled: boolean) => {
@@ -238,13 +306,30 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
                   </div>
                 )}
 
-                <Button
-                  onClick={handleConnectStripe}
-                  className="bg-[#635BFF] hover:bg-[#635BFF]/90 text-white"
-                  disabled={stripeConnected}
-                >
-                  {stripeConnected ? 'Connected' : 'Connect via Mobile App'}
-                </Button>
+                <div className="flex gap-2">
+                  {stripeConnected ? (
+                    <Button
+                      onClick={handleDisconnectStripe}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      disabled={disconnecting === 'stripe'}
+                    >
+                      {disconnecting === 'stripe' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                      ) : 'Disconnect Stripe'}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleConnectStripe}
+                      className="bg-[#635BFF] hover:bg-[#635BFF]/90 text-white"
+                      disabled={connecting === 'stripe'}
+                    >
+                      {connecting === 'stripe' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Connecting...</>
+                      ) : 'Connect Stripe'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </Card>
@@ -275,13 +360,30 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
                   </div>
                 )}
 
-                <Button
-                  onClick={handleConnectSquare}
-                  className="bg-black hover:bg-gray-800 text-white"
-                  disabled={squareConnected}
-                >
-                  {squareConnected ? 'Connected' : 'Connect via Mobile App'}
-                </Button>
+                <div className="flex gap-2">
+                  {squareConnected ? (
+                    <Button
+                      onClick={handleDisconnectSquare}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      disabled={disconnecting === 'square'}
+                    >
+                      {disconnecting === 'square' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                      ) : 'Disconnect Square'}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleConnectSquare}
+                      className="bg-black hover:bg-gray-800 text-white"
+                      disabled={connecting === 'square'}
+                    >
+                      {connecting === 'square' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Connecting...</>
+                      ) : 'Connect Square'}
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </Card>

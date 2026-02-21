@@ -735,3 +735,43 @@ export async function createSquarePayment(
     body: JSON.stringify({ amount, sourceId, invoiceId, customerEmail }),
   });
 }
+
+// OAuth URL APIs
+export async function getStripeOAuthUrl(): Promise<{ url: string; state: string }> {
+  return apiCall('/stripe/oauth-url');
+}
+
+export async function getSquareOAuthUrl(): Promise<{ url: string; state: string }> {
+  return apiCall('/square/oauth-url');
+}
+
+// OAuth Callback APIs
+export async function stripeOAuthCallback(code: string, state: string): Promise<{
+  success: boolean;
+  accountId: string;
+  chargesEnabled: boolean;
+}> {
+  return apiCall('/stripe/oauth-callback', {
+    method: 'POST',
+    body: JSON.stringify({ code, state }),
+  });
+}
+
+export async function squareOAuthCallback(code: string, state: string): Promise<{
+  success: boolean;
+  merchantId: string;
+}> {
+  return apiCall('/square/oauth-callback', {
+    method: 'POST',
+    body: JSON.stringify({ code, state }),
+  });
+}
+
+// Disconnect APIs
+export async function disconnectStripe(): Promise<{ success: boolean }> {
+  return apiCall('/stripe/disconnect', { method: 'POST' });
+}
+
+export async function disconnectSquare(): Promise<{ success: boolean }> {
+  return apiCall('/square/disconnect', { method: 'POST' });
+}

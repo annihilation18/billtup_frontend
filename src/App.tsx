@@ -24,6 +24,7 @@ import { HelpCenterSection } from './components/website/HelpCenterSection';
 import { MobileAppSection } from './components/website/MobileAppSection';
 import { BilltUpLogoExport } from './components/BilltUpLogoExport';
 import ResetPassword from './reset-password';
+import { OAuthCallbackPage } from './components/dashboard/OAuthCallbackPage';
 import { Toaster } from './components/ui/sonner';
 import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
@@ -276,6 +277,24 @@ export default function App() {
             <ResetPassword onBackToSignIn={() => navigate('/signin')} />
             <Toaster />
           </>
+        }
+      />
+
+      {/* OAuth callback routes — auth-guarded, process code/state then redirect to dashboard */}
+      <Route
+        path="/dashboard/oauth/stripe/callback"
+        element={
+          <AuthGuard isAuthenticated={isAuthenticated} authChecked={authChecked}>
+            <OAuthCallbackPage provider="stripe" />
+          </AuthGuard>
+        }
+      />
+      <Route
+        path="/dashboard/oauth/square/callback"
+        element={
+          <AuthGuard isAuthenticated={isAuthenticated} authChecked={authChecked}>
+            <OAuthCallbackPage provider="square" />
+          </AuthGuard>
         }
       />
 
