@@ -41,7 +41,9 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
   const [updatingFee, setUpdatingFee] = useState(false);
 
   const invoiceTotal = invoice.total || 0;
-  const { fee: processingFee, label: feeLabel } = calculateStripeFee(invoiceTotal, selectedMethodType);
+  const { fee: processingFee } = calculateStripeFee(invoiceTotal, selectedMethodType);
+  const { fee: cardFee } = calculateStripeFee(invoiceTotal, 'card');
+  const { fee: achFee } = calculateStripeFee(invoiceTotal, 'us_bank_account');
   const totalCharge = invoiceTotal + processingFee;
 
   const handlePaymentElementChange = async (event: any) => {
@@ -58,7 +60,6 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
       const newTotalCents = Math.round(newTotal * 100);
       const invoiceCents = Math.round(invoiceTotal * 100);
       await updatePaymentIntent(paymentIntentId, newTotalCents, invoiceCents);
-      console.log('[Payment] Updated PI amount for method:', newType, 'new total:', newTotal.toFixed(2));
     } catch (err) {
       console.error('[Payment] Failed to update PI amount:', err);
     } finally {
@@ -121,11 +122,15 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
         <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
           ${invoiceTotal.toFixed(2)}
         </p>
-        <div className="flex justify-between text-xs text-gray-500 mt-2">
-          <span>{feeLabel}</span>
-          <span>{updatingFee ? '...' : `$${processingFee.toFixed(2)}`}</span>
+        <div className={`flex justify-between text-xs mt-2 ${selectedMethodType !== 'us_bank_account' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+          <span>Card / Wallet (3.5% + $0.50)</span>
+          <span>${cardFee.toFixed(2)}</span>
         </div>
-        <div className="flex justify-between text-sm font-medium text-gray-700 mt-1">
+        <div className={`flex justify-between text-xs mt-1 ${selectedMethodType === 'us_bank_account' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+          <span>Bank Transfer (ACH)</span>
+          <span>${achFee.toFixed(2)}</span>
+        </div>
+        <div className="flex justify-between text-sm font-medium text-gray-700 mt-2 pt-1 border-t border-gray-200">
           <span>Total</span>
           <span>{updatingFee ? '...' : `$${totalCharge.toFixed(2)}`}</span>
         </div>
