@@ -699,13 +699,23 @@ export async function setActiveProvider(provider: string): Promise<{ success: bo
 }
 
 // Payment Processing APIs
-export async function createPaymentIntent(amount: number, invoiceId?: string, customerEmail?: string): Promise<{
+export async function createPaymentIntent(amount: number, invoiceId?: string, customerEmail?: string, invoiceAmount?: number): Promise<{
   clientSecret: string;
   paymentIntentId: string;
 }> {
   return apiCall('/payments/create-intent', {
     method: 'POST',
-    body: JSON.stringify({ amount, invoiceId, customerEmail }),
+    body: JSON.stringify({ amount, invoiceId, customerEmail, invoiceAmount }),
+  });
+}
+
+export async function updatePaymentIntent(paymentIntentId: string, amount: number, invoiceAmount?: number): Promise<{
+  success: boolean;
+  paymentIntentId: string;
+}> {
+  return apiCall('/payments/update-intent', {
+    method: 'POST',
+    body: JSON.stringify({ paymentIntentId, amount, invoiceAmount }),
   });
 }
 
