@@ -25,6 +25,8 @@ import { MobileAppSection } from './components/website/MobileAppSection';
 import { BilltUpLogoExport } from './components/BilltUpLogoExport';
 import ResetPassword from './reset-password';
 import { OAuthCallbackPage } from './components/dashboard/OAuthCallbackPage';
+import { PaymentPage } from './components/pay/PaymentPage';
+import { PaymentSuccessPage } from './components/pay/PaymentSuccessPage';
 import { Toaster } from './components/ui/sonner';
 import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
@@ -80,8 +82,8 @@ export default function App() {
 
   // Check session on mount; auto-redirect to dashboard only from public pages
   useEffect(() => {
-    // Reset-password doesn't need a session check
-    if (location.pathname === '/reset-password') {
+    // Reset-password and payment pages don't need a session check
+    if (location.pathname === '/reset-password' || location.pathname.startsWith('/pay/')) {
       setAuthChecked(true);
       return;
     }
@@ -279,6 +281,10 @@ export default function App() {
           </>
         }
       />
+
+      {/* Public payment pages — no header/footer, branded by business */}
+      <Route path="/pay/:token" element={<><PaymentPage /><Toaster /></>} />
+      <Route path="/pay/:token/success" element={<><PaymentSuccessPage /><Toaster /></>} />
 
       {/* OAuth callback routes — auth-guarded, process code/state then redirect to dashboard */}
       <Route

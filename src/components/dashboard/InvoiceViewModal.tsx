@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Clock, XCircle, Send, Loader2 } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Send, Loader2, Link2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider } from '../../utils/dashboard-api';
+import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, createPaymentLink } from '../../utils/dashboard-api';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
 import { EditInvoiceModal } from './EditInvoiceModal';
 import { TakePaymentModal } from './TakePaymentModal';
@@ -27,6 +27,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
   const [squareApplicationId, setSquareApplicationId] = useState<string>('');
   const [squareLocationId, setSquareLocationId] = useState<string>('');
   const [providersLoading, setProvidersLoading] = useState(true);
+  const [isCopyingLink, setIsCopyingLink] = useState(false);
 
   useEffect(() => {
     if (open && invoice?.status !== 'paid') {
@@ -94,6 +95,21 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
       toast.error('Failed to send invoice. Please try again.');
     } finally {
       setIsSending(false);
+    }
+  };
+
+  const handleCopyPaymentLink = async () => {
+    if (!invoice?.id) return;
+    setIsCopyingLink(true);
+    try {
+      const result = await createPaymentLink(invoice.id);
+      await navigator.clipboard.writeText(result.paymentUrl);
+      toast.success('Payment link copied to clipboard!');
+    } catch (error) {
+      console.error('Error creating payment link:', error);
+      toast.error('Failed to create payment link');
+    } finally {
+      setIsCopyingLink(false);
     }
   };
 
@@ -257,6 +273,28 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
               )}
             </Button>
           </div>
+
+          {/* Copy Payment Link — shown for pending invoices when provider connected */}
+          {invoice.status === 'pending' && !providersLoading && (stripeConnected || squareConnected) && (
+            <Button
+              variant="outline"
+              onClick={handleCopyPaymentLink}
+              disabled={isCopyingLink}
+              className="w-full"
+            >
+              {isCopyingLink ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Creating link...
+                </>
+              ) : (
+                <>
+                  <Link2 className="w-4 h-4 mr-2" />
+                  Copy Payment Link
+                </>
+              )}
+            </Button>
+          )}
 
           {/* Actions */}
           <div className="flex flex-wrap gap-2 mt-4">

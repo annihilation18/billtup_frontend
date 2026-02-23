@@ -775,3 +775,15 @@ export async function disconnectStripe(): Promise<{ success: boolean }> {
 export async function disconnectSquare(): Promise<{ success: boolean }> {
   return apiCall('/square/disconnect', { method: 'POST' });
 }
+
+// Payment Links
+export async function createPaymentLink(invoiceId: string): Promise<{ token: string; paymentUrl: string; expiresAt: string; reused: boolean }> {
+  return apiCall('/payment-links/create', {
+    method: 'POST',
+    body: JSON.stringify({ invoiceId }),
+  });
+}
+
+export async function getPaymentLink(invoiceId: string): Promise<{ exists: boolean; token?: string; paymentUrl?: string; expiresAt?: string }> {
+  return apiCall(`/payment-links/${invoiceId}`);
+}
