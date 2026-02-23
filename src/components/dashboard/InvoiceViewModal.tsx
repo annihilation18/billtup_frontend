@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { CheckCircle2, Clock, XCircle, Send, Loader2, Link2 } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { CheckCircle2, Clock, XCircle, Send, Loader2, Link2, Camera, X, Plus, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, createPaymentLink } from '../../utils/dashboard-api';
+import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, createPaymentLink, getInvoicePhotos, uploadInvoicePhoto, deleteInvoicePhoto } from '../../utils/dashboard-api';
 import { DeleteInvoiceModal } from './DeleteInvoiceModal';
 import { EditInvoiceModal } from './EditInvoiceModal';
 import { TakePaymentModal } from './TakePaymentModal';
@@ -28,6 +28,67 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
   const [squareLocationId, setSquareLocationId] = useState<string>('');
   const [providersLoading, setProvidersLoading] = useState(true);
   const [isCopyingLink, setIsCopyingLink] = useState(false);
+  const [photos, setPhotos] = useState<Array<{ id: string; url: string; filename: string; uploadedAt: string }>>([]);
+  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+
+  // Load photos when modal opens
+  useEffect(() => {
+    if (open && invoice?.id) {
+      setIsLoadingPhotos(true);
+      getInvoicePhotos(invoice.id)
+        .then((result) => setPhotos(result.photos || []))
+        .catch((error) => console.error('Error loading photos:', error))
+        .finally(() => setIsLoadingPhotos(false));
+    }
+  }, [open, invoice?.id]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('Photo exceeds 5MB size limit');
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    try {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+
+      const result = await uploadInvoicePhoto(invoice.id, dataUrl, file.name);
+      if (result.success && result.photo) {
+        setPhotos(prev => [...prev, result.photo]);
+        toast.success('Photo uploaded');
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to upload photo');
+    } finally {
+      setIsUploadingPhoto(false);
+      if (photoInputRef.current) photoInputRef.current.value = '';
+    }
+  };
+
+  const handleDeletePhoto = async (photoId: string) => {
+    setDeletingPhotoId(photoId);
+    try {
+      await deleteInvoicePhoto(invoice.id, photoId);
+      setPhotos(prev => prev.filter(p => p.id !== photoId));
+      toast.success('Photo deleted');
+    } catch (error) {
+      toast.error('Failed to delete photo');
+    } finally {
+      setDeletingPhotoId(null);
+    }
+  };
 
   useEffect(() => {
     if (open && invoice?.status !== 'paid') {
@@ -240,6 +301,103 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
               ${(invoice.total || 0).toFixed(2)}
             </span>
           </div>
+
+          {/* Photos Section */}
+          <div className="border-t border-gray-200 pt-4">
+            <div className="flex items-center justify-between mb-3">
+              <h4 className="text-sm text-gray-500 uppercase tracking-wide">Photos</h4>
+              {invoice.status === 'pending' && photos.length < 4 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => photoInputRef.current?.click()}
+                  disabled={isUploadingPhoto}
+                >
+                  {isUploadingPhoto ? (
+                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                  ) : (
+                    <Camera className="w-4 h-4 mr-1" />
+                  )}
+                  {isUploadingPhoto ? 'Uploading...' : 'Add Photo'}
+                </Button>
+              )}
+            </div>
+
+            <input
+              ref={photoInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handlePhotoUpload}
+            />
+
+            {isLoadingPhotos ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            ) : photos.length === 0 ? (
+              <div
+                className={`bg-gray-50 rounded-lg p-4 text-center text-gray-500 text-sm ${invoice.status === 'pending' ? 'cursor-pointer hover:bg-gray-100 transition-colors' : ''}`}
+                onClick={invoice.status === 'pending' ? () => photoInputRef.current?.click() : undefined}
+              >
+                <ImageIcon className="w-6 h-6 mx-auto mb-1 opacity-40" />
+                No photos attached{invoice.status === 'pending' && ' — click to add'}
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {photos.map((photo) => (
+                    <div key={photo.id} className="relative group">
+                      <img
+                        src={photo.url}
+                        alt={photo.filename}
+                        className="w-full h-28 object-cover rounded-lg cursor-pointer border border-gray-200 hover:border-gray-400 transition-colors"
+                        onClick={() => setPhotoPreview(photo.url)}
+                      />
+                      {invoice.status === 'pending' && (
+                        <button
+                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                          disabled={deletingPhotoId === photo.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeletePhoto(photo.id);
+                          }}
+                        >
+                          {deletingPhotoId === photo.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <X className="w-3 h-3" />
+                          )}
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">{photos.length}/4 photos</p>
+              </>
+            )}
+          </div>
+
+          {/* Photo Lightbox */}
+          {photoPreview && (
+            <div
+              className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4"
+              onClick={() => setPhotoPreview(null)}
+            >
+              <button
+                className="absolute top-4 right-4 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70"
+                onClick={() => setPhotoPreview(null)}
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <img
+                src={photoPreview}
+                alt="Photo preview"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
 
           {/* Email Section */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-4">

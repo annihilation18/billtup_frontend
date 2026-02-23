@@ -787,3 +787,22 @@ export async function createPaymentLink(invoiceId: string): Promise<{ token: str
 export async function getPaymentLink(invoiceId: string): Promise<{ exists: boolean; token?: string; paymentUrl?: string; expiresAt?: string }> {
   return apiCall(`/payment-links/${invoiceId}`);
 }
+
+// ==================== INVOICE PHOTOS ====================
+
+export async function uploadInvoicePhoto(invoiceId: string, photoData: string, fileName?: string): Promise<{ success: boolean; photo: { id: string; url: string; filename: string; uploadedAt: string } }> {
+  return apiCall(`/invoices/${invoiceId}/photos`, {
+    method: 'POST',
+    body: JSON.stringify({ photoData, fileName }),
+  });
+}
+
+export async function getInvoicePhotos(invoiceId: string): Promise<{ photos: Array<{ id: string; url: string; filename: string; uploadedAt: string }> }> {
+  return apiCall(`/invoices/${invoiceId}/photos`);
+}
+
+export async function deleteInvoicePhoto(invoiceId: string, photoId: string): Promise<{ success: boolean }> {
+  return apiCall(`/invoices/${invoiceId}/photos/${photoId}`, {
+    method: 'DELETE',
+  });
+}
