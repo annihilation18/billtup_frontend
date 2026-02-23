@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { toast } from '../ui/sonner';
 import { updateInvoice, fetchCustomers } from '../../utils/dashboard-api';
+import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
   description: string;
@@ -46,9 +47,12 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
+  const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [activeAutocomplete, setActiveAutocomplete] = useState<number | null>(null);
 
   useEffect(() => {
     if (open && invoice) {
+      savedLineItemsApi.list().then((items: any[]) => setSavedItems(items || [])).catch(() => {});
       // Load invoice data when modal opens
       setSelectedCustomerId(invoice.customerId || '');
       setInvoiceNumber(invoice.number || invoice.id);
@@ -112,6 +116,28 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
     return lineItems.reduce((sum, item) => sum + item.amount, 0);
   };
 
+  const getFilteredSuggestions = (query: string) => {
+    if (query.length < 2 || savedItems.length === 0) return [];
+    const lower = query.toLowerCase();
+    return savedItems
+      .filter((s: any) => s.name.toLowerCase().includes(lower))
+      .sort((a: any, b: any) => (b.usageCount || 0) - (a.usageCount || 0))
+      .slice(0, 8);
+  };
+
+  const handleSelectSuggestion = (index: number, suggestion: any) => {
+    const newItems = [...lineItems];
+    newItems[index] = {
+      ...newItems[index],
+      description: suggestion.name,
+      rate: suggestion.price || 0,
+      quantity: suggestion.quantity || 1,
+      amount: (suggestion.quantity || 1) * (suggestion.price || 0),
+    };
+    setLineItems(newItems);
+    setActiveAutocomplete(null);
+  };
+
   const handleSubmit = async () => {
     // Validation
     if (!selectedCustomerId) {
@@ -164,7 +190,18 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
       };
 
       await updateInvoice(invoice.id, updatedInvoice);
-      
+
+      // Fire-and-forget: save line items for autocomplete
+      for (const item of lineItems) {
+        if (item.description.trim()) {
+          savedLineItemsApi.save({
+            name: item.description,
+            price: item.rate,
+            quantity: item.quantity,
+          }).catch(() => {});
+        }
+      }
+
       toast.success('Invoice updated successfully!');
       setOpen(false);
       
@@ -302,13 +339,45 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
                   
                   <div className="flex gap-2 items-start bg-gray-50 p-3 rounded-lg">
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-2">
-                      <div className="md:col-span-2">
+                      <div className="md:col-span-2 relative">
                         <Input
                           placeholder="Description"
                           value={item.description}
-                          onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                          onChange={(e) => {
+                            handleLineItemChange(index, 'description', e.target.value);
+                            setActiveAutocomplete(e.target.value.length >= 2 ? index : null);
+                          }}
+                          onFocus={() => {
+                            if (item.description.length >= 2) setActiveAutocomplete(index);
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => setActiveAutocomplete((prev) => prev === index ? null : prev), 150);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setActiveAutocomplete(null);
+                          }}
                           disabled={isUpdating}
+                          autoComplete="off"
                         />
+                        {activeAutocomplete === index && getFilteredSuggestions(item.description).length > 0 && (
+                          <div className="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            {getFilteredSuggestions(item.description).map((s: any) => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm flex items-center justify-between gap-2"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => handleSelectSuggestion(index, s)}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium truncate">{s.name}</div>
+                                  {s.notes && <div className="text-xs text-gray-500 truncate">{s.notes}</div>}
+                                </div>
+                                {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${s.price.toFixed(2)}</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div>
                         <Input

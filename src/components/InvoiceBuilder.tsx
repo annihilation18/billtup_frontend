@@ -16,6 +16,15 @@ interface LineItem {
   price: number;
 }
 
+interface SavedLineItem {
+  id: string;
+  name: string;
+  notes?: string;
+  price: number;
+  quantity: number;
+  usageCount: number;
+}
+
 interface InvoiceBuilderProps {
   onBack: () => void;
   onPreviewPDF: (invoiceData: InvoiceData) => void;
@@ -25,6 +34,7 @@ interface InvoiceBuilderProps {
   chargeTax: boolean;
   defaultTaxRate: number;
   editingInvoice?: any; // When editing an existing invoice
+  savedItems?: SavedLineItem[];
 }
 
 export interface InvoiceData {
@@ -38,7 +48,7 @@ export interface InvoiceData {
   signature?: string;
 }
 
-export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSaveInvoice, customers, chargeTax, defaultTaxRate, editingInvoice }: InvoiceBuilderProps) {
+export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSaveInvoice, customers, chargeTax, defaultTaxRate, editingInvoice, savedItems = [] }: InvoiceBuilderProps) {
   const [selectedCustomer, setSelectedCustomer] = useState(editingInvoice?.customer || "");
   const [customerEmail, setCustomerEmail] = useState(editingInvoice?.customerEmail || "");
   const [customerPhone, setCustomerPhone] = useState(editingInvoice?.customerPhone || "");
@@ -58,7 +68,29 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
     }
     return initial;
   });
+  const [activeAutocomplete, setActiveAutocomplete] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const getFilteredSuggestions = (query: string): SavedLineItem[] => {
+    if (query.length < 2 || savedItems.length === 0) return [];
+    const lower = query.toLowerCase();
+    return savedItems
+      .filter((s) => s.name.toLowerCase().includes(lower))
+      .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
+      .slice(0, 8);
+  };
+
+  const handleSelectSuggestion = (itemId: string, suggestion: SavedLineItem) => {
+    setLineItems(lineItems.map(item =>
+      item.id === itemId
+        ? { ...item, name: suggestion.name, notes: suggestion.notes || "", price: suggestion.price || 0, quantity: suggestion.quantity || 1 }
+        : item
+    ));
+    if (suggestion.notes) {
+      setExpandedNotes(prev => new Set(prev).add(itemId));
+    }
+    setActiveAutocomplete(null);
+  };
 
   const handleCustomerChange = (customerName: string) => {
     setSelectedCustomer(customerName);
@@ -295,14 +327,46 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
                 <div key={item.id} className="space-y-2">
                   <div className="flex gap-2 items-start">
                     <div className="flex-1 space-y-2">
-                      <div className="space-y-1">
+                      <div className="space-y-1 relative">
                         <Label htmlFor={`item-name-${item.id}`} className="text-xs text-muted-foreground">Item Description</Label>
                         <Input
                           id={`item-name-${item.id}`}
                           placeholder="e.g., Full Interior Detailing"
                           value={item.name}
-                          onChange={(e) => updateLineItem(item.id, "name", e.target.value)}
+                          onChange={(e) => {
+                            updateLineItem(item.id, "name", e.target.value);
+                            setActiveAutocomplete(e.target.value.length >= 2 ? item.id : null);
+                          }}
+                          onFocus={() => {
+                            if (item.name.length >= 2) setActiveAutocomplete(item.id);
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => setActiveAutocomplete((prev) => prev === item.id ? null : prev), 150);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setActiveAutocomplete(null);
+                          }}
+                          autoComplete="off"
                         />
+                        {activeAutocomplete === item.id && getFilteredSuggestions(item.name).length > 0 && (
+                          <div className="absolute z-20 left-0 right-0 top-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            {getFilteredSuggestions(item.name).map((s) => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center justify-between gap-2"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => handleSelectSuggestion(item.id, s)}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium truncate">{s.name}</div>
+                                  {s.notes && <div className="text-xs text-muted-foreground truncate">{s.notes}</div>}
+                                </div>
+                                {s.price > 0 && <span className="text-xs font-mono text-muted-foreground shrink-0">${s.price.toFixed(2)}</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-2">
                         <div className="space-y-1 w-24">

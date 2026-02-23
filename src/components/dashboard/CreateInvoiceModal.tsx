@@ -19,6 +19,7 @@ import {
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
 import { createInvoice, fetchCustomers, fetchInvoices } from '../../utils/dashboard-api';
+import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
   description: string;
@@ -48,11 +49,14 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
   const [isDrawing, setIsDrawing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [showSignature, setShowSignature] = useState(false);
+  const [savedItems, setSavedItems] = useState<any[]>([]);
+  const [activeAutocomplete, setActiveAutocomplete] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
       loadCustomers();
       loadNextInvoiceNumber();
+      savedLineItemsApi.list().then((items: any[]) => setSavedItems(items || [])).catch(() => {});
       // Set date to today and due date to 30 days from now by default
       const today = new Date().toISOString().split('T')[0];
       const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
@@ -109,6 +113,28 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
 
   const calculateTotal = () => {
     return lineItems.reduce((sum, item) => sum + item.amount, 0);
+  };
+
+  const getFilteredSuggestions = (query: string) => {
+    if (query.length < 2 || savedItems.length === 0) return [];
+    const lower = query.toLowerCase();
+    return savedItems
+      .filter((s: any) => s.name.toLowerCase().includes(lower))
+      .sort((a: any, b: any) => (b.usageCount || 0) - (a.usageCount || 0))
+      .slice(0, 8);
+  };
+
+  const handleSelectSuggestion = (index: number, suggestion: any) => {
+    const newItems = [...lineItems];
+    newItems[index] = {
+      ...newItems[index],
+      description: suggestion.name,
+      rate: suggestion.price || 0,
+      quantity: suggestion.quantity || 1,
+      amount: (suggestion.quantity || 1) * (suggestion.price || 0),
+    };
+    setLineItems(newItems);
+    setActiveAutocomplete(null);
   };
 
   // Canvas drawing functions
@@ -187,6 +213,17 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
         signature: signature || undefined,
         createdAt: new Date().toISOString(),
       });
+
+      // Fire-and-forget: save line items for autocomplete
+      for (const item of lineItems) {
+        if (item.description.trim()) {
+          savedLineItemsApi.save({
+            name: item.description,
+            price: item.rate,
+            quantity: item.quantity,
+          }).catch(() => {});
+        }
+      }
 
       toast.success('Invoice created successfully!');
       onCreated();
@@ -320,13 +357,45 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
                   )}
 
                   <div className="grid grid-cols-12 gap-2 items-start p-3 bg-gray-50 rounded-lg">
-                    <div className="col-span-12 sm:col-span-5">
+                    <div className="col-span-12 sm:col-span-5 relative">
                       <Input
                         placeholder="Description"
                         value={item.description}
-                        onChange={(e) => handleLineItemChange(index, 'description', e.target.value)}
+                        onChange={(e) => {
+                          handleLineItemChange(index, 'description', e.target.value);
+                          setActiveAutocomplete(e.target.value.length >= 2 ? index : null);
+                        }}
+                        onFocus={() => {
+                          if (item.description.length >= 2) setActiveAutocomplete(index);
+                        }}
+                        onBlur={() => {
+                          setTimeout(() => setActiveAutocomplete((prev) => prev === index ? null : prev), 150);
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === "Escape") setActiveAutocomplete(null);
+                        }}
                         className="border-gray-300 bg-white"
+                        autoComplete="off"
                       />
+                      {activeAutocomplete === index && getFilteredSuggestions(item.description).length > 0 && (
+                        <div className="absolute z-20 left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                          {getFilteredSuggestions(item.description).map((s: any) => (
+                            <button
+                              key={s.id}
+                              type="button"
+                              className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm flex items-center justify-between gap-2"
+                              onMouseDown={(e) => e.preventDefault()}
+                              onClick={() => handleSelectSuggestion(index, s)}
+                            >
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium truncate">{s.name}</div>
+                                {s.notes && <div className="text-xs text-gray-500 truncate">{s.notes}</div>}
+                              </div>
+                              {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${s.price.toFixed(2)}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <div className="col-span-4 sm:col-span-2">
                       <Input
