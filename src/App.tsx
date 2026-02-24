@@ -142,14 +142,20 @@ export default function App() {
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
           <defs>
             <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#1E3A8A;stop-opacity:1" />
-              <stop offset="50%" style="stop-color:#14B8A6;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+              <stop offset="0%" stop-color="#1E3A8A"/>
+              <stop offset="50%" stop-color="#14B8A6"/>
+              <stop offset="100%" stop-color="#F59E0B"/>
             </linearGradient>
           </defs>
           <rect width="64" height="64" rx="12" fill="url(#grad)"/>
-          <path d="M20 16h24a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V20a4 4 0 0 1 4-4z" fill="white" opacity="0.95"/>
-          <path d="M28 24h-4v16h4V24z M40 24h-8v4h8v-4z M40 32h-8v4h8v-4z M40 40h-8v4h8v-4z" fill="url(#grad)"/>
+          <rect x="3" y="3" width="58" height="58" rx="10" fill="white"/>
+          <g transform="translate(14,14) scale(1.5)" fill="none" stroke="url(#grad)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+            <polyline points="10 9 9 9 8 9"/>
+          </g>
         </svg>
       `.trim();
 
