@@ -157,16 +157,16 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
         createdAt: new Date().toISOString(),
       });
 
-      // Fire-and-forget: save line items for autocomplete
-      for (const item of lineItems) {
-        if (item.description.trim()) {
-          savedLineItemsApi.save({
+      // Save line items for autocomplete
+      Promise.all(
+        lineItems
+          .filter((item) => item.description.trim())
+          .map((item) => savedLineItemsApi.save({
             name: item.description,
             price: item.rate,
             quantity: item.quantity,
-          }).catch(() => {});
-        }
-      }
+          }).catch(() => {}))
+      );
 
       toast.success('Estimate created successfully!');
       onCreated();

@@ -191,16 +191,16 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
 
       await updateInvoice(invoice.id, updatedInvoice);
 
-      // Fire-and-forget: save line items for autocomplete
-      for (const item of lineItems) {
-        if (item.description.trim()) {
-          savedLineItemsApi.save({
+      // Save line items for autocomplete
+      Promise.all(
+        lineItems
+          .filter((item) => item.description.trim())
+          .map((item) => savedLineItemsApi.save({
             name: item.description,
             price: item.rate,
             quantity: item.quantity,
-          }).catch(() => {});
-        }
-      }
+          }).catch(() => {}))
+      );
 
       toast.success('Invoice updated successfully!');
       setOpen(false);
