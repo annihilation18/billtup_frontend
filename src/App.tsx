@@ -27,6 +27,7 @@ import ResetPassword from './reset-password';
 import { OAuthCallbackPage } from './components/dashboard/OAuthCallbackPage';
 import { PaymentPage } from './components/pay/PaymentPage';
 import { PaymentSuccessPage } from './components/pay/PaymentSuccessPage';
+import { EstimateApprovalPage } from './components/estimate/EstimateApprovalPage';
 import { Toaster } from './components/ui/sonner';
 import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
@@ -59,7 +60,10 @@ function AuthGuard({
 }) {
   const location = useLocation();
   if (!authChecked) return null;
-  if (!isAuthenticated) return <Navigate to="/signin" replace state={{ from: location.pathname }} />;
+  if (!isAuthenticated) {
+    const redirectParam = encodeURIComponent(location.pathname);
+    return <Navigate to={`/signin?redirect=${redirectParam}`} replace state={{ from: location.pathname }} />;
+  }
   return <>{children}</>;
 }
 
@@ -83,7 +87,7 @@ export default function App() {
   // Check session on mount; auto-redirect to dashboard only from public pages
   useEffect(() => {
     // Reset-password and payment pages don't need a session check
-    if (location.pathname === '/reset-password' || location.pathname.startsWith('/pay/')) {
+    if (location.pathname === '/reset-password' || location.pathname.startsWith('/pay/') || location.pathname.startsWith('/estimate/')) {
       setAuthChecked(true);
       return;
     }
@@ -210,7 +214,8 @@ export default function App() {
     setErrorUser(getUserId(), getUserEmail());
     setUserPlan(plan);
     setIsAuthenticated(true);
-    const redirectTo = location.state?.from || '/dashboard';
+    const params = new URLSearchParams(location.search);
+    const redirectTo = location.state?.from || params.get('redirect') || '/dashboard';
     navigate(redirectTo, { replace: true });
   };
 
@@ -285,6 +290,9 @@ export default function App() {
       {/* Public payment pages — no header/footer, branded by business */}
       <Route path="/pay/:token" element={<><PaymentPage /><Toaster /></>} />
       <Route path="/pay/:token/success" element={<><PaymentSuccessPage /><Toaster /></>} />
+
+      {/* Public estimate approval page — no header/footer, branded by business */}
+      <Route path="/estimate/:token" element={<><EstimateApprovalPage /><Toaster /></>} />
 
       {/* OAuth callback routes — auth-guarded, process code/state then redirect to dashboard */}
       <Route
