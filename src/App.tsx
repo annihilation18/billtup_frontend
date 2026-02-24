@@ -212,7 +212,9 @@ export default function App() {
       authChecked &&
       hasVisitedDashboard.current &&
       !location.pathname.startsWith('/dashboard') &&
-      location.pathname !== '/reset-password'
+      location.pathname !== '/reset-password' &&
+      location.pathname !== '/signin' &&
+      location.pathname !== '/signup'
     ) {
       setShowLogoutConfirm(true);
     }
