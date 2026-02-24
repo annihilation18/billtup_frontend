@@ -176,6 +176,13 @@ export default function App() {
     setFavicon();
   }, []);
 
+  // Safety net: redirect unauthenticated users away from dashboard paths
+  useEffect(() => {
+    if (authChecked && !isAuthenticated && location.pathname.startsWith('/dashboard')) {
+      navigate(`/signin?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
+    }
+  }, [authChecked, isAuthenticated, location.pathname]);
+
   // Session inactivity timeout -- start when on dashboard, stop otherwise
   useEffect(() => {
     if (location.pathname.startsWith('/dashboard')) {
@@ -388,6 +395,8 @@ export default function App() {
                 <Route path="/terms" element={<TermsSection />} />
                 <Route path="/security" element={<SecuritySection />} />
                 <Route path="/logo-export" element={<BilltUpLogoExport />} />
+                {/* Auth-guarded paths that slip through — redirect to signin */}
+                <Route path="/dashboard/*" element={<Navigate to={`/signin?redirect=${encodeURIComponent(location.pathname)}`} replace />} />
                 {/* Catch-all redirects to home */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
