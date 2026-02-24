@@ -13,7 +13,8 @@ import {
   X,
   Smartphone,
   Clock,
-  Sparkles
+  Sparkles,
+  ClipboardList
 } from 'lucide-react@0.468.0';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -22,6 +23,7 @@ import { InvoicesTab } from './InvoicesTab';
 import { AnalyticsTab } from './AnalyticsTab';
 import { SettingsTab } from './SettingsTab';
 import { OverviewTab } from './OverviewTab';
+import { EstimatesTab } from './EstimatesTab';
 import { BilltUpLogo } from '../BilltUpLogo';
 import { UserMenu } from './UserMenu';
 import { fetchTrialStatus } from '../../utils/dashboard-api';
@@ -67,6 +69,7 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'customers', label: 'Customers', icon: Users },
+    { id: 'estimates', label: 'Estimates', icon: ClipboardList },
     { id: 'invoices', label: 'Invoices', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, premiumOnly: true },
     { id: 'settings', label: 'Settings', icon: Settings },
@@ -320,6 +323,7 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
           {activeTab === 'overview' && <OverviewTab userPlan={effectivePlan} onNavigateToTab={setActiveTab} onUpgrade={handleUpgrade} />}
           {activeTab === 'customers' && <CustomersTab userPlan={effectivePlan} />}
           {activeTab === 'invoices' && <InvoicesTab userPlan={effectivePlan} />}
+          {activeTab === 'estimates' && <EstimatesTab userPlan={effectivePlan} />}
           {activeTab === 'analytics' && <AnalyticsTab userPlan={effectivePlan} />}
           {activeTab === 'settings' && <SettingsTab userPlan={effectivePlan} onSignOut={onSignOut} onPlanChange={onPlanChange} />}
         </main>

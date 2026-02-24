@@ -53,12 +53,13 @@ export function pathToSection(pathname: string): SectionType {
   return pathSectionMap[pathname] || 'home';
 }
 
-export type DashboardTab = 'overview' | 'customers' | 'invoices' | 'analytics' | 'settings';
+export type DashboardTab = 'overview' | 'customers' | 'invoices' | 'estimates' | 'analytics' | 'settings';
 
 const tabPathMap: Record<DashboardTab, string> = {
   'overview': '/dashboard',
   'customers': '/dashboard/customers',
   'invoices': '/dashboard/invoices',
+  'estimates': '/dashboard/estimates',
   'analytics': '/dashboard/analytics',
   'settings': '/dashboard/settings',
 };
@@ -69,7 +70,7 @@ export function tabToPath(tab: DashboardTab): string {
 
 export function pathToTab(pathname: string): DashboardTab {
   const segment = pathname.replace('/dashboard', '').replace(/^\//, '');
-  if (segment === 'customers' || segment === 'invoices' || segment === 'analytics' || segment === 'settings') {
+  if (segment === 'customers' || segment === 'invoices' || segment === 'estimates' || segment === 'analytics' || segment === 'settings') {
     return segment;
   }
   return 'overview';

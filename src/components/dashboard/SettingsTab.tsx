@@ -4,7 +4,6 @@ import { Button } from '../ui/button';
 import {
   User,
   Building2,
-  Mail,
   TrendingUp,
   CreditCard,
   Settings2,
@@ -18,7 +17,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
 import { AccountSettingsModal } from './AccountSettingsModal';
 import { BusinessProfileModal } from './BusinessProfileModal';
-import { CommunicationModal } from './CommunicationModal';
+// CommunicationModal deferred for post-launch (L4.3)
 import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
 import { PreferencesModal } from './PreferencesModal';
@@ -75,14 +74,6 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       subtitle: businessProfile?.businessName || 'Set up your business information',
       color: 'text-indigo-600',
       bgColor: 'bg-indigo-100',
-    },
-    {
-      id: 'communication',
-      icon: Mail,
-      title: 'Communication',
-      subtitle: 'Email configuration & notifications',
-      color: 'text-cyan-600',
-      bgColor: 'bg-cyan-100',
     },
     {
       id: 'analytics',
@@ -220,13 +211,6 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       />
       <BusinessProfileModal
         open={activeModal === 'business'}
-        onClose={() => setActiveModal(null)}
-        businessProfile={businessProfile}
-        onDataUpdated={loadData}
-        userPlan={userPlan}
-      />
-      <CommunicationModal
-        open={activeModal === 'communication'}
         onClose={() => setActiveModal(null)}
         businessProfile={businessProfile}
         onDataUpdated={loadData}

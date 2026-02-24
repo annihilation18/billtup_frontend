@@ -172,7 +172,7 @@ export function TermsSection() {
                 New users may be eligible for a 14-day free trial of Premium features. During the trial period, you will have access to all Premium features without charge.
               </p>
               <p>
-                At the end of the trial period, your account will automatically convert to the Basic plan unless you choose to subscribe to a paid plan. No credit card is required to start your trial.
+                At the end of the trial period, your account will automatically convert to the Basic plan unless you choose to subscribe to a paid plan.
               </p>
               <p>
                 We reserve the right to limit or deny free trials to prevent abuse of the offer.

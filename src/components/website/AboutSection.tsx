@@ -317,7 +317,7 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
             Join Thousands of Happy Users
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Start creating professional invoices and getting paid faster today. No credit card required to get started.
+            Start creating professional invoices and getting paid faster today. Try it free for 14 days.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <button

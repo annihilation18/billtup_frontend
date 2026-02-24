@@ -431,39 +431,6 @@ export function SettingsScreen({ businessData, currentTab, onTabChange, onLogout
           </DialogHeader>
 
           <div className="space-y-4 py-4">
-            {/* Logo Upload */}
-            <div className="space-y-2">
-              <Label>Business Logo</Label>
-              <div className="flex items-center gap-4">
-                {logoPreview && (
-                  <div className="relative">
-                    <img src={logoPreview} alt="Logo" className="w-20 h-20 rounded-full object-cover border-2 border-primary" />
-                    <button
-                      onClick={() => setLogoPreview("")}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2"
-                >
-                  <Upload className="w-4 h-4" />
-                  {logoPreview ? "Change Logo" : "Upload Logo"}
-                </Button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleLogoUpload}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <Label htmlFor="businessName">Business Name *</Label>
               <Input

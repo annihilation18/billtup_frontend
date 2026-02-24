@@ -221,6 +221,75 @@ export async function deleteInvoice(invoiceId: string) {
   }
 }
 
+// Estimate APIs
+export async function fetchEstimates() {
+  try {
+    return await apiCall('/estimates');
+  } catch (error) {
+    console.error('Error fetching estimates:', error);
+    return [];
+  }
+}
+
+export async function createEstimate(estimateData: any) {
+  try {
+    return await apiCall('/estimates', {
+      method: 'POST',
+      body: JSON.stringify(estimateData),
+    });
+  } catch (error) {
+    console.error('Error creating estimate:', error);
+    throw error;
+  }
+}
+
+export async function updateEstimate(estimateId: string, estimateData: any) {
+  try {
+    return await apiCall(`/estimates/${estimateId}`, {
+      method: 'PUT',
+      body: JSON.stringify(estimateData),
+    });
+  } catch (error) {
+    console.error('Error updating estimate:', error);
+    throw error;
+  }
+}
+
+export async function deleteEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}`, {
+      method: 'DELETE',
+    });
+  } catch (error) {
+    console.error('Error deleting estimate:', error);
+    throw error;
+  }
+}
+
+export async function sendEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}/send`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  } catch (error) {
+    console.error('Error sending estimate:', error);
+    throw error;
+  }
+}
+
+export async function convertEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}/convert`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  } catch (error) {
+    console.error('Error converting estimate:', error);
+    throw error;
+  }
+}
+
 // Business Profile APIs
 export async function fetchBusinessProfile() {
   try {
