@@ -265,9 +265,7 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
                 Browse documentation, FAQs, and guides.
               </p>
               <a
-                href="https://billtup.com/help"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="/help"
                 className="inline-flex items-center gap-1.5 text-sm text-[#1E3A8A] hover:underline font-medium"
               >
                 Visit Help Center

@@ -248,32 +248,33 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
 
             {/* Fee Comparison Table */}
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <h4 className="text-sm font-semibold mb-3 text-gray-700">
+              <h4 className="text-sm font-semibold mb-1 text-gray-700">
                 Fee Comparison (U.S. Standard)
               </h4>
+              <p className="text-xs text-gray-500 mb-3">Includes BilltUp fee: 0.6% + 20¢</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">Online Card:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '2.9% + 30¢' : '2.6% + 10¢'}
+                    {activeProvider === 'stripe' ? '3.5% + 50¢' : '3.5% + 50¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">In-Person:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '2.7% + 5¢' : '2.6% + 10¢'}
+                    {activeProvider === 'stripe' ? '3.3% + 25¢' : '3.2% + 35¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">Keyed-In:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '3.4% + 30¢' : '3.5% + 15¢'}
+                    {activeProvider === 'stripe' ? '4.0% + 50¢' : '4.1% + 35¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5">
                   <span className="text-gray-600">ACH:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '0.8% (max $5)' : '1% (min $1)'}
+                    {activeProvider === 'stripe' ? '1.4% + 20¢ ($5.20 max)' : '1.6% + 20¢ ($5.20 max)'}
                   </span>
                 </div>
               </div>
