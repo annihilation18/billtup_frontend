@@ -8,56 +8,70 @@ This document outlines security standards, practices, and guidelines for the Bil
 2. [Data Protection](#data-protection)
 3. [API Security](#api-security)
 4. [Payment Security (PCI DSS)](#payment-security-pci-dss)
-5. [Environment Variables](#environment-variables)
+5. [Secret Management](#secret-management)
 6. [Common Vulnerabilities](#common-vulnerabilities)
-7. [Security Checklist](#security-checklist)
+7. [Monitoring & Alerting](#monitoring--alerting)
+8. [Security Checklist](#security-checklist)
 
 ---
 
 ## Authentication & Authorization
 
-### JWT Token Management
+### AWS Cognito JWT Validation
 
-**✅ Current Implementation:**
-- Tokens stored in `localStorage` (acceptable for web apps)
-- Automatic token refresh on API calls
-- Session validation on each request
+**Current Implementation:**
+- AWS Cognito handles user authentication (sign up, sign in, password reset)
+- JWT tokens validated server-side using the `aws-jwt-verify` library
+- `checkAuth()` middleware in `lambda/src/middleware/auth.ts` enforces authentication on protected routes
+- Tokens stored in `localStorage` on the frontend
 
-**🔒 Security Requirements:**
-
-1. **Token Expiration:** Tokens should expire within 1 hour
-2. **Refresh Tokens:** Implement refresh token rotation
-3. **Secure Storage:** Use `httpOnly` cookies for enhanced security (production)
+**Token Lifecycle:**
+- **Access token**: 1-hour expiry, used for API authorization
+- **Refresh token**: Automatic rotation for session continuity
+- **ID token**: Contains user profile info (email, sub, etc.)
 
 ```typescript
-// Good: Validate token on every request
-async function requireAuth(c: any, next: any) {
-  const accessToken = c.req.header('Authorization')?.split(' ')[1];
-  if (!accessToken || accessToken === publicAnonKey) {
-    return c.json({ error: 'Unauthorized' }, 401);
+// Backend: checkAuth middleware validates Cognito JWTs
+import { CognitoJwtVerifier } from 'aws-jwt-verify';
+
+const verifier = CognitoJwtVerifier.create({
+  userPoolId: process.env.COGNITO_USER_POOL_ID,
+  tokenUse: 'access',
+  clientId: process.env.COGNITO_CLIENT_ID,
+});
+
+async function checkAuth(event) {
+  const token = event.headers.authorization?.split(' ')[1];
+  if (!token) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Unauthorized' }) };
   }
-  const { user, error } = await supabase.auth.getUser(accessToken);
-  if (!user) return c.json({ error: 'Unauthorized' }, 401);
-  await next();
+
+  try {
+    const payload = await verifier.verify(token);
+    // Token is valid, payload contains user info
+    return payload;
+  } catch (err) {
+    return { statusCode: 401, body: JSON.stringify({ error: 'Invalid token' }) };
+  }
 }
 ```
 
 ### Password Requirements
 
-**Minimum Standards:**
+**Minimum Standards (enforced by Cognito):**
 - Minimum 8 characters
 - At least 1 uppercase letter
 - At least 1 lowercase letter
 - At least 1 number
 - At least 1 special character (optional but recommended)
 
-**🚨 Never log passwords:**
+**Never log passwords:**
 
 ```typescript
-// ❌ BAD
+// BAD
 console.log('User password:', password);
 
-// ✅ GOOD
+// GOOD
 console.log('Password validation successful');
 ```
 
@@ -70,26 +84,21 @@ console.log('Password validation successful');
 **Sensitive Data Requiring Encryption:**
 
 1. Bank account numbers
-2. Routing numbers  
+2. Routing numbers
 3. Email passwords (SMTP credentials)
 4. API keys stored in database
 
 **Implementation:**
 
 ```typescript
+// Node.js Web Crypto API (AES-256-GCM)
 import { encrypt, decrypt } from './utils/encryption';
 
-// Encrypting data
-const encryptedData = await encrypt(
-  sensitiveData,
-  Deno.env.get('ENCRYPTION_KEY')!
-);
+// Encrypting data - key sourced from Secrets Manager
+const encryptedData = await encrypt(sensitiveData, encryptionKey);
 
 // Decrypting data
-const decryptedData = await decrypt(
-  encryptedData,
-  Deno.env.get('ENCRYPTION_KEY')!
-);
+const decryptedData = await decrypt(encryptedData, encryptionKey);
 ```
 
 **Encryption Standard:**
@@ -97,22 +106,23 @@ const decryptedData = await decrypt(
 - **Key Derivation:** PBKDF2 with 100,000 iterations
 - **IV:** 12 bytes random per encryption
 - **Salt:** 16 bytes random per encryption
+- **Key Source:** AWS Secrets Manager (`billtup-{env}-secrets`)
 
 ### Data Sanitization
 
 **Always sanitize user input:**
 
 ```typescript
-// ❌ BAD - Direct storage without validation
-await kv.set(`customer:${customerId}`, rawInput);
+// BAD - Direct storage without validation
+await kvStore.set(`customer:${customerId}`, rawInput);
 
-// ✅ GOOD - Validate and sanitize
+// GOOD - Validate and sanitize
 const sanitizedData = {
   name: sanitizeString(input.name),
   email: validateEmail(input.email),
   phone: sanitizePhone(input.phone)
 };
-await kv.set(`customer:${customerId}`, sanitizedData);
+await kvStore.set(`customer:${customerId}`, sanitizedData);
 ```
 
 ---
@@ -121,57 +131,42 @@ await kv.set(`customer:${customerId}`, sanitizedData);
 
 ### CORS Configuration
 
-**⚠️ Current Issue:** CORS is too permissive
-```typescript
-// ❌ CURRENT - Too permissive
-cors({ origin: "*" })
-```
+**Current Implementation:** CORS is configured per environment with restricted origins.
 
-**✅ Recommended Fix:**
 ```typescript
-// Production configuration
+// Production - restricted to production domains
 cors({
-  origin: [
-    'https://billtup.com',
-    'https://www.billtup.com',
-    'https://staging.billtup.com'
-  ],
+  origin: ['https://billtup.com', 'https://www.billtup.com'],
   allowHeaders: ['Content-Type', 'Authorization'],
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true
 })
 
-// Development configuration
+// Staging
 cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://billtup.com'] 
-    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
-  credentials: true
+  origin: ['https://stg.billtup.com'],
+  ...
+})
+
+// Development
+cors({
+  origin: ['https://dev.billtup.com', 'http://localhost:5173'],
+  ...
 })
 ```
 
 ### Rate Limiting
 
-**🚨 Currently Missing:** No rate limiting implemented
+**Current Implementation:** DynamoDB-backed sliding window rate limiter, already active on all environments.
 
-**✅ Recommended Implementation:**
+- **General endpoints:** 100 requests per 15-minute window
+- **Auth endpoints:** Stricter limits (fewer requests allowed)
+- **Per-user tracking:** Rate limits applied per authenticated user or IP
 
 ```typescript
-import { rateLimiter } from 'npm:hono-rate-limiter';
-
-// Apply rate limiting
-app.use('*', rateLimiter({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // 100 requests per window
-  message: 'Too many requests, please try again later'
-}));
-
-// Stricter limits for auth endpoints
-app.use('/auth/*', rateLimiter({
-  windowMs: 15 * 60 * 1000,
-  max: 5, // Only 5 auth attempts per 15 minutes
-  message: 'Too many login attempts'
-}));
+// Rate limiter middleware (lambda/src/middleware/rateLimiter.ts)
+// Uses DynamoDB to track request counts per sliding window
+// Different limits configured per endpoint type
 ```
 
 ### Input Validation
@@ -179,51 +174,42 @@ app.use('/auth/*', rateLimiter({
 **Always validate input:**
 
 ```typescript
-// ❌ BAD - No validation
-app.post('/customers', async (c) => {
-  const body = await c.req.json();
-  await kv.set(`customer:${uuid}`, body);
+// BAD - No validation
+app.post('/customers', async (event) => {
+  const body = JSON.parse(event.body);
+  await kvStore.set(`customer:${uuid}`, body);
 });
 
-// ✅ GOOD - Validate all inputs
-app.post('/customers', async (c) => {
-  const body = await c.req.json();
-  
-  // Validate required fields
+// GOOD - Validate all inputs
+app.post('/customers', async (event) => {
+  const body = JSON.parse(event.body);
+
   if (!body.name || !body.email) {
-    return c.json({ error: 'Missing required fields' }, 400);
+    return { statusCode: 400, body: JSON.stringify({ error: 'Missing required fields' }) };
   }
-  
-  // Validate email format
+
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
-    return c.json({ error: 'Invalid email format' }, 400);
+    return { statusCode: 400, body: JSON.stringify({ error: 'Invalid email format' }) };
   }
-  
-  // Validate string lengths
+
   if (body.name.length > 255) {
-    return c.json({ error: 'Name too long' }, 400);
+    return { statusCode: 400, body: JSON.stringify({ error: 'Name too long' }) };
   }
-  
-  // Proceed with validated data
-  await kv.set(`customer:${uuid}`, sanitizeCustomer(body));
+
+  await kvStore.set(`customer:${uuid}`, sanitizeCustomer(body));
 });
 ```
 
-### SQL Injection Prevention
+### Injection Prevention
 
-**KV Store is safe from SQL injection**, but if migrating to direct SQL:
+**DynamoDB (NoSQL) is not vulnerable to SQL injection**, but always validate and sanitize inputs to prevent other forms of injection. If any direct SQL is ever introduced, use parameterized queries:
 
 ```typescript
-// ❌ BAD - SQL Injection vulnerability
-const result = await db.query(
-  `SELECT * FROM users WHERE email = '${email}'`
-);
+// BAD - SQL Injection vulnerability
+const result = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 
-// ✅ GOOD - Use parameterized queries
-const result = await db.query(
-  'SELECT * FROM users WHERE email = $1',
-  [email]
-);
+// GOOD - Use parameterized queries
+const result = await db.query('SELECT * FROM users WHERE email = $1', [email]);
 ```
 
 ---
@@ -232,7 +218,7 @@ const result = await db.query(
 
 ### PCI DSS Compliance
 
-**✅ Current Implementation:** Stripe handles all card data
+**Current Implementation:** Stripe handles all card data.
 - Card information never touches our servers
 - Stripe.js collects card details client-side
 - Only Stripe Payment Intent IDs and Payment Method IDs stored on backend
@@ -241,25 +227,25 @@ const result = await db.query(
 **Payment Data Flow:**
 ```
 User enters card details
-    ↓
-Stripe.js (client-side) → Tokenizes card data
-    ↓
+    |
+Stripe.js (client-side) -> Tokenizes card data
+    |
 Stripe Servers (PCI DSS Level 1)
-    ↓
+    |
 Returns Payment Intent ID (e.g., pi_abc123...)
-    ↓
-BilltUp Backend → Stores ONLY the Intent ID
-    ↓
-BilltUp Database → No card data, only references
+    |
+BilltUp Backend -> Stores ONLY the Intent ID
+    |
+DynamoDB -> No card data, only references
 ```
 
 **What We Store:**
-- ✅ Payment Intent IDs (e.g., `pi_1234567890abcdef`)
-- ✅ Payment Method IDs (e.g., `pm_1234567890abcdef`)
-- ✅ Payment method TYPE (e.g., "card" or "nfc")
-- ❌ NO card numbers
-- ❌ NO CVV codes
-- ❌ NO expiry dates
+- Payment Intent IDs (e.g., `pi_1234567890abcdef`)
+- Payment Method IDs (e.g., `pm_1234567890abcdef`)
+- Payment method TYPE (e.g., "card" or "nfc")
+- NO card numbers
+- NO CVV codes
+- NO expiry dates
 
 **Compliance Requirements:**
 
@@ -280,108 +266,89 @@ BilltUp Database → No card data, only references
 **Implementation:**
 
 ```typescript
-// ✅ GOOD - Client-side Stripe.js handles card data
-// Frontend creates payment intent
+// Client-side: Stripe.js handles card data
 const { clientSecret, paymentIntentId } = await fetch('/payments/create-intent', {
   method: 'POST',
-  body: JSON.stringify({
-    amount: 1000,
-    currency: 'usd'
-  })
+  body: JSON.stringify({ amount: 1000, currency: 'usd' })
 }).then(r => r.json());
 
 // Stripe.js confirms payment (card data stays with Stripe)
 const { error } = await stripe.confirmCardPayment(clientSecret, {
   payment_method: {
-    card: cardElement, // Stripe Elements handles this securely
+    card: cardElement,
     billing_details: { name, email }
   }
 });
 
 // Backend only stores the payment intent ID
-// Database: { paymentIntentId: 'pi_abc123...', status: 'succeeded' }
+// DynamoDB: { paymentIntentId: 'pi_abc123...', status: 'succeeded' }
 ```
 
 ### Stripe Webhook Security
 
-**Verify webhook signatures:**
+**Webhook signature verification is enforced in production.** Unsigned webhook requests return 401.
 
 ```typescript
-app.post('/webhooks/stripe', async (c) => {
-  const sig = c.req.header('stripe-signature');
-  const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET');
-  
+// lambda/src/routes/webhooks.ts
+async function handleStripeWebhook(event) {
+  const sig = event.headers['stripe-signature'];
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
   try {
-    // Verify the webhook signature
-    const event = stripe.webhooks.constructEvent(
-      await c.req.text(),
-      sig!,
-      webhookSecret!
+    const stripeEvent = stripe.webhooks.constructEvent(
+      event.body,
+      sig,
+      webhookSecret
     );
-    
-    // Process verified event
-    await handleStripeEvent(event);
-    
-    return c.json({ received: true });
+
+    await handleStripeEvent(stripeEvent);
+    return { statusCode: 200, body: JSON.stringify({ received: true }) };
   } catch (err) {
-    console.error('Webhook signature verification failed:', err);
-    return c.json({ error: 'Invalid signature' }, 400);
+    logger.error('Webhook signature verification failed', { error: err });
+    return { statusCode: 401, body: JSON.stringify({ error: 'Invalid signature' }) };
   }
-});
+}
 ```
 
 ---
 
-## Environment Variables
+## Secret Management
 
-### Secret Management
+### AWS Secrets Manager
 
-**✅ Current Secrets (Properly Configured):**
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY` (server-only)
-- `STRIPE_SECRET_KEY` (server-only)
-- `EMAIL_USER`
-- `EMAIL_PASSWORD`
+**All backend secrets are stored in AWS Secrets Manager** under `billtup-{env}-secrets` (one secret per environment: dev, stg, prod).
 
-**🚨 Security Rules:**
+**Backend Secrets (server-only, never exposed to frontend):**
+- `STRIPE_SECRET_KEY`
+- `STRIPE_WEBHOOK_SECRET`
+- `ENCRYPTION_KEY`
+- `EMAIL_USER` / `EMAIL_PASSWORD`
+- `SLACK_WEBHOOK_URL`
+- Cognito pool configuration
+
+**Frontend Variables (public, safe to expose):**
+- `VITE_COGNITO_REGION` - AWS region
+- `VITE_COGNITO_USER_POOL_ID` - Cognito pool ID
+- `VITE_COGNITO_CLIENT_ID` - Cognito app client ID
+- `VITE_STRIPE_PUBLISHABLE_KEY` - Stripe publishable key (public by design)
+- `VITE_API_URL` - API Gateway URL
+
+**Security Rules:**
 
 1. **Never commit secrets to Git**
-2. **Never expose server-only keys to frontend**
+2. **Never expose server-only keys to frontend** (only `VITE_` prefixed vars reach the browser)
 3. **Rotate secrets periodically**
-4. **Use different keys for dev/staging/production**
-
-**Frontend vs Backend:**
-
-```typescript
-// ✅ Frontend - Public keys only
-const supabaseClient = createClient(
-  publicUrl,
-  publicAnonKey // Safe to expose
-);
-
-// ✅ Backend - Can use service role key
-const supabaseAdmin = createClient(
-  supabaseUrl,
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')! // Never exposed
-);
-```
-
-### Hardcoded Secrets
-
-**🚨 Security Issue Found:**
+4. **Use different secrets per environment** (dev/stg/prod each have their own)
+5. **GitHub environment secrets** are synced to Secrets Manager via CI/CD workflows
 
 ```typescript
-// ❌ BAD - Hardcoded Stripe key in SignUpSection.tsx (line 39)
-const stripePromise = loadStripe('pk_test_51QUnWrAEhJsFVtrcPnA4...');
-```
+// Backend: Secrets loaded from Secrets Manager at Lambda cold start
+const secrets = await getSecrets(); // Fetches from billtup-{env}-secrets
+const stripeKey = secrets.STRIPE_SECRET_KEY;
 
-**✅ Fix:**
-
-```typescript
-// Move to environment variable
+// Frontend: Only public config via Vite env vars
+const apiUrl = import.meta.env.VITE_API_URL;
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
-const stripePromise = loadStripe(stripePublishableKey);
 ```
 
 ---
@@ -393,13 +360,13 @@ const stripePromise = loadStripe(stripePublishableKey);
 **Prevention:**
 
 ```typescript
-// ❌ BAD - Direct HTML injection
+// BAD - Direct HTML injection
 element.innerHTML = userInput;
 
-// ✅ GOOD - React automatically escapes
+// GOOD - React automatically escapes
 <div>{userInput}</div>
 
-// ✅ GOOD - Sanitize if HTML needed
+// GOOD - Sanitize if HTML is needed
 import DOMPurify from 'dompurify';
 element.innerHTML = DOMPurify.sanitize(userInput);
 ```
@@ -407,28 +374,51 @@ element.innerHTML = DOMPurify.sanitize(userInput);
 ### CSRF (Cross-Site Request Forgery)
 
 **Protection:**
-- CORS properly configured
-- SameSite cookies
-- Token-based authentication
+- CORS restricted to known domains per environment
+- Token-based authentication (Authorization header)
+- SameSite cookie attributes where applicable
 
 ### Information Disclosure
 
-**🚨 Issues to Fix:**
-
 ```typescript
-// ❌ BAD - Logs too much detail
+// BAD - Logs too much detail
 console.log('Login failed for:', email, 'with password:', password);
 
-// ✅ GOOD - Log minimal information
-console.log('Login attempt failed for user');
+// GOOD - Log minimal information
+logger.warn('Login attempt failed', { userId: anonymizedId });
 
-// ❌ BAD - Exposes system details in errors
-return c.json({ error: error.stack }, 500);
+// BAD - Exposes system details in errors
+return { statusCode: 500, body: JSON.stringify({ error: error.stack }) };
 
-// ✅ GOOD - Generic error message
-return c.json({ error: 'An error occurred' }, 500);
-console.error('Detailed error:', error); // Log server-side only
+// GOOD - Generic error message to client, detailed log server-side
+logger.error('Detailed error', { error });
+return { statusCode: 500, body: JSON.stringify({ error: 'An error occurred' }) };
 ```
+
+**Note:** Production console logs are suppressed on the frontend (C18). All frontend errors are captured via `captureError()` and the React Error Boundary, which sends reports to a dedicated error-report Lambda.
+
+---
+
+## Monitoring & Alerting
+
+### CloudWatch Alarms
+
+The following alarms are configured and active:
+- **API 5xx errors** - triggers on elevated server error rates
+- **Lambda errors** - triggers on function invocation failures
+- **DynamoDB throttling** - triggers when read/write capacity is exceeded
+
+### Slack Alerts
+
+- `logger.error()` and `logger.critical()` calls in Lambda functions send notifications to Slack via webhook
+- Covers: payment failures, auth errors, webhook verification failures, unhandled exceptions
+
+### Frontend Error Reporting
+
+- `captureError()` utility captures frontend errors with context
+- React Error Boundary catches unhandled component errors
+- Errors sent to a dedicated `error-report` Lambda endpoint
+- Production console logs suppressed to avoid information leakage
 
 ---
 
@@ -436,30 +426,21 @@ console.error('Detailed error:', error); // Log server-side only
 
 ### Before Deploying to Production
 
-- [ ] All secrets in environment variables (no hardcoded keys)
-- [ ] CORS restricted to production domains
+- [ ] All secrets in AWS Secrets Manager (no hardcoded keys)
+- [ ] CORS restricted to production domains only
 - [ ] Rate limiting enabled on all endpoints
 - [ ] Input validation on all API endpoints
 - [ ] Error messages don't expose system details
 - [ ] Logging doesn't include sensitive data
-- [ ] HTTPS enforced (no HTTP allowed)
+- [ ] HTTPS enforced (CloudFront handles TLS termination)
 - [ ] Authentication required on protected endpoints
-- [ ] Webhook signatures verified
-- [ ] Password requirements enforced
-- [ ] SQL injection prevention (if using direct SQL)
+- [ ] Stripe webhook signatures verified (401 for unsigned)
+- [ ] Password requirements enforced (Cognito policy)
 - [ ] XSS prevention in all user inputs
-- [ ] Encryption enabled for sensitive data
-- [ ] Regular security audits scheduled
+- [ ] Encryption enabled for sensitive data (AES-256-GCM)
+- [ ] Frontend `VITE_` env vars contain only public values
+- [ ] CloudWatch alarms configured and tested
 - [ ] Dependency security scanning enabled
-
-### Monitoring & Alerts
-
-**Set up alerts for:**
-- Failed authentication attempts (>5 in 15 min)
-- Unusual API usage patterns
-- Database access errors
-- Payment failures
-- Webhook verification failures
 
 ---
 
@@ -468,7 +449,7 @@ console.error('Detailed error:', error); // Log server-side only
 ### If a Security Issue is Discovered:
 
 1. **Immediately:**
-   - Rotate all affected secrets
+   - Rotate all affected secrets in AWS Secrets Manager
    - Disable compromised endpoints
    - Document the incident
 
@@ -488,10 +469,11 @@ console.error('Detailed error:', error); // Log server-side only
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 - [Stripe Security Best Practices](https://stripe.com/docs/security)
-- [Supabase Security](https://supabase.com/docs/guides/platform/security)
+- [AWS Cognito Security](https://docs.aws.amazon.com/cognito/latest/developerguide/security.html)
+- [AWS Secrets Manager](https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html)
 - [Web Crypto API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Crypto_API)
 
 ---
 
-**Last Updated:** November 21, 2025  
+**Last Updated:** February 2026
 **Security Contact:** security@billtup.com

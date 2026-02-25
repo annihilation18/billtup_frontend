@@ -435,8 +435,8 @@ interface Invoice {
 
 ---
 
-**Last Updated:** November 21, 2025  
-**Compliance Status:** ✅ Compliant via Stripe  
+**Last Updated:** February 2026
+**Compliance Status:** Compliant via Stripe
 **Next Review:** Quarterly
 
 ---

@@ -1,82 +1,64 @@
 # Developer Documentation
 
-This section contains technical documentation for developers working on the BilltUp platform.
+Technical documentation for developers working on the BilltUp platform.
 
-## Table of Contents
+## Documentation Index
 
-### Getting Started
-- [Quick Start Guide](./QUICK_START.md) - Get up and running quickly
-- [Development Environment Setup](./SETUP.md) - Detailed setup instructions
-- [Project Structure](./PROJECT_STRUCTURE.md) - Understanding the codebase
+### Core
+- [Quick Start Guide](./QUICK_START.md) — Get up and running in minutes
+- [Architecture](./ARCHITECTURE.md) — System design, tech stack, data flow
+- [Database](./DATABASE.md) — DynamoDB schema, key patterns, entities
+- [Deployment](./DEPLOYMENT.md) — Environments, CI/CD, SAM, CloudFront
+- [Security](./SECURITY.md) — Auth, encryption, PCI DSS, secrets
 
-### Architecture & Design
-- [System Architecture](./ARCHITECTURE.md) - High-level system design
-- [Database Schema](./DATABASE.md) - Database structure and relationships
-- [Authentication Flow](./AUTHENTICATION.md) - Auth system documentation
-- [Payment Integration](./PAYMENTS.md) - Stripe integration guide
+### Payments
+- [Stripe Setup](./STRIPE_SETUP.md) — Stripe Connect configuration and testing
+- [Payment Security FAQ](./PAYMENT_SECURITY_FAQ.md) — PCI DSS compliance details
 
-### API Documentation
-- [API Reference](./API_REFERENCE.md) - Complete API endpoint documentation
-- [API Testing Guide](./API_TESTING.md) - Testing your API integrations
-- [Webhooks](./WEBHOOKS.md) - Webhook events and handling
-
-### Security
-- [Security Best Practices](./SECURITY.md) - Security guidelines and standards
-- [Environment Variables](./ENVIRONMENT.md) - Managing secrets and config
-- [Compliance Guide](./COMPLIANCE.md) - GDPR, PCI-DSS, and legal compliance
-
-### Development Guides
-- [Frontend Development](./FRONTEND.md) - React, TypeScript, and UI components
-- [Backend Development](./BACKEND.md) - Supabase Edge Functions guide
-- [Testing Guide](./TESTING.md) - Unit, integration, and E2E testing
-- [Performance Optimization](./PERFORMANCE.md) - Best practices for performance
-
-### Deployment
-- [Deployment Guide](./DEPLOYMENT.md) - Production deployment steps
-- [CI/CD Pipeline](./CICD.md) - Automated deployment setup
-- [Monitoring & Logging](./MONITORING.md) - Application monitoring
-
-### Contributing
-- [Contributing Guidelines](./CONTRIBUTING.md) - How to contribute
-- [Code Style Guide](./CODE_STYLE.md) - Code formatting and conventions
-- [Git Workflow](./GIT_WORKFLOW.md) - Branching and PR guidelines
+### Testing
+- [Testing Guide](./TESTING.md) — Manual test scenarios and test cards
 
 ## Quick Reference
 
 ### Common Commands
 
 ```bash
-# Start development server
-npm run dev
-
-# Run tests
-npm test
-
-# Build for production
-npm run build
-
-# Deploy backend
-./deploy-backend.sh
-
-# Type checking
-npm run type-check
+npm run dev -- --host      # Start dev server (--host required)
+npm run build              # Production build
+npx vitest run             # Run tests (214 tests)
+npx vitest --ui            # Vitest UI
+npm run type-check         # TypeScript checking
+sam deploy                 # Deploy backend (dev)
+sam deploy --config-env prod  # Deploy backend (prod)
 ```
 
-### Key Technologies
+### Tech Stack
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS v4
-- **Backend**: Supabase Edge Functions (Deno), Hono
-- **Database**: PostgreSQL (via Supabase)
-- **Payments**: Stripe
-- **Authentication**: Supabase Auth
-- **Email**: Nodemailer
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, TypeScript, Vite 6.3, Tailwind CSS v4, shadcn/ui |
+| Mobile | Capacitor 8 (Android + iOS) |
+| Backend | Hono on Node.js 22 (AWS Lambda) |
+| Database | DynamoDB (KV table) |
+| Storage | S3 (logos, invoices) |
+| Auth | AWS Cognito (JWT) |
+| Payments | Stripe Connect, Square OAuth |
+| Email | Resend API |
+| CI/CD | GitHub Actions, SAM (CloudFormation) |
+| Monitoring | CloudWatch alarms, SNS, Slack alerts |
 
-### Project Links
+### Environments
 
-- Production: https://billtup.com
-- Staging: https://staging.billtup.com
-- API Base: https://xrgywtdjdlqthpthyxwj.supabase.co/functions/v1/make-server-dce439b6
+| Env | Branch | Domain | S3 Bucket |
+|-----|--------|--------|-----------|
+| dev | `dev` | dev.billtup.com | billtup-frontend-dev |
+| stg | `stg` | stg.billtup.com | billtup-frontend-stg |
+| prod | `main` | billtup.com | billtup-frontend-prod |
+
+### Branch Promotion
+
+`dev` → `stg` → `main` (via PR merges, never skip stages)
 
 ---
 
-**Need help?** Check the [Troubleshooting Guide](./TROUBLESHOOTING.md) or reach out to the development team.
+*Last Updated: February 2026*

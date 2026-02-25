@@ -2,15 +2,15 @@
 
 ## Overview
 
-This document provides comprehensive documentation for all 27 API endpoints in the BilltUp invoicing platform. The API follows RESTful principles and uses JSON for request and response payloads.
+This document provides documentation for the BilltUp API endpoints. The API is built on AWS Lambda with Hono routing behind API Gateway HTTP API.
 
 ## Base URL
 
 ```
-https://{projectId}.supabase.co/functions/v1/make-server-dce439b6
+https://{api-gateway-id}.execute-api.us-east-1.amazonaws.com
 ```
 
-All endpoints must be prefixed with `/make-server-dce439b6`.
+Environment-specific URLs are configured via `VITE_API_URL` in `.env`.
 
 ## Authentication
 
@@ -21,9 +21,9 @@ Authorization: Bearer {access_token}
 ```
 
 ### Public Endpoints (No Auth Required)
-- POST `/make-server-dce439b6/signup`
-- POST `/make-server-dce439b6/signin`
-- POST `/make-server-dce439b6/auth/google` (OAuth)
+- POST `/signup`
+- POST `/signin`
+- POST `/auth/google` (OAuth)
 
 ### Protected Endpoints
 All other endpoints require a valid access token obtained from sign-in or session.
@@ -42,7 +42,7 @@ Authorization: Bearer {access_token}
 ### 1. Sign Up
 Create a new user account.
 
-**Endpoint:** `POST /make-server-dce439b6/signup`
+**Endpoint:** `POST /signup`
 
 **Request Body:**
 ```json
@@ -77,7 +77,7 @@ Create a new user account.
 ### 2. Sign In
 Authenticate an existing user.
 
-**Endpoint:** `POST /make-server-dce439b6/signin`
+**Endpoint:** `POST /signin`
 
 **Request Body:**
 ```json
@@ -107,27 +107,10 @@ Authenticate an existing user.
 
 ---
 
-### 3. Google OAuth Sign In
-Authenticate using Google OAuth.
-
-**Endpoint:** `POST /make-server-dce439b6/auth/google`
-
-**Note:** Requires Google OAuth setup in Supabase. Follow instructions at https://supabase.com/docs/guides/auth/social-login/auth-google
-
-**Response (200):**
-```json
-{
-  "url": "https://accounts.google.com/oauth...",
-  "provider": "google"
-}
-```
-
----
-
-### 4. Sign Out
+### 3. Sign Out
 End the current user session.
 
-**Endpoint:** `POST /make-server-dce439b6/signout`
+**Endpoint:** `POST /signout`
 
 **Headers:** Requires Authorization
 
@@ -143,7 +126,7 @@ End the current user session.
 ### 5. Get Session
 Retrieve the current user session.
 
-**Endpoint:** `GET /make-server-dce439b6/session`
+**Endpoint:** `GET /session`
 
 **Headers:** Requires Authorization
 
@@ -173,7 +156,7 @@ Retrieve the current user session.
 ### 6. Get Subscription Status
 Get the current user's subscription details, including trial status and billing cycle.
 
-**Endpoint:** `GET /make-server-dce439b6/subscription/status`
+**Endpoint:** `GET /subscription/status`
 
 **Headers:** Requires Authorization
 
@@ -214,7 +197,7 @@ Get the current user's subscription details, including trial status and billing 
 ### 7. Create Subscription
 Subscribe to a plan.
 
-**Endpoint:** `POST /make-server-dce439b6/subscription/create`
+**Endpoint:** `POST /subscription/create`
 
 **Headers:** Requires Authorization
 
@@ -246,7 +229,7 @@ Subscribe to a plan.
 ### 8. Update Subscription
 Change the subscription plan.
 
-**Endpoint:** `PUT /make-server-dce439b6/subscription/update`
+**Endpoint:** `PUT /subscription/update`
 
 **Headers:** Requires Authorization
 
@@ -277,7 +260,7 @@ Change the subscription plan.
 ### 9. Cancel Subscription
 Cancel the current subscription.
 
-**Endpoint:** `DELETE /make-server-dce439b6/subscription/cancel`
+**Endpoint:** `DELETE /subscription/cancel`
 
 **Headers:** Requires Authorization
 
@@ -298,7 +281,7 @@ Cancel the current subscription.
 ### 10. Get Payment Methods
 Retrieve saved payment methods.
 
-**Endpoint:** `GET /make-server-dce439b6/subscription/payment-methods`
+**Endpoint:** `GET /subscription/payment-methods`
 
 **Headers:** Requires Authorization
 
@@ -323,7 +306,7 @@ Retrieve saved payment methods.
 ### 11. Add Payment Method
 Add a new payment method using Stripe Elements.
 
-**Endpoint:** `POST /make-server-dce439b6/subscription/payment-methods`
+**Endpoint:** `POST /subscription/payment-methods`
 
 **Headers:** Requires Authorization
 
@@ -348,7 +331,7 @@ Add a new payment method using Stripe Elements.
 ### 12. Delete Payment Method
 Remove a saved payment method.
 
-**Endpoint:** `DELETE /make-server-dce439b6/subscription/payment-methods/:id`
+**Endpoint:** `DELETE /subscription/payment-methods/:id`
 
 **Headers:** Requires Authorization
 
@@ -366,7 +349,7 @@ Remove a saved payment method.
 ### 13. List Invoices
 Get all invoices for the current user.
 
-**Endpoint:** `GET /make-server-dce439b6/invoices`
+**Endpoint:** `GET /invoices`
 
 **Headers:** Requires Authorization
 
@@ -410,7 +393,7 @@ Get all invoices for the current user.
 ### 14. Get Invoice
 Retrieve a specific invoice by ID.
 
-**Endpoint:** `GET /make-server-dce439b6/invoices/:id`
+**Endpoint:** `GET /invoices/:id`
 
 **Headers:** Requires Authorization
 
@@ -449,7 +432,7 @@ Retrieve a specific invoice by ID.
 ### 15. Create Invoice
 Create a new invoice.
 
-**Endpoint:** `POST /make-server-dce439b6/invoices`
+**Endpoint:** `POST /invoices`
 
 **Headers:** Requires Authorization
 
@@ -494,7 +477,7 @@ Create a new invoice.
 ### 16. Update Invoice
 Update an existing invoice.
 
-**Endpoint:** `PUT /make-server-dce439b6/invoices/:id`
+**Endpoint:** `PUT /invoices/:id`
 
 **Headers:** Requires Authorization
 
@@ -532,7 +515,7 @@ Update an existing invoice.
 ### 17. Delete Invoice
 Delete an invoice (only drafts can be deleted).
 
-**Endpoint:** `DELETE /make-server-dce439b6/invoices/:id`
+**Endpoint:** `DELETE /invoices/:id`
 
 **Headers:** Requires Authorization
 
@@ -552,14 +535,14 @@ Delete an invoice (only drafts can be deleted).
 ### 18. Generate PDF
 Generate a PDF for an invoice.
 
-**Endpoint:** `GET /make-server-dce439b6/invoices/:id/pdf`
+**Endpoint:** `GET /invoices/:id/pdf`
 
 **Headers:** Requires Authorization
 
 **Response (200):**
 ```json
 {
-  "pdfUrl": "https://storage.supabase.co/signed-url...",
+  "pdfUrl": "https://s3.amazonaws.com/billtup-{env}-storage/...",
   "expiresAt": "2026-01-14T10:00:00Z"
 }
 ```
@@ -576,7 +559,7 @@ Generate a PDF for an invoice.
 ### 19. Send Invoice
 Send an invoice via email to the customer.
 
-**Endpoint:** `POST /make-server-dce439b6/invoices/:id/send`
+**Endpoint:** `POST /invoices/:id/send`
 
 **Headers:** Requires Authorization
 
@@ -606,7 +589,7 @@ Send an invoice via email to the customer.
 ### 20. List Customers
 Get all customers for the current user.
 
-**Endpoint:** `GET /make-server-dce439b6/customers`
+**Endpoint:** `GET /customers`
 
 **Headers:** Requires Authorization
 
@@ -645,7 +628,7 @@ Get all customers for the current user.
 ### 21. Get Customer
 Retrieve a specific customer by ID.
 
-**Endpoint:** `GET /make-server-dce439b6/customers/:id`
+**Endpoint:** `GET /customers/:id`
 
 **Headers:** Requires Authorization
 
@@ -679,7 +662,7 @@ Retrieve a specific customer by ID.
 ### 22. Create Customer
 Create a new customer.
 
-**Endpoint:** `POST /make-server-dce439b6/customers`
+**Endpoint:** `POST /customers`
 
 **Headers:** Requires Authorization
 
@@ -716,7 +699,7 @@ Create a new customer.
 ### 23. Update Customer
 Update an existing customer.
 
-**Endpoint:** `PUT /make-server-dce439b6/customers/:id`
+**Endpoint:** `PUT /customers/:id`
 
 **Headers:** Requires Authorization
 
@@ -747,7 +730,7 @@ Update an existing customer.
 ### 24. Delete Customer
 Delete a customer (only if they have no invoices).
 
-**Endpoint:** `DELETE /make-server-dce439b6/customers/:id`
+**Endpoint:** `DELETE /customers/:id`
 
 **Headers:** Requires Authorization
 
@@ -769,7 +752,7 @@ Delete a customer (only if they have no invoices).
 ### 25. Get Active Payment Provider
 Get the user's currently selected payment provider (Stripe or Square).
 
-**Endpoint:** `GET /make-server-dce439b6/payment-provider/active`
+**Endpoint:** `GET /payment-provider/active`
 
 **Headers:** Requires Authorization
 
@@ -794,7 +777,7 @@ Get the user's currently selected payment provider (Stripe or Square).
 ### 26. Set Payment Provider
 Set or change the user's active payment provider.
 
-**Endpoint:** `POST /make-server-dce439b6/payment-provider/set`
+**Endpoint:** `POST /payment-provider/set`
 
 **Headers:** Requires Authorization
 
@@ -832,7 +815,7 @@ Set or change the user's active payment provider.
 ### 27. Delete Account
 Permanently delete the user account and all associated data.
 
-**Endpoint:** `DELETE /make-server-dce439b6/account`
+**Endpoint:** `DELETE /account`
 
 **Headers:** Requires Authorization
 
@@ -905,7 +888,7 @@ When rate limited, the API returns:
 List endpoints support pagination using `limit` and `offset` parameters:
 
 ```
-GET /make-server-dce439b6/invoices?limit=20&offset=40
+GET /invoices?limit=20&offset=40
 ```
 
 Response includes pagination metadata:
@@ -932,16 +915,17 @@ Platform fees are automatically calculated and displayed in the dashboard analyt
 
 ---
 
-## Webhook Events (Future)
+## Webhook Events
 
-The following webhook events will be supported for Stripe payment notifications:
+Stripe webhook events are handled at `POST /webhooks/stripe`:
 
-- `invoice.payment_succeeded`
-- `invoice.payment_failed`
-- `subscription.updated`
-- `subscription.cancelled`
+- `payment_intent.succeeded`
+- `payment_intent.payment_failed`
+- `charge.refunded`
+- `customer.subscription.updated`
+- `customer.subscription.deleted`
 
-Configure webhook URL in dashboard settings.
+Webhook signature verification is enforced. Configure the endpoint URL in the Stripe Dashboard.
 
 ---
 
@@ -954,11 +938,8 @@ For API support and questions:
 
 ---
 
-## Changelog
+---
 
-### Version 1.0.0 (January 2026)
-- Initial API release
-- 25 endpoints covering authentication, subscriptions, invoices, and customers
-- Stripe payment integration
-- PDF generation support
-- Material 3 design compliance
+*Last Updated: February 2026*
+*Backend: AWS Lambda + Hono + API Gateway HTTP API*
+*Auth: AWS Cognito JWT*

@@ -121,7 +121,7 @@ When ready for real payments:
 
 3. **Update Environment Variable**
    ```bash
-   # In Supabase Dashboard → Edge Functions → Secrets
+   # Update in AWS Secrets Manager (billtup-{env}-secrets)
    STRIPE_SECRET_KEY=sk_live_...
    ```
 
@@ -149,7 +149,7 @@ Webhooks notify your app when:
 
 2. **Add Endpoint**
    ```
-   https://xrgywtdjdlqthpthyxwj.supabase.co/functions/v1/make-server-dce439b6/webhooks/stripe
+   https://{api-gateway-id}.execute-api.us-east-1.amazonaws.com/webhooks/stripe
    ```
 
 3. **Select Events**
@@ -162,9 +162,9 @@ Webhooks notify your app when:
 4. **Copy Signing Secret**
    - Copy the `whsec_...` value
 
-5. **Add to Supabase**
-   ```bash
-   npx supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
+5. **Add to AWS Secrets Manager**
+   ```
+   Update STRIPE_WEBHOOK_SECRET in billtup-{env}-secrets via AWS Console
    ```
 
 ### Verify Webhook
@@ -274,7 +274,7 @@ The backend automatically verifies webhook signatures for security.
 **Solutions:**
 - Double-check endpoint URL
 - Verify `STRIPE_WEBHOOK_SECRET` is set
-- Check Edge Function logs
+- Check CloudWatch Lambda logs
 
 ### Issue: Payouts Not Working
 
@@ -354,4 +354,4 @@ The backend automatically verifies webhook signatures for security.
 
 ---
 
-*Last Updated: November 21, 2025*
+*Last Updated: February 2026*
