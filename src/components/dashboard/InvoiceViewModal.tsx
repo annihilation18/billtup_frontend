@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { compressImage } from '../../utils/imageCompression';
 import { CheckCircle2, Clock, XCircle, Send, Loader2, Link2, Camera, X, Plus, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
@@ -57,12 +58,13 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
 
     setIsUploadingPhoto(true);
     try {
-      const dataUrl = await new Promise<string>((resolve, reject) => {
+      const rawDataUrl = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
+      const dataUrl = await compressImage(rawDataUrl);
 
       const result = await uploadInvoicePhoto(invoice.id, dataUrl, file.name);
       if (result.success && result.photo) {
