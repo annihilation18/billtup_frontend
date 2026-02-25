@@ -33,6 +33,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [isReactivating, setIsReactivating] = useState(false);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
+  const [isTrial, setIsTrial] = useState(false);
   const [pendingPlan, setPendingPlan] = useState<'basic' | 'premium'>('basic');
 
   // Load subscription status to check for pending cancellation
@@ -50,6 +51,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           const data = await response.json();
           setCancelAtPeriodEnd(!!data.cancelAtPeriodEnd);
           setCurrentPeriodEnd(data.currentPeriodEnd || null);
+          setIsTrial(!!data.isTrial);
         }
       } catch {
         // Subscription status not available
@@ -745,14 +747,29 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
             <p className="text-sm font-medium text-amber-900 mb-2">What happens when you cancel:</p>
             <ul className="space-y-1.5 text-sm text-amber-800">
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
-                You'll have access until the end of your current billing period
-              </li>
-              <li className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
-                No refunds for partial months
-              </li>
+              {isTrial ? (
+                <>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                    You'll have full access until the end of your 14-day trial
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                    No charges will be made
+                  </li>
+                </>
+              ) : (
+                <>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                    You'll have access until the end of your current billing period
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                    No refunds for partial months
+                  </li>
+                </>
+              )}
               <li className="flex items-start gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
                 Your data will be retained for 30 days
