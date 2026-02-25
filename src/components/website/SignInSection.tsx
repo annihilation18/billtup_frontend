@@ -53,10 +53,8 @@ export function SignInSection({ onNavigateToSignUp, onSignIn }: SignInSectionPro
         let plan: 'basic' | 'premium' = 'basic';
         if (response.ok) {
           const businessData = await response.json();
-          // Check planType first (newer field), then fall back to plan
           const userPlanType = businessData?.planType || businessData?.plan || 'basic';
-          // Map 'trial' to 'basic' for UI purposes (trial users get premium features via the trial banner)
-          plan = userPlanType === 'premium' ? 'premium' : 'basic';
+          plan = (userPlanType === 'premium' || userPlanType === 'trial') ? 'premium' : 'basic';
         }
 
         console.log('[Sign In] User plan:', plan);

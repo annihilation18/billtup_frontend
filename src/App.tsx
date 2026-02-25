@@ -112,7 +112,7 @@ export default function App() {
           if (response.ok) {
             const businessData = await response.json();
             const userPlanType = businessData?.planType || businessData?.plan || 'basic';
-            plan = userPlanType === 'premium' ? 'premium' : 'basic';
+            plan = (userPlanType === 'premium' || userPlanType === 'trial') ? 'premium' : 'basic';
           }
         } catch {
           // Default to basic if profile fetch fails
