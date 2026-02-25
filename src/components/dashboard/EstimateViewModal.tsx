@@ -1,29 +1,12 @@
-import { useState } from 'react';
 import {
   CheckCircle2,
   Clock,
   XCircle,
   Send,
-  Loader2,
-  Link2,
   FileText,
   ArrowRightLeft,
-  Trash2
 } from 'lucide-react@0.468.0';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
-import { Button } from '../ui/button';
-import { toast } from '../ui/sonner';
-import { sendEstimate, convertEstimate, deleteEstimate } from '../../utils/dashboard-api';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '../ui/alert-dialog';
 
 interface EstimateViewModalProps {
   estimate: any;
@@ -32,79 +15,7 @@ interface EstimateViewModalProps {
   onUpdate?: () => void;
 }
 
-export function EstimateViewModal({ estimate, open = true, onClose, onUpdate }: EstimateViewModalProps) {
-  const [isSending, setIsSending] = useState(false);
-  const [isConverting, setIsConverting] = useState(false);
-  const [isCopyingLink, setIsCopyingLink] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  const handleSend = async () => {
-    if (!estimate?.id) return;
-    setIsSending(true);
-    try {
-      const result = await sendEstimate(estimate.id);
-      if (result.approvalUrl) {
-        toast.success('Estimate sent to customer!');
-      } else {
-        toast.success('Estimate sent!');
-      }
-      if (onUpdate) onUpdate();
-      onClose();
-    } catch (error) {
-      console.error('Error sending estimate:', error);
-      toast.error('Failed to send estimate');
-    } finally {
-      setIsSending(false);
-    }
-  };
-
-  const handleCopyApprovalLink = async () => {
-    if (!estimate?.approvalUrl) return;
-    setIsCopyingLink(true);
-    try {
-      await navigator.clipboard.writeText(estimate.approvalUrl);
-      toast.success('Approval link copied to clipboard!');
-    } catch (error) {
-      toast.error('Failed to copy link');
-    } finally {
-      setIsCopyingLink(false);
-    }
-  };
-
-  const handleConvert = async () => {
-    if (!estimate?.id) return;
-    setIsConverting(true);
-    try {
-      await convertEstimate(estimate.id);
-      toast.success('Estimate converted to invoice!');
-      if (onUpdate) onUpdate();
-      onClose();
-    } catch (error) {
-      console.error('Error converting estimate:', error);
-      toast.error('Failed to convert estimate to invoice');
-    } finally {
-      setIsConverting(false);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!estimate?.id) return;
-    setIsDeleting(true);
-    try {
-      await deleteEstimate(estimate.id);
-      toast.success('Estimate deleted');
-      setShowDeleteDialog(false);
-      if (onUpdate) onUpdate();
-      onClose();
-    } catch (error) {
-      console.error('Error deleting estimate:', error);
-      toast.error('Failed to delete estimate');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
+export function EstimateViewModal({ estimate, open = true, onClose }: EstimateViewModalProps) {
   if (!estimate) return null;
 
   const estimateItems = estimate.lineItems?.map((item: any) => ({
@@ -149,16 +60,13 @@ export function EstimateViewModal({ estimate, open = true, onClose, onUpdate }: 
     }
   };
 
-  const canDelete = estimate.status === 'draft' || estimate.status === 'rejected';
-
   return (
-    <>
       <Dialog open={open} onOpenChange={onClose}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>Estimate Details</DialogTitle>
             <DialogDescription className="text-sm text-gray-500">
-              View estimate information and manage its status.
+              View estimate information.
             </DialogDescription>
           </DialogHeader>
 
@@ -277,174 +185,14 @@ export function EstimateViewModal({ estimate, open = true, onClose, onUpdate }: 
               </div>
             )}
 
-            {/* Actions by Status */}
-            <div className="flex flex-wrap gap-2 mt-4 border-t border-gray-200 pt-4">
-              {/* Draft: Send, Delete */}
-              {estimate.status === 'draft' && (
-                <>
-                  <Button
-                    onClick={handleSend}
-                    disabled={isSending}
-                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90"
-                  >
-                    {isSending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Send to Customer
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                </>
-              )}
-
-              {/* Sent: Resend, Copy Link */}
-              {estimate.status === 'sent' && (
-                <>
-                  <Button
-                    onClick={handleSend}
-                    disabled={isSending}
-                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90"
-                  >
-                    {isSending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Resend
-                      </>
-                    )}
-                  </Button>
-                  {estimate.approvalUrl && (
-                    <Button
-                      variant="outline"
-                      onClick={handleCopyApprovalLink}
-                      disabled={isCopyingLink}
-                    >
-                      {isCopyingLink ? (
-                        <>
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                          Copying...
-                        </>
-                      ) : (
-                        <>
-                          <Link2 className="w-4 h-4 mr-2" />
-                          Copy Approval Link
-                        </>
-                      )}
-                    </Button>
-                  )}
-                </>
-              )}
-
-              {/* Approved: Convert to Invoice */}
-              {estimate.status === 'approved' && (
-                <Button
-                  onClick={handleConvert}
-                  disabled={isConverting}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  {isConverting ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Converting...
-                    </>
-                  ) : (
-                    <>
-                      <ArrowRightLeft className="w-4 h-4 mr-2" />
-                      Convert to Invoice
-                    </>
-                  )}
-                </Button>
-              )}
-
-              {/* Rejected: Resend, Delete */}
-              {estimate.status === 'rejected' && (
-                <>
-                  <Button
-                    onClick={handleSend}
-                    disabled={isSending}
-                    className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90"
-                  >
-                    {isSending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
-                      </>
-                    ) : (
-                      <>
-                        <Send className="w-4 h-4 mr-2" />
-                        Edit & Resend
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    className="text-red-600 border-red-200 hover:bg-red-50"
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Delete
-                  </Button>
-                </>
-              )}
-
-              {/* Converted: Info */}
-              {estimate.status === 'converted' && estimate.convertedInvoiceId && (
-                <div className="text-sm text-purple-700 bg-purple-50 px-4 py-2 rounded-lg">
-                  Converted to invoice. View it in the Invoices tab.
-                </div>
-              )}
-            </div>
+            {/* Converted Info */}
+            {estimate.status === 'converted' && estimate.convertedInvoiceId && (
+              <div className="text-sm text-purple-700 bg-purple-50 px-4 py-2 rounded-lg mt-4">
+                Converted to invoice. View it in the Invoices tab.
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Delete Confirmation Dialog */}
-      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Delete Estimate
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete estimate {estimate.number || estimate.id}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </>
   );
 }

@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { compressImage } from '../../utils/imageCompression';
-import { CheckCircle2, Clock, XCircle, Send, Loader2, Link2, Camera, X, Plus, ImageIcon } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, Clock, XCircle, Send, Loader2, X, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { fetchBusinessProfile, fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, createPaymentLink, getInvoicePhotos, uploadInvoicePhoto, deleteInvoicePhoto } from '../../utils/dashboard-api';
-import { DeleteInvoiceModal } from './DeleteInvoiceModal';
-import { EditInvoiceModal } from './EditInvoiceModal';
-import { TakePaymentModal } from './TakePaymentModal';
-import { RefundModal } from './RefundModal';
+import { fetchBusinessProfile, getInvoicePhotos } from '../../utils/dashboard-api';
 
 interface InvoiceViewModalProps {
   invoice: any;
@@ -19,22 +14,12 @@ interface InvoiceViewModalProps {
   onUpdate?: () => void;
 }
 
-export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: InvoiceViewModalProps) {
+export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewModalProps) {
   const [customerEmail, setCustomerEmail] = useState(invoice?.customerEmail || '');
   const [isSending, setIsSending] = useState(false);
-  const [stripeConnected, setStripeConnected] = useState(false);
-  const [squareConnected, setSquareConnected] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<string>('stripe');
-  const [squareApplicationId, setSquareApplicationId] = useState<string>('');
-  const [squareLocationId, setSquareLocationId] = useState<string>('');
-  const [providersLoading, setProvidersLoading] = useState(true);
-  const [isCopyingLink, setIsCopyingLink] = useState(false);
   const [photos, setPhotos] = useState<Array<{ id: string; url: string; filename: string; uploadedAt: string }>>([]);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
-  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  const [deletingPhotoId, setDeletingPhotoId] = useState<string | null>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
 
   // Load photos when modal opens
   useEffect(() => {
@@ -46,78 +31,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
         .finally(() => setIsLoadingPhotos(false));
     }
   }, [open, invoice?.id]);
-
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error('Photo exceeds 5MB size limit');
-      return;
-    }
-
-    setIsUploadingPhoto(true);
-    try {
-      const rawDataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const dataUrl = await compressImage(rawDataUrl);
-
-      const result = await uploadInvoicePhoto(invoice.id, dataUrl, file.name);
-      if (result.success && result.photo) {
-        setPhotos(prev => [...prev, result.photo]);
-        toast.success('Photo uploaded');
-      }
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to upload photo');
-    } finally {
-      setIsUploadingPhoto(false);
-      if (photoInputRef.current) photoInputRef.current.value = '';
-    }
-  };
-
-  const handleDeletePhoto = async (photoId: string) => {
-    setDeletingPhotoId(photoId);
-    try {
-      await deleteInvoicePhoto(invoice.id, photoId);
-      setPhotos(prev => prev.filter(p => p.id !== photoId));
-      toast.success('Photo deleted');
-    } catch (error) {
-      toast.error('Failed to delete photo');
-    } finally {
-      setDeletingPhotoId(null);
-    }
-  };
-
-  useEffect(() => {
-    if (open && invoice?.status !== 'paid') {
-      setProvidersLoading(true);
-      Promise.all([fetchStripeStatus(), fetchSquareStatus(), fetchActiveProvider()])
-        .then(([stripeResult, squareResult, providerResult]) => {
-          setStripeConnected(stripeResult.connected && stripeResult.chargesEnabled);
-          setSquareConnected(squareResult.connected && squareResult.active);
-          setSquareApplicationId(squareResult.applicationId || '');
-          setSquareLocationId(squareResult.locationId || '');
-          setActiveProvider(providerResult.provider || 'stripe');
-        })
-        .catch((error) => {
-          console.error('Error fetching provider status:', error);
-        })
-        .finally(() => setProvidersLoading(false));
-    } else {
-      setProvidersLoading(false);
-    }
-  }, [open, invoice?.status]);
-
-  const handleActionComplete = () => {
-    if (onUpdate) {
-      onUpdate();
-    }
-    onClose();
-  };
 
   const handleSendEmail = async () => {
     if (!customerEmail) {
@@ -152,27 +65,11 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
       }
 
       toast.success('Invoice sent successfully!');
-      handleActionComplete();
     } catch (error) {
       console.error('Error sending invoice email:', error);
       toast.error('Failed to send invoice. Please try again.');
     } finally {
       setIsSending(false);
-    }
-  };
-
-  const handleCopyPaymentLink = async () => {
-    if (!invoice?.id) return;
-    setIsCopyingLink(true);
-    try {
-      const result = await createPaymentLink(invoice.id);
-      await navigator.clipboard.writeText(result.paymentUrl);
-      toast.success('Payment link copied to clipboard!');
-    } catch (error) {
-      console.error('Error creating payment link:', error);
-      toast.error('Failed to create payment link');
-    } finally {
-      setIsCopyingLink(false);
     }
   };
 
@@ -186,7 +83,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
     rate: item.price,
     amount: item.quantity * item.price
   })) || [];
-  const hasItems = invoiceItems.length > 0;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -220,7 +116,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
         <DialogHeader>
           <DialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>Invoice Details</DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
-            View invoice information and send it to the customer via email.
+            View invoice details and send to customer via email.
           </DialogDescription>
         </DialogHeader>
 
@@ -306,73 +202,28 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
 
           {/* Photos Section */}
           <div className="border-t border-gray-200 pt-4">
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm text-gray-500 uppercase tracking-wide">Photos</h4>
-              {invoice.status === 'pending' && photos.length < 4 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => photoInputRef.current?.click()}
-                  disabled={isUploadingPhoto}
-                >
-                  {isUploadingPhoto ? (
-                    <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                  ) : (
-                    <Camera className="w-4 h-4 mr-1" />
-                  )}
-                  {isUploadingPhoto ? 'Uploading...' : 'Add Photo'}
-                </Button>
-              )}
-            </div>
-
-            <input
-              ref={photoInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handlePhotoUpload}
-            />
+            <h4 className="text-sm text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
 
             {isLoadingPhotos ? (
               <div className="flex justify-center py-6">
                 <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
               </div>
             ) : photos.length === 0 ? (
-              <div
-                className={`bg-gray-50 rounded-lg p-4 text-center text-gray-500 text-sm ${invoice.status === 'pending' ? 'cursor-pointer hover:bg-gray-100 transition-colors' : ''}`}
-                onClick={invoice.status === 'pending' ? () => photoInputRef.current?.click() : undefined}
-              >
+              <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500 text-sm">
                 <ImageIcon className="w-6 h-6 mx-auto mb-1 opacity-40" />
-                No photos attached{invoice.status === 'pending' && ' — click to add'}
+                No photos attached
               </div>
             ) : (
               <>
                 <div className="grid grid-cols-2 gap-3">
                   {photos.map((photo) => (
-                    <div key={photo.id} className="relative group">
-                      <img
-                        src={photo.url}
-                        alt={photo.filename}
-                        className="w-full h-28 object-cover rounded-lg cursor-pointer border border-gray-200 hover:border-gray-400 transition-colors"
-                        onClick={() => setPhotoPreview(photo.url)}
-                      />
-                      {invoice.status === 'pending' && (
-                        <button
-                          className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                          disabled={deletingPhotoId === photo.id}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeletePhoto(photo.id);
-                          }}
-                        >
-                          {deletingPhotoId === photo.id ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <X className="w-3 h-3" />
-                          )}
-                        </button>
-                      )}
-                    </div>
+                    <img
+                      key={photo.id}
+                      src={photo.url}
+                      alt={photo.filename}
+                      className="w-full h-28 object-cover rounded-lg cursor-pointer border border-gray-200 hover:border-gray-400 transition-colors"
+                      onClick={() => setPhotoPreview(photo.url)}
+                    />
                   ))}
                 </div>
                 <p className="text-xs text-gray-400 mt-2">{photos.length}/4 photos</p>
@@ -434,45 +285,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
             </Button>
           </div>
 
-          {/* Copy Payment Link — shown for pending invoices when provider connected */}
-          {invoice.status === 'pending' && !providersLoading && (stripeConnected || squareConnected) && (
-            <Button
-              variant="outline"
-              onClick={handleCopyPaymentLink}
-              disabled={isCopyingLink}
-              className="w-full"
-            >
-              {isCopyingLink ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Creating link...
-                </>
-              ) : (
-                <>
-                  <Link2 className="w-4 h-4 mr-2" />
-                  Copy Payment Link
-                </>
-              )}
-            </Button>
-          )}
-
-          {/* Actions */}
-          <div className="flex flex-wrap gap-2 mt-4">
-            <EditInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-            <DeleteInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-            {!providersLoading && (stripeConnected || squareConnected) && (
-              <TakePaymentModal
-                invoice={invoice}
-                onUpdate={onUpdate}
-                stripeConnected={stripeConnected}
-                squareConnected={squareConnected}
-                activeProvider={activeProvider}
-                squareApplicationId={squareApplicationId}
-                squareLocationId={squareLocationId}
-              />
-            )}
-            <RefundModal invoice={invoice} onUpdate={onUpdate} />
-          </div>
         </div>
       </DialogContent>
     </Dialog>

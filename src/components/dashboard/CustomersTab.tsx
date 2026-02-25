@@ -2,33 +2,19 @@ import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { 
-  Plus, 
-  Search, 
-  Mail, 
-  Phone, 
+import {
+  Search,
+  Mail,
+  Phone,
   MapPin,
-  MoreVertical,
-  Edit,
-  Trash2,
   Eye,
   Crown,
   TrendingUp,
   DollarSign,
   Loader2
 } from 'lucide-react@0.468.0';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
 import { fetchCustomers, fetchInvoices, fixInvoiceCustomerReferences } from '../../utils/dashboard-api';
-import { CreateCustomerModal } from './CreateCustomerModal';
 import { CustomerViewModal } from './CustomerViewModal';
-import { EditCustomerModal } from './EditCustomerModal';
-import { DeleteCustomerModal } from './DeleteCustomerModal';
 
 interface CustomersTabProps {
   userPlan: 'basic' | 'premium';
@@ -38,10 +24,7 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [customers, setCustomers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showCreateModal, setShowCreateModal] = useState(false);
   const [viewingCustomer, setViewingCustomer] = useState<any>(null);
-  const [editingCustomer, setEditingCustomer] = useState<any>(null);
-  const [deletingCustomer, setDeletingCustomer] = useState<any>(null);
 
   useEffect(() => {
     loadCustomers();
@@ -131,14 +114,10 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
             Customers
           </h2>
           <p className="text-gray-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Manage your customer relationships
+            View your customer relationships
             {!isPremium && ' (Basic features only)'}
           </p>
         </div>
-        <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Customer
-        </Button>
       </div>
 
       {/* Search and Filters */}
@@ -213,28 +192,13 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
                       </div>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                        <MoreVertical className="w-5 h-5 text-gray-400" />
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => setViewingCustomer(customer)}>
-                        <Eye className="w-4 h-4 mr-2" />
-                        View Details
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => setEditingCustomer(customer)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit Customer
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem variant="destructive" onClick={() => setDeletingCustomer(customer)}>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete Customer
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    onClick={() => setViewingCustomer(customer)}
+                    title="View details"
+                  >
+                    <Eye className="w-5 h-5 text-gray-400" />
+                  </button>
                 </div>
 
                 {/* Advanced Stats (Premium Only) */}
@@ -286,10 +250,7 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
       )}
 
       {/* Modals */}
-      <CreateCustomerModal open={showCreateModal} onClose={() => setShowCreateModal(false)} onCreated={loadCustomers} />
       <CustomerViewModal customer={viewingCustomer} open={viewingCustomer !== null} onClose={() => setViewingCustomer(null)} />
-      <EditCustomerModal customer={editingCustomer} open={editingCustomer !== null} onClose={() => setEditingCustomer(null)} onUpdated={loadCustomers} />
-      <DeleteCustomerModal customer={deletingCustomer} open={deletingCustomer !== null} onClose={() => setDeletingCustomer(null)} onDeleted={loadCustomers} />
     </div>
   );
 }

@@ -2,20 +2,16 @@ import { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
-import { 
-  Plus, 
-  Search, 
-  Download, 
-  Eye, 
-  Trash2, 
-  CheckCircle2, 
-  Clock, 
-  XCircle, 
+import {
+  Search,
+  Download,
+  Eye,
+  CheckCircle2,
+  Clock,
+  XCircle,
   RefreshCw,
   Loader2
 } from 'lucide-react@0.468.0';
-import { DeleteInvoiceModal } from './DeleteInvoiceModal';
-import { CreateInvoiceModal } from './CreateInvoiceModal';
 import { InvoiceViewModal } from './InvoiceViewModal';
 import { toast } from '../ui/sonner';
 import { fetchInvoices, fetchBillingCycleUsage } from '../../utils/dashboard-api';
@@ -31,8 +27,6 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
   const [loading, setLoading] = useState(true);
   const [billingUsage, setBillingUsage] = useState<{ used: number; limit: number } | null>(null);
   const [viewingInvoice, setViewingInvoice] = useState<any>(null);
-  const [deletingInvoice, setDeletingInvoice] = useState<any>(null);
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -95,10 +89,6 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
 
   const isPremium = userPlan === 'premium';
 
-  const handleNewInvoice = () => {
-    setShowCreateModal(true);
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -108,13 +98,9 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
             Invoices
           </h2>
           <p className="text-gray-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Create and manage your invoices
+            View and track your invoices
           </p>
         </div>
-        <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg" onClick={handleNewInvoice}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Invoice
-        </Button>
       </div>
 
       {/* Stats */}
@@ -240,23 +226,14 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                 </span>
                 <span>Due: {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="h-8 px-3 text-xs border-gray-300 flex-1"
-                  onClick={() => setViewingInvoice(invoice)}
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  View
-                </Button>
-                <button
-                  className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                  onClick={() => setDeletingInvoice(invoice)}
-                  title="Delete invoice"
-                >
-                  <Trash2 className="w-4 h-4 text-red-600" />
-                </button>
-              </div>
+              <Button
+                variant="outline"
+                className="h-8 px-3 text-xs border-gray-300 w-full"
+                onClick={() => setViewingInvoice(invoice)}
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                View
+              </Button>
             </Card>
           ))
         ) : (
@@ -340,23 +317,14 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                       </span>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <Button 
-                          variant="outline" 
-                          className="h-8 px-3 text-xs border-gray-300" 
+                        <Button
+                          variant="outline"
+                          className="h-8 px-3 text-xs border-gray-300"
                           onClick={() => setViewingInvoice(invoice)}
                         >
                           <Eye className="w-3 h-3 mr-1" />
                           View
                         </Button>
-                        <button 
-                          className="p-1.5 hover:bg-red-50 rounded transition-colors" 
-                          onClick={() => setDeletingInvoice(invoice)}
-                          title="Delete invoice"
-                        >
-                          <Trash2 className="w-4 h-4 text-red-600" />
-                        </button>
-                      </div>
                     </td>
                   </tr>
                 ))
@@ -390,29 +358,6 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
         />
       )}
 
-      {/* Delete Invoice Modal */}
-      {deletingInvoice && (
-        <DeleteInvoiceModal
-          invoice={deletingInvoice}
-          open={true}
-          onClose={() => setDeletingInvoice(null)}
-          onDeleted={() => {
-            setInvoices(prev => prev.filter(inv => inv.id !== deletingInvoice.id));
-            setDeletingInvoice(null);
-          }}
-        />
-      )}
-
-      {/* Create Invoice Modal */}
-      {showCreateModal && (
-        <CreateInvoiceModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={() => {
-            setShowCreateModal(false);
-            loadData();
-          }}
-        />
-      )}
     </div>
   );
 }

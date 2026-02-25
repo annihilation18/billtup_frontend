@@ -3,10 +3,8 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import {
-  Plus,
   Search,
   Eye,
-  Trash2,
   CheckCircle2,
   Clock,
   XCircle,
@@ -16,20 +14,8 @@ import {
   ArrowRightLeft,
   Send
 } from 'lucide-react@0.468.0';
-import { CreateEstimateModal } from './CreateEstimateModal';
 import { EstimateViewModal } from './EstimateViewModal';
-import { toast } from '../ui/sonner';
-import { fetchEstimates, deleteEstimate } from '../../utils/dashboard-api';
-import {
-  AlertDialog,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from '../ui/alert-dialog';
+import { fetchEstimates } from '../../utils/dashboard-api';
 
 interface EstimatesTabProps {
   userPlan: 'basic' | 'premium';
@@ -41,9 +27,6 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
   const [estimates, setEstimates] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [viewingEstimate, setViewingEstimate] = useState<any>(null);
-  const [deletingEstimate, setDeletingEstimate] = useState<any>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showCreateModal, setShowCreateModal] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -109,24 +92,6 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
     }
   };
 
-  const handleDelete = async () => {
-    if (!deletingEstimate) return;
-    setIsDeleting(true);
-    try {
-      await deleteEstimate(deletingEstimate.id);
-      setEstimates(prev => prev.filter(e => e.id !== deletingEstimate.id));
-      toast.success('Estimate deleted');
-      setDeletingEstimate(null);
-    } catch (error) {
-      console.error('Error deleting estimate:', error);
-      toast.error('Failed to delete estimate');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
-  const canDelete = (status: string) => status === 'draft' || status === 'rejected';
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -136,13 +101,9 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
             Estimates
           </h2>
           <p className="text-gray-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Create and manage estimates for your customers
+            View and track your estimates
           </p>
         </div>
-        <Button className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg" onClick={() => setShowCreateModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          New Estimate
-        </Button>
       </div>
 
       {/* Stats */}
@@ -266,25 +227,14 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                   <span>Valid until: {new Date(estimate.validUntil).toLocaleDateString()}</span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  className="h-8 px-3 text-xs border-gray-300 flex-1"
-                  onClick={() => setViewingEstimate(estimate)}
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  View
-                </Button>
-                {canDelete(estimate.status) && (
-                  <button
-                    className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                    onClick={() => setDeletingEstimate(estimate)}
-                    title="Delete estimate"
-                  >
-                    <Trash2 className="w-4 h-4 text-red-600" />
-                  </button>
-                )}
-              </div>
+              <Button
+                variant="outline"
+                className="h-8 px-3 text-xs border-gray-300 w-full"
+                onClick={() => setViewingEstimate(estimate)}
+              >
+                <Eye className="w-3 h-3 mr-1" />
+                View
+              </Button>
             </Card>
           ))
         ) : (
@@ -368,7 +318,6 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                       </span>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap text-right">
-                      <div className="flex items-center justify-end gap-2">
                         <Button
                           variant="outline"
                           className="h-8 px-3 text-xs border-gray-300"
@@ -377,16 +326,6 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                           <Eye className="w-3 h-3 mr-1" />
                           View
                         </Button>
-                        {canDelete(estimate.status) && (
-                          <button
-                            className="p-1.5 hover:bg-red-50 rounded transition-colors"
-                            onClick={() => setDeletingEstimate(estimate)}
-                            title="Delete estimate"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-600" />
-                          </button>
-                        )}
-                      </div>
                     </td>
                   </tr>
                 ))
@@ -411,47 +350,6 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
         />
       )}
 
-      {/* Delete Estimate Dialog */}
-      <AlertDialog open={!!deletingEstimate} onOpenChange={(open) => { if (!open) setDeletingEstimate(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Delete Estimate
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete estimate {deletingEstimate?.number || deletingEstimate?.id}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              className="bg-red-600 hover:bg-red-700 text-white"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Delete'
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Create Estimate Modal */}
-      {showCreateModal && (
-        <CreateEstimateModal
-          onClose={() => setShowCreateModal(false)}
-          onCreated={() => {
-            setShowCreateModal(false);
-            loadData();
-          }}
-        />
-      )}
     </div>
   );
 }
