@@ -77,6 +77,24 @@ export function FeaturesSection({ onNavigate }: FeaturesSectionProps) {
       title: 'Refund Management',
       description: 'Process refunds instantly with full or partial refund options directly from the invoice view.',
       color: 'from-[#1E3A8A] to-[#F59E0B]'
+    },
+    {
+      icon: FileText,
+      title: 'Estimates & Quotes',
+      description: 'Create professional estimates and send them to customers for approval. Approved estimates convert to invoices with one click.',
+      color: 'from-[#14B8A6] to-[#F59E0B]'
+    },
+    {
+      icon: CreditCard,
+      title: 'Payment Links',
+      description: 'Share secure payment links via email or text. Customers pay online through Stripe Checkout or Square — no app needed.',
+      color: 'from-[#1E3A8A] to-[#14B8A6]'
+    },
+    {
+      icon: Clock,
+      title: 'Overdue Tracking',
+      description: 'Automatic overdue detection with email notifications. Never lose track of unpaid invoices again.',
+      color: 'from-[#F59E0B] to-[#1E3A8A]'
     }
   ];
 
@@ -189,7 +207,7 @@ export function FeaturesSection({ onNavigate }: FeaturesSectionProps) {
             Ready to Streamline Your Invoicing?
           </h3>
           <p className="text-xl text-white/90 mb-6 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Join thousands of service professionals who are getting paid faster with BilltUp.
+            Service professionals are getting paid faster with BilltUp.
             Start your 14-day free trial today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">

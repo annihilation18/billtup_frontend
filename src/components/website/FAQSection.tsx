@@ -77,6 +77,10 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
           answer: 'Yes! You can enable tax in your settings and set your tax rate. When creating invoices, you can toggle tax on or off, and the total is calculated automatically. This is perfect for businesses that need to collect sales tax.',
         },
         {
+          question: 'Can I send estimates before invoicing?',
+          answer: 'Yes! BilltUp has a full estimate workflow. Create a professional estimate, send it to your customer for review, and they can approve or decline it via email. Once approved, you can convert the estimate to an invoice with one click — all the line items, customer info, and totals carry over automatically.',
+        },
+        {
           question: 'Can I process refunds?',
           answer: 'Yes, you can process full or partial refunds directly from any paid invoice. Simply open the invoice, click the Refund button, choose full or partial refund, and confirm. The customer will be notified and receive their refund within 5-10 business days.',
         },

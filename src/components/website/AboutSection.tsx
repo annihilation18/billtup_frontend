@@ -32,26 +32,26 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
         <div className="grid md:grid-cols-4 gap-6 mb-20">
           <Card className="p-6 text-center bg-gradient-to-br from-[#14B8A6]/5 to-white border-[#14B8A6]/20">
             <Users className="w-12 h-12 text-[#14B8A6] mx-auto mb-4" />
-            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>10,000+</h3>
-            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Active Users</p>
+            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>15+</h3>
+            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Invoice Templates</p>
           </Card>
 
           <Card className="p-6 text-center bg-gradient-to-br from-[#1E3A8A]/5 to-white border-[#1E3A8A]/20">
             <DollarSign className="w-12 h-12 text-[#1E3A8A] mx-auto mb-4" />
-            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>$5M+</h3>
-            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Processed Monthly</p>
+            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>2</h3>
+            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Payment Processors</p>
           </Card>
 
           <Card className="p-6 text-center bg-gradient-to-br from-[#F59E0B]/5 to-white border-[#F59E0B]/20">
-            <Heart className="w-12 h-12 text-[#F59E0B] mx-auto mb-4" />
-            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>4.9★</h3>
-            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>User Rating</p>
+            <Shield className="w-12 h-12 text-[#F59E0B] mx-auto mb-4" />
+            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>Bank-Level</h3>
+            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Encryption</p>
           </Card>
 
           <Card className="p-6 text-center bg-gradient-to-br from-purple-500/5 to-white border-purple-500/20">
             <Globe className="w-12 h-12 text-purple-500 mx-auto mb-4" />
-            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>50+</h3>
-            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Countries Served</p>
+            <h3 className="text-3xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>iOS, Android & Web</h3>
+            <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>Available Everywhere</p>
           </Card>
         </div>
 
@@ -314,7 +314,7 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
         <Card className="p-12 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] text-white text-center">
           <Target className="w-20 h-20 mx-auto mb-6 opacity-90" />
           <h2 className="text-3xl lg:text-4xl mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Join Thousands of Happy Users
+            Ready to Simplify Your Invoicing?
           </h2>
           <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
             Start creating professional invoices and getting paid faster today. Try it free for 14 days.
