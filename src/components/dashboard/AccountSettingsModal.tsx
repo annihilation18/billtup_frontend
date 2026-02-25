@@ -353,8 +353,12 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                   </span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-gray-600">Plan Renewal</span>
-                  <span className="text-gray-900">Monthly</span>
+                  <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : 'Next Billing Date'}</span>
+                  <span className={cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-900'}>
+                    {currentPeriodEnd
+                      ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                      : 'Monthly'}
+                  </span>
                 </div>
               </div>
             </Card>
