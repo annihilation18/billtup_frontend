@@ -347,9 +347,11 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
     // Get date ranges for the selected period
     const { startDate, endDate } = getDateRangeForPeriod(period);
 
+    // Helper: net revenue for a paid invoice (subtracts refunds)
+    const invoiceNetRevenue = (inv: any) => inv.total - (inv.refundedAmount || 0);
+
     // Helper function to get the invoice date (try multiple fields for compatibility)
     const getInvoiceDate = (inv: any): Date => {
-      // Try date (invoice date field), then createdAt (system timestamp)
       const dateStr = inv.date || inv.createdAt;
       return dateStr ? new Date(dateStr) : new Date();
     };
@@ -360,14 +362,12 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
       return invDate >= startDate && invDate <= endDate;
     });
 
-    console.log(`[Analytics] Period: ${period}, Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-
     // Calculate stats for current period
     const paidInvoices = periodInvoices.filter((inv: any) => inv.status === 'paid');
     const pendingInvoices = periodInvoices.filter((inv: any) => inv.status === 'pending');
     const overdueInvoices = periodInvoices.filter((inv: any) => inv.status === 'overdue');
 
-    const totalRevenue = paidInvoices.reduce((sum: number, inv: any) => sum + inv.total, 0);
+    const totalRevenue = paidInvoices.reduce((sum: number, inv: any) => sum + invoiceNetRevenue(inv), 0);
     const pendingAmount = pendingInvoices.reduce((sum: number, inv: any) => sum + inv.total, 0);
 
     // Get comparison period label
@@ -381,10 +381,18 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
       return custDate >= startDate && custDate <= endDate;
     }).length;
 
+    // Active customers: those with at least one invoice in this period
+    const activeCustomerIds = new Set(
+      periodInvoices.map((inv: any) => inv.customerId).filter(Boolean)
+    );
+    const activeCustomers = activeCustomerIds.size || customers.filter((cust: any) =>
+      periodInvoices.some((inv: any) => inv.customer === cust.name)
+    ).length;
+
     return {
       totalRevenue,
       totalInvoices: periodInvoices.length,
-      totalCustomers: customers.length,
+      totalCustomers: activeCustomers,
       pendingAmount,
       paidCount: paidInvoices.length,
       pendingCount: pendingInvoices.length,
@@ -427,9 +435,9 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
     // Get date ranges for the selected period
     const { startDate, endDate } = getDateRangeForPeriod(period);
 
-    // Helper function to get the invoice date (try multiple fields for compatibility)
+    // Helper function to get the invoice date (consistent with fetchSalesStats)
     const getInvoiceDate = (inv: any): Date => {
-      const dateStr = inv.issueDate || inv.date || inv.createdAt;
+      const dateStr = inv.date || inv.createdAt;
       return dateStr ? new Date(dateStr) : new Date();
     };
 
@@ -439,13 +447,13 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
       return invDate >= startDate && invDate <= endDate;
     });
 
-    // Calculate revenue per customer
+    // Calculate revenue per customer (subtract refunds)
     const customerRevenue = customers.map((customer: any) => {
       const customerInvoices = periodInvoices.filter(
-        (inv: any) => inv.customerId === customer.id && inv.status === 'paid'
+        (inv: any) => (inv.customerId === customer.id || inv.customer === customer.name) && inv.status === 'paid'
       );
       const totalRevenue = customerInvoices.reduce(
-        (sum: number, inv: any) => sum + inv.total,
+        (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
         0
       );
       return {
@@ -501,7 +509,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
         });
 
         const dayRevenue = dayInvoices.reduce(
-          (sum: number, inv: any) => sum + inv.total,
+          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
           0
         );
 
@@ -560,7 +568,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
         });
 
         const dayRevenue = dayInvoices.reduce(
-          (sum: number, inv: any) => sum + inv.total,
+          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
           0
         );
 
@@ -606,7 +614,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
       });
 
       const monthRevenue = monthInvoices.reduce(
-        (sum: number, inv: any) => sum + inv.total,
+        (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
         0
       );
 
