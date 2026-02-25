@@ -677,6 +677,18 @@ export async function cancelSubscription() {
   }
 }
 
+// Reactivate a cancelled subscription (before period end)
+export async function reactivateSubscription() {
+  try {
+    return await apiCall('/subscription/reactivate', {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error reactivating subscription:', error);
+    throw error;
+  }
+}
+
 // Trial Status API
 export async function fetchTrialStatus(): Promise<{
   isInTrial: boolean;

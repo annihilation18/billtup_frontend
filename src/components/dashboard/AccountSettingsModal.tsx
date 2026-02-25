@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle } from 'lucide-react@0.468.0';
+import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle } from 'lucide-react@0.468.0';
 import { API_CONFIG } from '../../utils/config';
 
 interface AccountSettingsModalProps {
@@ -28,7 +28,67 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [isChangingPlan, setIsChangingPlan] = useState(false);
   const [showUpgradeConfirm, setShowUpgradeConfirm] = useState(false);
   const [showDowngradeConfirm, setShowDowngradeConfirm] = useState(false);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
+  const [isReactivating, setIsReactivating] = useState(false);
+  const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
+  const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
   const [pendingPlan, setPendingPlan] = useState<'basic' | 'premium'>('basic');
+
+  // Load subscription status to check for pending cancellation
+  useEffect(() => {
+    if (!open) return;
+    (async () => {
+      try {
+        const { getIdToken } = await import('../../utils/auth/cognito');
+        const token = await getIdToken();
+        if (!token) return;
+        const response = await fetch(`${API_CONFIG.baseUrl}/subscription/status`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCancelAtPeriodEnd(!!data.cancelAtPeriodEnd);
+          setCurrentPeriodEnd(data.currentPeriodEnd || null);
+        }
+      } catch {
+        // Subscription status not available
+      }
+    })();
+  }, [open]);
+
+  const handleCancelSubscription = async () => {
+    setIsCancelling(true);
+    try {
+      const { cancelSubscription } = await import('../../utils/dashboard-api');
+      const result = await cancelSubscription();
+      const { toast } = await import('../ui/sonner');
+      toast.success(result?.message || 'Subscription will be cancelled at end of billing period');
+      setCancelAtPeriodEnd(true);
+      setShowCancelConfirm(false);
+    } catch (error) {
+      const { toast } = await import('../ui/sonner');
+      toast.error('Failed to cancel subscription');
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  const handleReactivateSubscription = async () => {
+    setIsReactivating(true);
+    try {
+      const { reactivateSubscription } = await import('../../utils/dashboard-api');
+      await reactivateSubscription();
+      const { toast } = await import('../ui/sonner');
+      toast.success('Subscription reactivated!');
+      setCancelAtPeriodEnd(false);
+    } catch (error) {
+      const { toast } = await import('../ui/sonner');
+      toast.error('Failed to reactivate subscription');
+    } finally {
+      setIsReactivating(false);
+    }
+  };
 
   const handlePlanChange = async (newPlan: 'basic' | 'premium') => {
     console.log('[Plan Change] Starting plan change to:', newPlan);
@@ -352,6 +412,56 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
               </div>
             </Card>
 
+            {/* Subscription Management */}
+            {isPremium && (
+              <Card className="p-6 border-gray-200">
+                <h3 className="text-lg mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  Subscription
+                </h3>
+
+                {cancelAtPeriodEnd && currentPeriodEnd ? (
+                  <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-amber-900 font-medium">Subscription Ending Soon</p>
+                      <p className="text-sm text-amber-800 mt-1">
+                        Your subscription will be cancelled on {new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+                        You'll continue to have access until then.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
+                        onClick={handleReactivateSubscription}
+                        disabled={isReactivating}
+                      >
+                        {isReactivating ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Reactivating...
+                          </>
+                        ) : 'Reactivate Subscription'}
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600">
+                        Cancel your subscription. You'll keep access until the end of your current billing period.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="ml-4 border-red-300 text-red-600 hover:bg-red-50"
+                      onClick={() => setShowCancelConfirm(true)}
+                    >
+                      Cancel Subscription
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
+
             {/* Danger Zone */}
             <Card className="p-6 border-red-200 bg-red-50/50">
               <div className="flex items-start gap-4">
@@ -606,6 +716,65 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                   Downgrade to Basic
                 </>
               )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Cancel Subscription Confirmation Dialog */}
+      <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-amber-600" />
+              </div>
+              <DialogTitle className="text-xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Cancel Subscription
+              </DialogTitle>
+            </div>
+            <DialogDescription className="text-base pt-2">
+              Are you sure you want to cancel your subscription?
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+            <p className="text-sm font-medium text-amber-900 mb-2">What happens when you cancel:</p>
+            <ul className="space-y-1.5 text-sm text-amber-800">
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                You'll have access until the end of your current billing period
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                No refunds for partial months
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                Your data will be retained for 30 days
+              </li>
+              <li className="flex items-start gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-600 mt-1.5 flex-shrink-0" />
+                You can reactivate anytime before your access ends
+              </li>
+            </ul>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowCancelConfirm(false)}>
+              Keep Subscription
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleCancelSubscription}
+              disabled={isCancelling}
+            >
+              {isCancelling ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Cancelling...
+                </>
+              ) : 'Yes, Cancel'}
             </Button>
           </DialogFooter>
         </DialogContent>
