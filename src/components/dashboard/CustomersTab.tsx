@@ -59,25 +59,26 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
 
       // Calculate revenue and invoice counts for each customer
       const enrichedCustomers = customersData.map((customer: any) => {
+        const matchesCustomer = (inv: any) => inv.customerId === customer.id || inv.customer === customer.name;
         const customerInvoices = invoicesData.filter(
-          (inv: any) => inv.customerId === customer.id && inv.status === 'paid'
+          (inv: any) => matchesCustomer(inv) && inv.status === 'paid'
         );
         const totalRevenue = customerInvoices.reduce(
-          (sum: number, inv: any) => sum + (inv.total || 0),
+          (sum: number, inv: any) => sum + (inv.total || 0) - (inv.refundedAmount || 0),
           0
         );
-        
+
         // Get last invoice date
         const sortedInvoices = invoicesData
-          .filter((inv: any) => inv.customerId === customer.id)
+          .filter((inv: any) => matchesCustomer(inv))
           .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        
+
         const lastInvoice = sortedInvoices[0];
         const lastInvoiceDate = lastInvoice ? formatDate(lastInvoice.createdAt) : 'Never';
 
         return {
           ...customer,
-          totalInvoices: invoicesData.filter((inv: any) => inv.customerId === customer.id).length,
+          totalInvoices: invoicesData.filter((inv: any) => matchesCustomer(inv)).length,
           totalRevenue,
           lastInvoice: lastInvoiceDate,
         };
