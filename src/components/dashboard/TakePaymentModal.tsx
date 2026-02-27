@@ -23,6 +23,21 @@ function calculateStripeFee(invoiceTotal: number, methodType: string) {
   return { fee, label: 'Processing Fee (3.5% + $0.50)' };
 }
 
+/** Calculate processing fee for Square payment methods */
+function calculateSquareFee(invoiceTotal: number, methodType: SquareMethod) {
+  if (methodType === 'ach') {
+    // Square ACH: 1% (min $1, max $5) + Platform 0.6% + $0.20
+    const squareFee = Math.max(1.00, Math.min(5.00, invoiceTotal * 0.01));
+    const platformFee = (invoiceTotal * 0.006) + 0.20;
+    return { fee: squareFee + platformFee, label: 'Processing Fee (ACH)' };
+  }
+  // Card / Google Pay: Square 2.9% + $0.30 + Platform 0.6% + $0.20 = 3.5% + $0.50
+  const fee = (invoiceTotal * 0.035) + 0.50;
+  return { fee, label: 'Processing Fee (3.5% + $0.50)' };
+}
+
+type SquareMethod = 'card' | 'google_pay' | 'ach';
+
 // ─── Stripe Payment Form (rendered inside <Elements> with clientSecret) ───
 interface StripeFormProps {
   invoice: any;
@@ -246,8 +261,6 @@ function StripePaymentWrapper({ invoice, onSuccess, onCancel, onBack }: StripeWr
 }
 
 // ─── Square Payment Form (loads Square Web Payments SDK) ─────────────
-type SquareMethod = 'card' | 'google_pay' | 'ach';
-
 interface SquareFormProps {
   invoice: any;
   applicationId: string;
@@ -295,7 +308,9 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
             return;
           }
           const script = document.createElement('script');
-          script.src = 'https://sandbox.web.squarecdn.com/v1/square.js';
+          script.src = applicationId.startsWith('sandbox-')
+            ? 'https://sandbox.web.squarecdn.com/v1/square.js'
+            : 'https://web.squarecdn.com/v1/square.js';
           script.onload = () => resolve();
           script.onerror = () => reject(new Error('Failed to load Square SDK'));
           document.head.appendChild(script);
@@ -316,10 +331,11 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
 
       // Initialize Google Pay
       try {
+        const gpFee = calculateSquareFee(invoice.total || 0, 'google_pay');
         const googlePay = await payments.googlePay({
           countryCode: 'US',
           currencyCode: 'USD',
-          total: { amount: (invoice.total || 0).toFixed(2), label: 'Payment' },
+          total: { amount: ((invoice.total || 0) + gpFee.fee).toFixed(2), label: 'Payment' },
         });
         googlePayRef.current = googlePay;
         setGooglePayReady(true);
@@ -411,12 +427,17 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
         return;
       }
 
-      const amountInCents = Math.round((invoice.total || 0) * 100);
+      const invoiceTotal = invoice.total || 0;
+      const { fee } = calculateSquareFee(invoiceTotal, selectedMethod);
+      const totalCharge = invoiceTotal + fee;
+      const amountInCents = Math.round(totalCharge * 100);
+      const invoiceAmountInCents = Math.round(invoiceTotal * 100);
       const result = await createSquarePayment(
         amountInCents,
         tokenResult.token,
         invoice.id,
         invoice.customerEmail,
+        invoiceAmountInCents,
       );
 
       if (result.success) {
@@ -461,6 +482,30 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
         <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
           ${(invoice.total || 0).toFixed(2)}
         </p>
+        {(() => {
+          const invTotal = invoice.total || 0;
+          const { fee: cardFee } = calculateSquareFee(invTotal, 'card');
+          const { fee: achFee } = calculateSquareFee(invTotal, 'ach');
+          const { fee: currentFee } = calculateSquareFee(invTotal, selectedMethod);
+          return (
+            <>
+              <div className={`flex justify-between text-xs mt-2 ${selectedMethod !== 'ach' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                <span>Card / Wallet (3.5% + $0.50)</span>
+                <span>${cardFee.toFixed(2)}</span>
+              </div>
+              {achReady && (
+                <div className={`flex justify-between text-xs mt-1 ${selectedMethod === 'ach' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
+                  <span>Bank Transfer (ACH)</span>
+                  <span>${achFee.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm font-medium text-gray-700 mt-2 pt-1 border-t border-gray-200">
+                <span>Total</span>
+                <span>${(invTotal + currentFee).toFixed(2)}</span>
+              </div>
+            </>
+          );
+        })()}
       </div>
 
       {/* Method tabs */}
@@ -561,7 +606,7 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
           {isProcessing ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
           ) : (
-            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${(invoice.total || 0).toFixed(2)}</>
+            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${((invoice.total || 0) + calculateSquareFee(invoice.total || 0, selectedMethod).fee).toFixed(2)}</>
           )}
         </Button>
       </div>
