@@ -18,10 +18,10 @@ export function BilltUpLogo({
 }: BilltUpLogoProps) {
   return (
     <div
-      className={`inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#14B8A6] to-[#F59E0B] p-0.5 ${className}`}
+      className={`inline-flex items-center justify-center rounded-full bg-gradient-to-br from-[#1E3A8A] via-[#14B8A6] to-[#F59E0B] p-0.5 ${className}`}
       style={{ width: size, height: size }}
     >
-      <div className="w-full h-full bg-white rounded-xl flex items-center justify-center">
+      <div className="w-full h-full bg-white rounded-full flex items-center justify-center">
         <svg
           width={size * 0.6}
           height={size * 0.6}

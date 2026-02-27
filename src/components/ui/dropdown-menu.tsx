@@ -10,13 +10,15 @@ interface DropdownMenuProps {
 
 function DropdownMenu({ open, onOpenChange, children }: DropdownMenuProps) {
   const [isOpen, setIsOpen] = React.useState(false);
-  
+
   const controlledOpen = open !== undefined ? open : isOpen;
   const handleOpenChange = onOpenChange || setIsOpen;
-  
+
   return (
     <DropdownMenuContext.Provider value={{ open: controlledOpen, onOpenChange: handleOpenChange }}>
-      {children}
+      <div className="relative">
+        {children}
+      </div>
     </DropdownMenuContext.Provider>
   );
 }
@@ -70,6 +72,8 @@ function DropdownMenuContent({ className, children, align = "center", sideOffset
       ref={contentRef}
       className={cn(
         "absolute z-50 min-w-[8rem] rounded-md border bg-white p-1 shadow-md",
+        align === "end" && "right-0",
+        align === "start" && "left-0",
         className
       )}
       style={{ marginTop: sideOffset }}

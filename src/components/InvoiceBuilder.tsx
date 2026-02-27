@@ -5,13 +5,24 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Card } from "./ui/card";
 import { Switch } from "./ui/switch";
+import { Textarea } from "./ui/textarea";
 import { ArrowLeft, Plus, Trash2, FileText, CreditCard } from "lucide-react";
 
 interface LineItem {
   id: string;
   name: string;
+  notes?: string;
   quantity: number;
   price: number;
+}
+
+interface SavedLineItem {
+  id: string;
+  name: string;
+  notes?: string;
+  price: number;
+  quantity: number;
+  usageCount: number;
 }
 
 interface InvoiceBuilderProps {
@@ -23,6 +34,7 @@ interface InvoiceBuilderProps {
   chargeTax: boolean;
   defaultTaxRate: number;
   editingInvoice?: any; // When editing an existing invoice
+  savedItems?: SavedLineItem[];
 }
 
 export interface InvoiceData {
@@ -36,7 +48,7 @@ export interface InvoiceData {
   signature?: string;
 }
 
-export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSaveInvoice, customers, chargeTax, defaultTaxRate, editingInvoice }: InvoiceBuilderProps) {
+export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSaveInvoice, customers, chargeTax, defaultTaxRate, editingInvoice, savedItems = [] }: InvoiceBuilderProps) {
   const [selectedCustomer, setSelectedCustomer] = useState(editingInvoice?.customer || "");
   const [customerEmail, setCustomerEmail] = useState(editingInvoice?.customerEmail || "");
   const [customerPhone, setCustomerPhone] = useState(editingInvoice?.customerPhone || "");
@@ -47,7 +59,38 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
   const [isDrawing, setIsDrawing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [includeSignature, setIncludeSignature] = useState(editingInvoice?.signature ? true : false);
+  const [expandedNotes, setExpandedNotes] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    if (editingInvoice?.lineItems) {
+      editingInvoice.lineItems.forEach((item: any) => {
+        if (item.notes) initial.add(item.id);
+      });
+    }
+    return initial;
+  });
+  const [activeAutocomplete, setActiveAutocomplete] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  const getFilteredSuggestions = (query: string): SavedLineItem[] => {
+    if (query.length < 2 || savedItems.length === 0) return [];
+    const lower = query.toLowerCase();
+    return savedItems
+      .filter((s) => s.name.toLowerCase().includes(lower))
+      .sort((a, b) => (b.usageCount || 0) - (a.usageCount || 0))
+      .slice(0, 8);
+  };
+
+  const handleSelectSuggestion = (itemId: string, suggestion: SavedLineItem) => {
+    setLineItems(lineItems.map(item =>
+      item.id === itemId
+        ? { ...item, name: suggestion.name, notes: suggestion.notes || "", price: suggestion.price || 0, quantity: suggestion.quantity || 1 }
+        : item
+    ));
+    if (suggestion.notes) {
+      setExpandedNotes(prev => new Set(prev).add(itemId));
+    }
+    setActiveAutocomplete(null);
+  };
 
   const handleCustomerChange = (customerName: string) => {
     setSelectedCustomer(customerName);
@@ -281,58 +324,125 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
               <p className="text-center text-muted-foreground py-8">No items added yet</p>
             ) : (
               lineItems.map((item) => (
-                <div key={item.id} className="flex gap-2 items-start">
-                  <div className="flex-1 space-y-2">
-                    <div className="space-y-1">
-                      <Label htmlFor={`item-name-${item.id}`} className="text-xs text-muted-foreground">Item Description</Label>
-                      <Input
-                        id={`item-name-${item.id}`}
-                        placeholder="e.g., Full Interior Detailing"
-                        value={item.name}
-                        onChange={(e) => updateLineItem(item.id, "name", e.target.value)}
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="space-y-1 w-24">
-                        <Label htmlFor={`item-qty-${item.id}`} className="text-xs text-muted-foreground">Quantity</Label>
+                <div key={item.id} className="space-y-2">
+                  <div className="flex gap-2 items-start">
+                    <div className="flex-1 space-y-2">
+                      <div className="space-y-1 relative">
+                        <Label htmlFor={`item-name-${item.id}`} className="text-xs text-muted-foreground">Item Description</Label>
                         <Input
-                          id={`item-qty-${item.id}`}
-                          type="number"
-                          placeholder="1"
-                          value={item.quantity}
-                          onChange={(e) => updateLineItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="1"
+                          id={`item-name-${item.id}`}
+                          placeholder="e.g., Full Interior Detailing"
+                          value={item.name}
+                          onChange={(e) => {
+                            updateLineItem(item.id, "name", e.target.value);
+                            setActiveAutocomplete(e.target.value.length >= 2 ? item.id : null);
+                          }}
+                          onFocus={() => {
+                            if (item.name.length >= 2) setActiveAutocomplete(item.id);
+                          }}
+                          onBlur={() => {
+                            setTimeout(() => setActiveAutocomplete((prev) => prev === item.id ? null : prev), 150);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === "Escape") setActiveAutocomplete(null);
+                          }}
+                          autoComplete="off"
                         />
+                        {activeAutocomplete === item.id && getFilteredSuggestions(item.name).length > 0 && (
+                          <div className="absolute z-20 left-0 right-0 top-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-y-auto">
+                            {getFilteredSuggestions(item.name).map((s) => (
+                              <button
+                                key={s.id}
+                                type="button"
+                                className="w-full text-left px-3 py-2 hover:bg-accent text-sm flex items-center justify-between gap-2"
+                                onMouseDown={(e) => e.preventDefault()}
+                                onClick={() => handleSelectSuggestion(item.id, s)}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <div className="font-medium truncate">{s.name}</div>
+                                  {s.notes && <div className="text-xs text-muted-foreground truncate">{s.notes}</div>}
+                                </div>
+                                {s.price > 0 && <span className="text-xs font-mono text-muted-foreground shrink-0">${s.price.toFixed(2)}</span>}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
-                      <div className="space-y-1 flex-1">
-                        <Label htmlFor={`item-price-${item.id}`} className="text-xs text-muted-foreground">Price ($)</Label>
-                        <Input
-                          id={`item-price-${item.id}`}
-                          type="number"
-                          placeholder="0.00"
-                          value={item.price}
-                          onChange={(e) => updateLineItem(item.id, "price", parseFloat(e.target.value) || 0)}
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-xs text-muted-foreground">Total</Label>
-                        <div className="flex items-center justify-center h-10 px-3 bg-muted rounded-lg font-mono text-sm">
-                          ${(item.quantity * item.price).toFixed(2)}
+                      <div className="flex gap-2">
+                        <div className="space-y-1 w-24">
+                          <Label htmlFor={`item-qty-${item.id}`} className="text-xs text-muted-foreground">Quantity</Label>
+                          <Input
+                            id={`item-qty-${item.id}`}
+                            type="number"
+                            placeholder="1"
+                            value={item.quantity}
+                            onChange={(e) => updateLineItem(item.id, "quantity", parseFloat(e.target.value) || 0)}
+                            min="0"
+                            step="1"
+                          />
+                        </div>
+                        <div className="space-y-1 flex-1">
+                          <Label htmlFor={`item-price-${item.id}`} className="text-xs text-muted-foreground">Price ($)</Label>
+                          <Input
+                            id={`item-price-${item.id}`}
+                            type="number"
+                            placeholder="0.00"
+                            value={item.price}
+                            onChange={(e) => updateLineItem(item.id, "price", parseFloat(e.target.value) || 0)}
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <Label className="text-xs text-muted-foreground">Total</Label>
+                          <div className="flex items-center justify-center h-10 px-3 bg-muted rounded-lg font-mono text-sm">
+                            ${(item.quantity * item.price).toFixed(2)}
+                          </div>
                         </div>
                       </div>
                     </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => deleteLineItem(item.id)}
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-7"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => deleteLineItem(item.id)}
-                    className="text-destructive hover:text-destructive hover:bg-destructive/10 mt-7"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  {/* Notes toggle / textarea */}
+                  {expandedNotes.has(item.id) || item.notes ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor={`item-notes-${item.id}`} className="text-xs text-muted-foreground">Notes</Label>
+                        <button
+                          type="button"
+                          className="text-xs text-destructive hover:underline"
+                          onClick={() => {
+                            updateLineItem(item.id, "notes", "");
+                            setExpandedNotes(prev => { const next = new Set(prev); next.delete(item.id); return next; });
+                          }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                      <Textarea
+                        id={`item-notes-${item.id}`}
+                        placeholder="e.g., Vacuum carpets, clean all surfaces..."
+                        value={item.notes || ""}
+                        onChange={(e) => updateLineItem(item.id, "notes", e.target.value)}
+                        className="min-h-[60px] text-sm"
+                      />
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="text-xs text-primary hover:underline"
+                      onClick={() => setExpandedNotes(prev => new Set(prev).add(item.id))}
+                    >
+                      + Add notes
+                    </button>
+                  )}
                 </div>
               ))
             )}

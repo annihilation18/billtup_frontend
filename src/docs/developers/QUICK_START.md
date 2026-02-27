@@ -4,18 +4,20 @@ Get BilltUp running on your local machine in minutes.
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 22+ and npm
 - Git
-- A Supabase account
-- A Stripe account (for payment features)
+- AWS CLI + SAM CLI (for backend work)
+- Stripe account (for payment features)
 
 ## Installation
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/billtup/billtup.git
-cd billtup
+git clone <repo-url>
+cd billtup_frontend   # Website (Vite + React)
+# or
+cd Billtup            # Android app (React Native)
 ```
 
 ### 2. Install Dependencies
@@ -26,56 +28,66 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-The following environment variables are already configured in Supabase:
-- `SUPABASE_URL`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `STRIPE_SECRET_KEY`
-- `EMAIL_HOST`
-- `EMAIL_PORT`
-- `EMAIL_USER`
-- `EMAIL_PASSWORD`
-- `EMAIL_FROM`
+Frontend needs a `.env` file with:
 
-No additional `.env` file is needed for local development.
+```env
+VITE_API_URL=<AWS API Gateway URL>
+VITE_COGNITO_REGION=us-east-1
+VITE_COGNITO_USER_POOL_ID=<Cognito User Pool ID>
+VITE_COGNITO_CLIENT_ID=<Cognito App Client ID>
+VITE_STRIPE_PUBLISHABLE_KEY=<Stripe publishable key>
+```
+
+Backend secrets are stored in AWS Secrets Manager (`billtup-{env}-secrets`) and synced automatically via CI/CD. You do not need backend secrets for frontend-only development.
 
 ### 4. Start Development Server
 
 ```bash
-# Windows
-start-dev.bat
-
-# Mac/Linux
-./start-dev.sh
+npm run dev -- --host
 ```
 
 The application will open at `http://localhost:5173`
 
-## Project Structure
+## Project Structure (Website)
 
 ```
-billtup/
-├── components/          # React components
-│   ├── dashboard/      # Dashboard-specific components
-│   ├── website/        # Marketing website components
-│   ├── ui/             # Reusable UI components (shadcn/ui)
-│   └── mockups/        # Mobile app mockups
-├── supabase/
-│   └── functions/
-│       └── server/     # Backend API (Edge Functions)
-├── utils/              # Utility functions
-│   ├── api.tsx         # Legacy API client
-│   ├── dashboard-api.tsx # Dashboard API client
-│   ├── encryption.ts   # Encryption utilities
-│   └── supabase/       # Supabase client
-├── styles/             # Global styles
-└── docs/               # Documentation
+src/
+├── components/
+│   ├── dashboard/         # Dashboard UI (tabs, modals)
+│   ├── website/           # Marketing pages
+│   └── ui/                # Reusable UI (shadcn)
+├── utils/
+│   ├── dashboard-api.tsx  # Dashboard API client
+│   ├── auth/              # Cognito auth
+│   └── config.ts          # API config
+├── docs/                  # Documentation
+└── App.tsx                # Main app + routing
+```
+
+## Project Structure (App)
+
+```
+src/
+├── components/            # React components (screens + UI)
+├── hooks/                 # Custom hooks
+├── utils/                 # API client, auth, formatters
+├── tests/                 # Vitest tests (214 passing)
+└── docs/                  # Dev docs
+
+lambda/                    # Backend (AWS Lambda)
+├── src/
+│   ├── functions/         # 22 Lambda entry points
+│   ├── routes/            # 19 route modules
+│   ├── middleware/         # Auth, rate limiting
+│   └── utils/             # Logger, kv_store, cognito, storage
+├── template.yaml          # SAM CloudFormation template
+└── samconfig.toml         # Multi-env config
 ```
 
 ## Key Features
 
 ### 1. Authentication
-- Sign up with email/password
+- Sign up with email/password (AWS Cognito)
 - Stripe payment integration during signup
 - Password reset functionality
 - 14-day free trial for all new users
@@ -97,9 +109,9 @@ billtup/
 
 ### Making Changes
 
-1. **Frontend Changes**: Edit files in `/components` or `/App.tsx`
-2. **Backend Changes**: Edit files in `/supabase/functions/server/`
-3. **Styles**: Modify `/styles/globals.css` for global styles
+1. **Frontend Changes**: Edit components in `src/components/`, hot-reload via Vite
+2. **Backend Changes**: Edit files in `lambda/src/`, deploy via `sam deploy` or push to the `dev` branch (CI/CD handles deployment)
+3. **Tests**: Run `npx vitest run`
 
 ### Testing Your Changes
 
@@ -107,20 +119,18 @@ billtup/
 2. Check browser console for errors
 3. Test API endpoints via the dashboard
 
-### Deploying Backend Changes
+### Deploying
 
-```bash
-# Deploy to Supabase Edge Functions
-./deploy-backend.sh  # Mac/Linux
-deploy-backend.bat   # Windows
-```
+- **Frontend**: Push to `dev` branch; GitHub Actions deploys to dev environment automatically
+- **Backend**: Push to `dev` branch for CI/CD deployment, or deploy manually with `sam deploy`
+- **Promotion**: dev -> stg -> main via pull requests (never skip a stage)
 
 ## Common Tasks
 
 ### Create a New Component
 
 ```tsx
-// components/MyComponent.tsx
+// src/components/MyComponent.tsx
 export function MyComponent() {
   return (
     <div className="p-4">
@@ -132,11 +142,17 @@ export function MyComponent() {
 
 ### Add a New API Endpoint
 
-```tsx
-// supabase/functions/server/index.tsx
-app.get("/make-server-dce439b6/my-endpoint", async (c) => {
-  return c.json({ message: "Hello from my endpoint" });
+```typescript
+// lambda/src/routes/my-route.ts
+import { Router } from '../utils/router';
+
+const router = new Router();
+
+router.get('/my-endpoint', async (req) => {
+  return { message: 'Hello from my endpoint' };
 });
+
+export default router;
 ```
 
 ### Use Existing UI Components
@@ -160,15 +176,15 @@ function MyForm() {
 
 ### Development Server Won't Start
 
-1. Ensure Node.js 18+ is installed: `node --version`
+1. Ensure Node.js 22+ is installed: `node --version`
 2. Delete `node_modules` and reinstall: `rm -rf node_modules && npm install`
 3. Clear browser cache
 
 ### API Requests Failing
 
 1. Check browser console for detailed error messages
-2. Verify Supabase backend is deployed: `./deploy-backend.sh`
-3. Check Supabase Edge Functions logs in the Supabase dashboard
+2. Verify `.env` has the correct `VITE_API_URL` pointing to API Gateway
+3. Check CloudWatch logs for Lambda errors in the AWS Console
 
 ### Build Errors
 
@@ -191,4 +207,4 @@ function MyForm() {
 
 ---
 
-*Last Updated: November 21, 2025*
+*Last Updated: February 2026*

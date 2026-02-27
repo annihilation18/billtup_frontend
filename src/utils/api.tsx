@@ -314,6 +314,27 @@ export const analyticsApi = {
   }
 };
 
+// ==================== SAVED LINE ITEMS API ====================
+
+export const savedLineItemsApi = {
+  async list() {
+    return apiRequest('/line-items');
+  },
+
+  async save(item: { name: string; notes?: string; price?: number; quantity?: number }) {
+    return apiRequest('/line-items', {
+      method: 'POST',
+      body: JSON.stringify(item),
+    });
+  },
+
+  async delete(id: string) {
+    return apiRequest(`/line-items/${id}`, {
+      method: 'DELETE',
+    });
+  },
+};
+
 // ==================== USER DATA API (GDPR Compliance) ====================
 
 export const userDataApi = {

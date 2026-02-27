@@ -35,8 +35,8 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
             </h1>
 
             <p className="text-xl text-white/90 mb-8 max-w-xl" style={{ fontFamily: 'Inter, sans-serif' }}>
-              The mobile invoicing app for service businesses. Create professional invoices, 
-              optionally accept payments, and manage customers—all from your Android or iOS device.
+              The mobile invoicing app for service businesses. Create professional invoices and estimates,
+              accept payments via Stripe & Square, and manage customers—all from your Android or iOS device.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 mb-10">
@@ -78,37 +78,39 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                   <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl p-6">
                     {/* Mock app screen */}
                     <div className="mb-4 flex items-center justify-between">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6]" />
-                      <div className="flex gap-2">
-                        <div className="w-6 h-6 rounded-full bg-gray-300" />
-                        <div className="w-6 h-6 rounded-full bg-gray-300" />
-                      </div>
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6]" />
+                      <div className="text-xs text-gray-500" style={{ fontFamily: 'Poppins, sans-serif' }}>BilltUp</div>
                     </div>
-                    
-                    <div className="space-y-4">
+
+                    <div className="space-y-3">
+                      {/* Invoice card - Paid */}
                       <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <div className="flex justify-between items-center mb-2">
-                          <div className="h-4 bg-gray-200 rounded w-24" />
-                          <div className="h-6 bg-[#14B8A6] rounded w-20" />
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Sarah Mitchell</span>
+                          <span className="text-[10px] bg-[#14B8A6]/10 text-[#14B8A6] px-2 py-0.5 rounded-full font-medium">Paid</span>
                         </div>
-                        <div className="h-8 bg-[#1E3A8A] rounded w-32" style={{ fontFamily: 'Roboto Mono, monospace' }} />
+                        <div className="text-lg text-[#1E3A8A]" style={{ fontFamily: 'Roboto Mono, monospace' }}>$1,250.00</div>
+                        <div className="text-[10px] text-gray-400 mt-1">INV-0042 &middot; Feb 20, 2026</div>
                       </div>
-                      
+
+                      {/* Invoice card - Pending */}
                       <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <div className="space-y-2">
-                          <div className="h-3 bg-gray-200 rounded w-full" />
-                          <div className="h-3 bg-gray-200 rounded w-3/4" />
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>James Cooper</span>
+                          <span className="text-[10px] bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-0.5 rounded-full font-medium">Pending</span>
                         </div>
+                        <div className="text-lg text-[#1E3A8A]" style={{ fontFamily: 'Roboto Mono, monospace' }}>$840.00</div>
+                        <div className="text-[10px] text-gray-400 mt-1">INV-0043 &middot; Feb 22, 2026</div>
                       </div>
-                      
-                      <div className="bg-white rounded-xl p-4 shadow-sm">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6]" />
-                          <div className="flex-1 space-y-2">
-                            <div className="h-3 bg-gray-200 rounded w-2/3" />
-                            <div className="h-3 bg-gray-200 rounded w-1/2" />
-                          </div>
+
+                      {/* Invoice card - Overdue */}
+                      <div className="bg-white rounded-xl p-4 shadow-sm border-l-2 border-red-400">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-xs text-gray-500" style={{ fontFamily: 'Inter, sans-serif' }}>Apex Renovations</span>
+                          <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-full font-medium">Overdue</span>
                         </div>
+                        <div className="text-lg text-[#1E3A8A]" style={{ fontFamily: 'Roboto Mono, monospace' }}>$3,200.00</div>
+                        <div className="text-[10px] text-gray-400 mt-1">INV-0038 &middot; Due Jan 15</div>
                       </div>
                     </div>
                   </div>
@@ -146,10 +148,10 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
         {/* Stats Bar */}
         <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { value: '10K+', label: 'Active Users' },
-            { value: '$5M+', label: 'Processed' },
-            { value: '99.9%', label: 'Uptime' },
-            { value: '4.9★', label: 'Rating' },
+            { value: '15+', label: 'Invoice Templates' },
+            { value: 'Stripe & Square', label: 'Payment Processing' },
+            { value: 'Offline Ready', label: 'Works Anywhere' },
+            { value: 'iOS & Android', label: 'Native Apps' },
           ].map((stat, index) => (
             <div key={index} className="text-center text-white">
               <div className="text-3xl mb-2" style={{ fontFamily: 'Roboto Mono, monospace' }}>

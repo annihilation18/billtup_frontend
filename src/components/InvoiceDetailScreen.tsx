@@ -172,6 +172,7 @@ export function InvoiceDetailScreen({
               >
                 <div className="flex-1">
                   <p className="font-medium">{item.name}</p>
+                  {item.notes && <p className="text-xs text-muted-foreground mt-0.5">{item.notes}</p>}
                   <p className="text-sm text-muted-foreground">
                     Qty: {item.quantity} × ${item.price.toFixed(2)}
                   </p>

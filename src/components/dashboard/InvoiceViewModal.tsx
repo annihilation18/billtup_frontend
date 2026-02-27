@@ -1,14 +1,11 @@
-import { useState } from 'react';
-import { CheckCircle2, Clock, XCircle, Send, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CheckCircle2, Clock, XCircle, Send, Loader2, X, ImageIcon } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { DeleteInvoiceModal } from './DeleteInvoiceModal';
-import { EditInvoiceModal } from './EditInvoiceModal';
-import { TakePaymentModal } from './TakePaymentModal';
-import { RefundModal } from './RefundModal';
+import { fetchBusinessProfile, getInvoicePhotos } from '../../utils/dashboard-api';
 
 interface InvoiceViewModalProps {
   invoice: any;
@@ -17,16 +14,23 @@ interface InvoiceViewModalProps {
   onUpdate?: () => void;
 }
 
-export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: InvoiceViewModalProps) {
+export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewModalProps) {
   const [customerEmail, setCustomerEmail] = useState(invoice?.customerEmail || '');
   const [isSending, setIsSending] = useState(false);
+  const [photos, setPhotos] = useState<Array<{ id: string; url: string; filename: string; uploadedAt: string }>>([]);
+  const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
 
-  const handleActionComplete = () => {
-    if (onUpdate) {
-      onUpdate();
+  // Load photos when modal opens
+  useEffect(() => {
+    if (open && invoice?.id) {
+      setIsLoadingPhotos(true);
+      getInvoicePhotos(invoice.id)
+        .then((result) => setPhotos(result.photos || []))
+        .catch((error) => console.error('Error loading photos:', error))
+        .finally(() => setIsLoadingPhotos(false));
     }
-    onClose();
-  };
+  }, [open, invoice?.id]);
 
   const handleSendEmail = async () => {
     if (!customerEmail) {
@@ -39,6 +43,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
       const { API_CONFIG } = await import('../../utils/config');
       const { getIdToken } = await import('../../utils/auth/cognito');
       const token = await getIdToken();
+      const businessData = await fetchBusinessProfile() || {};
       const response = await fetch(
         `${API_CONFIG.baseUrl}/invoices/send-email`,
         {
@@ -50,7 +55,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
           body: JSON.stringify({
             invoiceData: invoice,
             customerEmail,
-            businessData: {}, // Optional business data can be added
+            businessData,
           }),
         }
       );
@@ -60,7 +65,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
       }
 
       toast.success('Invoice sent successfully!');
-      handleActionComplete();
     } catch (error) {
       console.error('Error sending invoice email:', error);
       toast.error('Failed to send invoice. Please try again.');
@@ -79,7 +83,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
     rate: item.price,
     amount: item.quantity * item.price
   })) || [];
-  const hasItems = invoiceItems.length > 0;
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -109,11 +112,11 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle style={{ fontFamily: 'Poppins, sans-serif' }}>Invoice Details</DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
-            View invoice information and send it to the customer via email.
+            View invoice details and send to customer via email.
           </DialogDescription>
         </DialogHeader>
 
@@ -197,6 +200,58 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
             </span>
           </div>
 
+          {/* Photos Section */}
+          <div className="border-t border-gray-200 pt-4">
+            <h4 className="text-sm text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
+
+            {isLoadingPhotos ? (
+              <div className="flex justify-center py-6">
+                <Loader2 className="w-5 h-5 animate-spin text-gray-400" />
+              </div>
+            ) : photos.length === 0 ? (
+              <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500 text-sm">
+                <ImageIcon className="w-6 h-6 mx-auto mb-1 opacity-40" />
+                No photos attached
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-3">
+                  {photos.map((photo) => (
+                    <img
+                      key={photo.id}
+                      src={photo.url}
+                      alt={photo.filename}
+                      className="w-full h-28 object-cover rounded-lg cursor-pointer border border-gray-200 hover:border-gray-400 transition-colors"
+                      onClick={() => setPhotoPreview(photo.url)}
+                    />
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2">{photos.length}/4 photos</p>
+              </>
+            )}
+          </div>
+
+          {/* Photo Lightbox */}
+          {photoPreview && (
+            <div
+              className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4"
+              onClick={() => setPhotoPreview(null)}
+            >
+              <button
+                className="absolute top-4 right-4 text-white bg-black/50 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70"
+                onClick={() => setPhotoPreview(null)}
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <img
+                src={photoPreview}
+                alt="Photo preview"
+                className="max-w-full max-h-[85vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          )}
+
           {/* Email Section */}
           <div className="bg-gray-50 rounded-lg p-4 space-y-4">
             <h4 className="text-sm text-gray-900">Send Invoice via Email</h4>
@@ -230,17 +285,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose, onUpdate }: In
             </Button>
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-between items-center mt-4">
-            <div className="space-x-2">
-              <EditInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-              <DeleteInvoiceModal invoice={invoice} onUpdate={onUpdate} />
-            </div>
-            <div className="space-x-2">
-              <TakePaymentModal invoice={invoice} onUpdate={onUpdate} />
-              <RefundModal invoice={invoice} onUpdate={onUpdate} />
-            </div>
-          </div>
         </div>
       </DialogContent>
     </Dialog>

@@ -61,5 +61,5 @@ jobs:
           if [ -n "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
             curl -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
               -H 'Content-type: application/json' \
-              -d '{"text":"Frontend deploy (${{ env.ENVIRONMENT }}) failed for ${{ github.sha }}"}'
+              -d '{"text":"[Frontend] Deploy (${{ env.ENVIRONMENT }}) failed for ${{ github.sha }}"}'
           fi

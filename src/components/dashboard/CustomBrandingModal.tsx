@@ -62,6 +62,7 @@ export function CustomBrandingModal({
   const [invoiceTemplate, setInvoiceTemplate] = useState<string>('modern');
   const [customLogo, setCustomLogo] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
+  const [logoRemoved, setLogoRemoved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [showTemplateBrowser, setShowTemplateBrowser] = useState(false);
@@ -75,6 +76,7 @@ export function CustomBrandingModal({
       setInvoiceTemplate(businessProfile.invoiceTemplate || 'modern');
       setCustomLogo(businessProfile.customLogo || businessProfile.logo || '');
       setLogoPreview(businessProfile.customLogo || businessProfile.logo || '');
+      setLogoRemoved(false);
     }
   }, [businessProfile, open]);
 
@@ -101,6 +103,7 @@ export function CustomBrandingModal({
         const dataUrl = reader.result as string;
         setCustomLogo(dataUrl);
         setLogoPreview(dataUrl);
+        setLogoRemoved(false);
         toast.success('Logo uploaded successfully!');
       };
       reader.readAsDataURL(file);
@@ -115,6 +118,7 @@ export function CustomBrandingModal({
   const handleRemoveLogo = () => {
     setCustomLogo('');
     setLogoPreview('');
+    setLogoRemoved(true);
     toast.success('Logo removed');
   };
 
@@ -135,6 +139,7 @@ export function CustomBrandingModal({
 
       // If logo is a base64 data URL, upload to S3 first
       let logoUrl = customLogo;
+      let logoPath = businessProfile?.logoPath;
       if (customLogo && customLogo.startsWith('data:')) {
         const logoResponse = await fetch(
           `${API_CONFIG.baseUrl}/business/logo`,
@@ -155,6 +160,23 @@ export function CustomBrandingModal({
 
         const logoResult = await logoResponse.json();
         logoUrl = logoResult.logoUrl;
+        logoPath = logoResult.path;
+      }
+
+      // Build the update payload - include logoPath so the backend can
+      // regenerate a fresh presigned URL on subsequent GET /business calls
+      const updatePayload: Record<string, any> = {
+        brandColor,
+        accentColor,
+        invoiceTemplate,
+        customLogo: logoUrl,
+      };
+      if (logoRemoved) {
+        // User explicitly removed the logo - clear both fields
+        updatePayload.customLogo = '';
+        updatePayload.logoPath = '';
+      } else if (logoPath) {
+        updatePayload.logoPath = logoPath;
       }
 
       const response = await fetch(
@@ -165,12 +187,7 @@ export function CustomBrandingModal({
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            brandColor,
-            accentColor,
-            invoiceTemplate,
-            customLogo: logoUrl,
-          }),
+          body: JSON.stringify(updatePayload),
         }
       );
 

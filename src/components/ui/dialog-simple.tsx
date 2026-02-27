@@ -34,7 +34,7 @@ function DialogTrigger({ children, asChild, ...props }: any) {
 
 function DialogContent({ className, children, ...props }: any) {
   const { open, onOpenChange } = React.useContext(DialogContext);
-  
+
   React.useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") onOpenChange?.(false);
@@ -48,18 +48,21 @@ function DialogContent({ className, children, ...props }: any) {
       document.body.style.overflow = "unset";
     };
   }, [open, onOpenChange]);
-  
+
   if (!open) return null;
-  
+
+  const hasMaxWidth = typeof className === 'string' && /max-w-/.test(className);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div 
+      <div
         className="fixed inset-0 bg-black/50"
         onClick={() => onOpenChange?.(false)}
       />
       <div
         className={cn(
-          "relative bg-white rounded-lg border shadow-lg p-6 w-full max-w-lg mx-4 z-50",
+          "relative bg-white rounded-lg border shadow-lg p-6 w-full mx-4 z-50 max-h-[90vh] overflow-y-auto",
+          !hasMaxWidth && "max-w-lg",
           className
         )}
         {...props}

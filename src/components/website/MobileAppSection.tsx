@@ -62,9 +62,9 @@ export function MobileAppSection() {
               <ul className="mt-8 grid grid-cols-2 gap-4" role="list" aria-label="Mobile app features">
                 {[
                   'Offline Mode',
-                  'Push Notifications',
-                  'Quick Actions',
-                  'Secure & Fast'
+                  'Estimates & Invoices',
+                  'Payment Links',
+                  'Biometric Security'
                 ].map((feature, index) => (
                   <li key={index} className="flex items-center gap-2">
                     <Download className="w-4 h-4 text-[#F59E0B]" aria-hidden="true" />

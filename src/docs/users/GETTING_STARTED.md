@@ -383,5 +383,5 @@ When contacting support, include:
 
 ---
 
-*Last Updated: November 21, 2025*  
+*Last Updated: February 2026*
 *Questions? Email support@billtup.com*

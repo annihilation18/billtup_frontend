@@ -87,6 +87,11 @@ export function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
         }
       }
       
+      // Auto-set contactEmail from business email for notifications
+      if (!finalBusinessData.contactEmail && finalBusinessData.email) {
+        finalBusinessData.contactEmail = finalBusinessData.email;
+      }
+
       onComplete(finalBusinessData);
     }
   };

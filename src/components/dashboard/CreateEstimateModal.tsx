@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,15 +10,14 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Textarea } from '../ui/textarea';
-import { 
-  Loader2, 
-  FileText, 
-  Plus, 
+import {
+  Loader2,
+  ClipboardList,
+  Plus,
   Trash2,
-  X
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
-import { createInvoice, fetchCustomers, fetchInvoices } from '../../utils/dashboard-api';
+import { createEstimate, fetchCustomers, fetchEstimates } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
@@ -28,40 +27,35 @@ interface LineItem {
   amount: number;
 }
 
-interface CreateInvoiceModalProps {
+interface CreateEstimateModalProps {
   open?: boolean;
   onClose: () => void;
   onCreated: () => void;
 }
 
-export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateInvoiceModalProps) {
+export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateEstimateModalProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [customers, setCustomers] = useState<any[]>([]);
   const [selectedCustomerId, setSelectedCustomerId] = useState('');
-  const [invoiceNumber, setInvoiceNumber] = useState('');
+  const [estimateNumber, setEstimateNumber] = useState('');
   const [date, setDate] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [validUntil, setValidUntil] = useState('');
   const [notes, setNotes] = useState('');
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
-  const [signature, setSignature] = useState('');
-  const [isDrawing, setIsDrawing] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [showSignature, setShowSignature] = useState(false);
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [activeAutocomplete, setActiveAutocomplete] = useState<number | null>(null);
 
   useEffect(() => {
     if (open) {
       loadCustomers();
-      loadNextInvoiceNumber();
+      loadNextEstimateNumber();
       savedLineItemsApi.list().then((items: any[]) => setSavedItems(items || [])).catch(() => {});
-      // Set date to today and due date to 30 days from now by default
       const today = new Date().toISOString().split('T')[0];
       const in30Days = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
       setDate(today);
-      setDueDate(in30Days);
+      setValidUntil(in30Days);
     }
   }, [open]);
 
@@ -74,30 +68,27 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
     }
   };
 
-  const loadNextInvoiceNumber = async () => {
+  const loadNextEstimateNumber = async () => {
     try {
-      const invoices = await fetchInvoices();
-      const existing = Array.isArray(invoices) ? invoices : [];
+      const estimates = await fetchEstimates();
+      const existing = Array.isArray(estimates) ? estimates : [];
       let maxNum = 0;
-      for (const inv of existing) {
-        const match = String(inv.number || '').match(/^INV-(\d+)$/);
+      for (const est of existing) {
+        const match = String(est.number || '').match(/^EST-(\d+)$/);
         if (match) maxNum = Math.max(maxNum, parseInt(match[1], 10));
       }
-      setInvoiceNumber(`INV-${String(maxNum + 1).padStart(3, '0')}`);
+      setEstimateNumber(`EST-${String(maxNum + 1).padStart(3, '0')}`);
     } catch {
-      setInvoiceNumber(`INV-${String(1).padStart(3, '0')}`);
+      setEstimateNumber(`EST-${String(1).padStart(3, '0')}`);
     }
   };
 
   const handleLineItemChange = (index: number, field: keyof LineItem, value: string | number) => {
     const newItems = [...lineItems];
     newItems[index] = { ...newItems[index], [field]: value };
-    
-    // Calculate amount
     if (field === 'quantity' || field === 'rate') {
       newItems[index].amount = newItems[index].quantity * newItems[index].rate;
     }
-    
     setLineItems(newItems);
   };
 
@@ -137,53 +128,6 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
     setActiveAutocomplete(null);
   };
 
-  // Canvas drawing functions
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDrawing(true);
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.beginPath();
-    ctx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
-  };
-
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing) return;
-    
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const rect = canvas.getBoundingClientRect();
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctx.stroke();
-  };
-
-  const stopDrawing = () => {
-    setIsDrawing(false);
-    const canvas = canvasRef.current;
-    if (canvas) {
-      setSignature(canvas.toDataURL());
-    }
-  };
-
-  const clearSignature = () => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    setSignature('');
-  };
-
   const handleCreate = async () => {
     if (!selectedCustomerId) {
       toast.error('Please select a customer');
@@ -198,19 +142,18 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
     setIsCreating(true);
     try {
       const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
-      
-      await createInvoice({
-        number: invoiceNumber,
+
+      await createEstimate({
+        number: estimateNumber,
         customerId: selectedCustomerId,
         customer: selectedCustomer?.name || '',
         customerEmail: selectedCustomer?.email || '',
         items: lineItems,
         total: calculateTotal(),
-        status: 'pending',
+        status: 'draft',
         date: date || new Date().toISOString(),
-        dueDate: dueDate || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        validUntil: validUntil || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         notes: notes,
-        signature: signature || undefined,
         createdAt: new Date().toISOString(),
       });
 
@@ -225,13 +168,13 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
           }).catch(() => {}))
       );
 
-      toast.success('Invoice created successfully!');
+      toast.success('Estimate created successfully!');
       onCreated();
       onClose();
       resetForm();
     } catch (error) {
-      console.error('Error creating invoice:', error);
-      toast.error('Failed to create invoice. Please try again.');
+      console.error('Error creating estimate:', error);
+      toast.error('Failed to create estimate. Please try again.');
     } finally {
       setIsCreating(false);
     }
@@ -239,13 +182,11 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
 
   const resetForm = () => {
     setSelectedCustomerId('');
-    setInvoiceNumber('');
+    setEstimateNumber('');
     setDate('');
-    setDueDate('');
+    setValidUntil('');
     setNotes('');
     setLineItems([{ description: '', quantity: 1, rate: 0, amount: 0 }]);
-    setSignature('');
-    setShowSignature(false);
   };
 
   return (
@@ -253,23 +194,23 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#1E3A8A]" />
-            <span style={{ fontFamily: 'Poppins, sans-serif' }}>Create New Invoice</span>
+            <ClipboardList className="w-5 h-5 text-[#1E3A8A]" />
+            <span style={{ fontFamily: 'Poppins, sans-serif' }}>Create New Estimate</span>
           </DialogTitle>
           <DialogDescription className="text-sm text-gray-500">
-            Create a new invoice for a customer with line items and optional notes and signature.
+            Create a new estimate to send to a customer for approval.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Invoice Details */}
+          {/* Estimate Details */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="invoiceNumber">Invoice Number</Label>
+              <Label htmlFor="estimateNumber">Estimate Number</Label>
               <Input
-                id="invoiceNumber"
-                value={invoiceNumber}
-                onChange={(e) => setInvoiceNumber(e.target.value)}
+                id="estimateNumber"
+                value={estimateNumber}
+                onChange={(e) => setEstimateNumber(e.target.value)}
                 className="border-gray-300"
               />
             </div>
@@ -305,12 +246,12 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="dueDate">Due Date</Label>
+              <Label htmlFor="validUntil">Valid Until</Label>
               <Input
-                id="dueDate"
+                id="validUntil"
                 type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                value={validUntil}
+                onChange={(e) => setValidUntil(e.target.value)}
                 className="border-gray-300"
               />
             </div>
@@ -335,24 +276,17 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
             <div className="space-y-3">
               {lineItems.map((item, index) => (
                 <div key={index} className="space-y-1">
-                  {/* Column Headers - only show for first item */}
                   {index === 0 && (
                     <div className="grid grid-cols-12 gap-2 items-start px-3">
-                      <div className="col-span-12 sm:col-span-5">
-                        {/* Empty space for description, no label needed */}
-                      </div>
+                      <div className="col-span-12 sm:col-span-5" />
                       <div className="col-span-4 sm:col-span-2">
                         <Label className="text-xs text-gray-500">Quantity</Label>
                       </div>
                       <div className="col-span-4 sm:col-span-2">
                         <Label className="text-xs text-gray-500">Price</Label>
                       </div>
-                      <div className="col-span-4 sm:col-span-2">
-                        {/* Empty space for amount */}
-                      </div>
-                      <div className="col-span-12 sm:col-span-1">
-                        {/* Empty space for delete button */}
-                      </div>
+                      <div className="col-span-4 sm:col-span-2" />
+                      <div className="col-span-12 sm:col-span-1" />
                     </div>
                   )}
 
@@ -441,7 +375,7 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
             <div className="flex justify-end">
               <div className="bg-[#1E3A8A]/5 px-4 py-2 rounded-lg">
                 <div className="flex items-center gap-4">
-                  <span className="text-gray-700">Total:</span>
+                  <span className="text-gray-700">Estimated Total:</span>
                   <span className="text-xl text-[#1E3A8A]" style={{ fontFamily: 'Roboto Mono, monospace' }}>
                     ${calculateTotal().toFixed(2)}
                   </span>
@@ -452,58 +386,14 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
 
           {/* Notes */}
           <div className="space-y-2">
-            <Label htmlFor="notes">Notes (Optional)</Label>
+            <Label htmlFor="notes">Notes / Terms (Optional)</Label>
             <Textarea
               id="notes"
-              placeholder="Add any additional notes or payment terms..."
+              placeholder="Add any terms, conditions, or additional notes..."
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               className="border-gray-300 min-h-[80px]"
             />
-          </div>
-
-          {/* Signature */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Signature (Optional)</Label>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowSignature(!showSignature)}
-                className="h-8"
-              >
-                {showSignature ? 'Hide' : 'Add'} Signature
-              </Button>
-            </div>
-
-            {showSignature && (
-              <div className="space-y-2">
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-white">
-                  <canvas
-                    ref={canvasRef}
-                    width={600}
-                    height={200}
-                    onMouseDown={startDrawing}
-                    onMouseMove={draw}
-                    onMouseUp={stopDrawing}
-                    onMouseLeave={stopDrawing}
-                    className="w-full border border-gray-200 rounded cursor-crosshair bg-white"
-                    style={{ touchAction: 'none' }}
-                  />
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={clearSignature}
-                  className="w-full"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Clear Signature
-                </Button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -527,7 +417,7 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
                 Creating...
               </>
             ) : (
-              'Create Invoice'
+              'Create Estimate'
             )}
           </Button>
         </div>

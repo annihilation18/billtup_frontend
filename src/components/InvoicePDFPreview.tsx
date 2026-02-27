@@ -135,7 +135,10 @@ export function InvoicePDFPreview({
                   {invoiceData.lineItems && invoiceData.lineItems.length > 0 ? (
                     invoiceData.lineItems.map((item, index) => (
                       <tr key={item.id || index} className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}>
-                        <td className="p-3 text-sm border-t">{item.name || 'Unnamed Item'}</td>
+                        <td className="p-3 text-sm border-t">
+                          <div>{item.name || 'Unnamed Item'}</div>
+                          {item.notes && <div className="text-xs text-gray-500 mt-0.5">{item.notes}</div>}
+                        </td>
                         <td className="p-3 text-sm text-center font-mono border-t">{item.quantity || 0}</td>
                         <td className="p-3 text-sm text-right font-mono border-t">${(item.price || 0).toFixed(2)}</td>
                         <td className="p-3 text-sm text-right font-mono border-t">${((item.quantity || 0) * (item.price || 0)).toFixed(2)}</td>
