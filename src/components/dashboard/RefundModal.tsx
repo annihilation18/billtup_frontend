@@ -1,4 +1,9 @@
+import { useState } from 'react';
 import { RefreshCcw, Loader2, AlertTriangle } from 'lucide-react@0.468.0';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from '../ui/dialog-simple';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
 import { updateInvoice } from '../../utils/dashboard-api';
 

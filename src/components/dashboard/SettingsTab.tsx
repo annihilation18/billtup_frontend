@@ -1,25 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { 
-  User, 
-  Building2, 
-  Mail, 
-  TrendingUp, 
-  CreditCard, 
+import {
+  User,
+  Building2,
+  TrendingUp,
+  CreditCard,
   Settings2,
   ChevronRight,
   Loader2,
-  Palette
+  HelpCircle,
+  ExternalLink,
+  Bell
 } from 'lucide-react@0.468.0';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
 import { AccountSettingsModal } from './AccountSettingsModal';
 import { BusinessProfileModal } from './BusinessProfileModal';
-import { CommunicationModal } from './CommunicationModal';
+// CommunicationModal deferred for post-launch (L4.3)
 import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
 import { PreferencesModal } from './PreferencesModal';
-import { CustomBrandingModal } from './CustomBrandingModal';
+import { EmailNotificationsModal } from './EmailNotificationsModal';
 
 interface SettingsTabProps {
   userPlan: 'basic' | 'premium';
@@ -74,21 +76,13 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       bgColor: 'bg-indigo-100',
     },
     {
-      id: 'communication',
-      icon: Mail,
-      title: 'Communication',
-      subtitle: 'Email configuration & notifications',
-      color: 'text-cyan-600',
-      bgColor: 'bg-cyan-100',
-    },
-    {
       id: 'analytics',
       icon: TrendingUp,
       title: 'Customer Analytics',
       subtitle: 'Lifetime value & insights',
       color: 'text-green-600',
       bgColor: 'bg-green-100',
-      premiumOnly: true,
+      premium: true,
     },
     {
       id: 'payment',
@@ -99,21 +93,28 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       bgColor: 'bg-purple-100',
     },
     {
+      id: 'notifications',
+      icon: Bell,
+      title: 'Email Notifications',
+      subtitle: 'Choose which emails you receive',
+      color: 'text-amber-600',
+      bgColor: 'bg-amber-100',
+    },
+    {
       id: 'preferences',
       icon: Settings2,
       title: 'Preferences',
-      subtitle: 'Security & notification preferences',
+      subtitle: 'Security settings',
       color: 'text-gray-600',
       bgColor: 'bg-gray-100',
     },
     {
-      id: 'branding',
-      icon: Palette,
-      title: 'Custom Branding',
-      subtitle: 'Logo & color scheme',
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
-      premiumOnly: true,
+      id: 'help',
+      icon: HelpCircle,
+      title: 'Help & Support',
+      subtitle: 'Contact support & documentation',
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-100',
     },
   ];
 
@@ -152,29 +153,24 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       {/* Settings Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {settingsCards.map((card) => {
-          const isLocked = card.premiumOnly && !isPremium;
           return (
             <Card
               key={card.id}
-              onClick={() => !isLocked && setActiveModal(card.id)}
-              className={`p-6 border-gray-200 hover:shadow-md transition-all ${
-                isLocked ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-[#1E3A8A]'
-              }`}
+              onClick={() => setActiveModal(card.id)}
+              className="p-6 border-gray-200 hover:shadow-md transition-all cursor-pointer hover:border-[#1E3A8A]"
             >
               <div className="flex items-start justify-between mb-4">
                 <div className={`w-12 h-12 rounded-lg ${card.bgColor} flex items-center justify-center`}>
                   <card.icon className={`w-6 h-6 ${card.color}`} />
                 </div>
-                {!isLocked && (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                )}
+                <ChevronRight className="w-5 h-5 text-gray-400" />
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
                     {card.title}
                   </h3>
-                  {card.premiumOnly && (
+                  {card.premium && (
                     <span className="px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#D97706] text-white text-xs rounded-full">
                       Premium
                     </span>
@@ -218,12 +214,7 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         onClose={() => setActiveModal(null)}
         businessProfile={businessProfile}
         onDataUpdated={loadData}
-      />
-      <CommunicationModal
-        open={activeModal === 'communication'}
-        onClose={() => setActiveModal(null)}
-        businessProfile={businessProfile}
-        onDataUpdated={loadData}
+        userPlan={userPlan}
       />
       <CustomerAnalyticsModal
         open={activeModal === 'analytics'}
@@ -235,19 +226,67 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         onClose={() => setActiveModal(null)}
         onDataUpdated={loadData}
       />
+      <EmailNotificationsModal
+        open={activeModal === 'notifications'}
+        onClose={() => setActiveModal(null)}
+        userProfile={userProfile}
+        onDataUpdated={loadData}
+      />
       <PreferencesModal
         open={activeModal === 'preferences'}
         onClose={() => setActiveModal(null)}
         userProfile={userProfile}
         onDataUpdated={loadData}
       />
-      <CustomBrandingModal
-        open={activeModal === 'branding'}
-        onClose={() => setActiveModal(null)}
-        businessProfile={businessProfile}
-        onDataUpdated={loadData}
-        userPlan={userPlan}
-      />
+      <Dialog open={activeModal === 'help'} onOpenChange={() => setActiveModal(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <HelpCircle className="w-5 h-5 text-[#1E3A8A]" />
+              <span style={{ fontFamily: 'Poppins, sans-serif' }}>Help & Support</span>
+            </DialogTitle>
+            <DialogDescription>
+              Get help with your BilltUp account
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Contact Support</h4>
+              <p className="text-sm text-gray-600">
+                Email us at{' '}
+                <a href="mailto:support@billtup.com" className="text-[#1E3A8A] hover:underline font-medium">
+                  support@billtup.com
+                </a>
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-1">Help Center</h4>
+              <p className="text-sm text-gray-600 mb-3">
+                Browse documentation, FAQs, and guides.
+              </p>
+              <a
+                href="/help"
+                className="inline-flex items-center gap-1.5 text-sm text-[#1E3A8A] hover:underline font-medium"
+              >
+                Visit Help Center
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
+            <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-900 mb-2">App Information</h4>
+              <div className="text-sm text-gray-600 space-y-1">
+                <p>Version: 1.0.0</p>
+                <p>Plan: <span className="font-medium capitalize">{userPlan}</span></p>
+              </div>
+            </div>
+          </div>
+          <div className="pt-2 border-t">
+            <Button variant="outline" onClick={() => setActiveModal(null)} className="w-full">
+              Close
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

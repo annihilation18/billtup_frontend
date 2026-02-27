@@ -2,7 +2,6 @@ import {
   FileText,
   CreditCard,
   Users,
-  TrendingUp,
   Mail,
   Shield,
   Smartphone,
@@ -45,9 +44,9 @@ export function FeatureHighlights({ onNavigate }: FeatureHighlightsProps) {
       color: 'from-[#14B8A6] to-[#1E3A8A]'
     },
     {
-      icon: TrendingUp,
-      title: 'Business Analytics',
-      description: 'Monitor revenue, track trends, and get insights to grow your business (Premium feature).',
+      icon: FileText,
+      title: 'Estimates & Quotes',
+      description: 'Send professional estimates to customers. They approve or decline via email, and approved estimates convert to invoices instantly.',
       color: 'from-[#F59E0B] to-[#14B8A6]'
     },
     {

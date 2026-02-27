@@ -1,353 +1,323 @@
-# Production Deployment Guide
+# Deployment Guide
 
-Complete guide for deploying BilltUp to production securely and at scale.
+Complete guide for deploying BilltUp across all environments.
 
-## Quick Start
-
-**Recommended Stack:**
-- Frontend: Vercel (Free tier)
-- Backend: Supabase (Already deployed)
-- Payments: Stripe
-- Email: Resend/Nodemailer
-
-**Total cost to start:** $0/month (free tiers)
-
----
-
-## Deployment Architecture
+## Architecture Diagram
 
 ```
-User's Device
-     ↓
-Vercel CDN (Frontend)
-  - React App
-  - Static Assets
-     ↓
-Supabase (Backend - Already Deployed)
-  - Edge Functions API
-  - PostgreSQL Database
-  - File Storage
-     ↓
+User's Browser
+     |
+     v
+Route 53 DNS (billtup.com, *.billtup.com)
+     |
+     v
+CloudFront CDN (per environment)
+  - SSL termination (ACM cert: billtup.com + *.billtup.com)
+  - Edge caching
+  - index.html: no-cache
+  - Assets: immutable, 1-year max-age
+     |
+     v
+S3 Bucket (static site hosting)
+  - billtup-frontend-dev
+  - billtup-frontend-stg
+  - billtup-frontend-prod
+     |
+     v (API calls)
+API Gateway HTTP API v2 (per environment)
+     |
+     v
+AWS Lambda Functions (SAM/CloudFormation)
+  - Auth (Cognito)
+  - Invoices, Clients, Payments, etc.
+     |
+     v
+DynamoDB Tables + S3 (file storage) + Secrets Manager
+     |
+     v
 External Services
   - Stripe (Payments)
-  - Resend (Emails)
+  - Cognito (Authentication)
+  - SES / Email provider
 ```
 
 ---
 
-## Step 1: Frontend Deployment (Vercel)
+## Environments
 
-### Prerequisites
-- GitHub account
-- Vercel account (free)
-- Domain name (optional)
+| Environment | Branch | Domain | S3 Bucket | CloudFront ID |
+|-------------|--------|--------|-----------|---------------|
+| dev | `dev` | dev.billtup.com | billtup-frontend-dev | `E3IBYP7ZOWQE4R` |
+| stg | `stg` | stg.billtup.com | billtup-frontend-stg | `EY7GQL9GE8S9I` |
+| prod | `main` | billtup.com, www.billtup.com | billtup-frontend-prod | `E3UO9LEXKR9373` |
 
-### Deploy Steps
-
-1. **Push to GitHub**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial deployment"
-   git remote add origin https://github.com/yourusername/billtup.git
-   git push -u origin main
-   ```
-
-2. **Deploy to Vercel**
-   - Go to https://vercel.com
-   - Click "New Project"
-   - Import your GitHub repository
-   - Configure:
-     - Framework: Vite (auto-detected)
-     - Build Command: `npm run build`
-     - Output Directory: `dist`
-   
-3. **Add Environment Variables**
-   - `VITE_STRIPE_PUBLISHABLE_KEY` = your Stripe publishable key
-
-4. **Deploy!**
-   - Click "Deploy"
-   - Wait 2-3 minutes
-   - Your app is live!
-
-### Custom Domain (Optional)
-
-1. In Vercel Dashboard → Settings → Domains
-2. Add your domain (e.g., `app.billtup.com`)
-3. Update DNS records as instructed
-4. SSL is automatic!
+**Branch promotion flow:** `dev` -> `stg` -> `main` (via pull requests, never skip a stage).
 
 ---
 
-## Step 2: Security Configuration
+## Frontend Deployment
 
-### Add Security Headers
+### How It Works
 
-Create or update `/vercel.json`:
+The frontend is a Vite + React app. On every push to `dev`, `stg`, or `main`, a GitHub Actions workflow:
 
-```json
-{
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        },
-        {
-          "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
-        },
-        {
-          "key": "Strict-Transport-Security",
-          "value": "max-age=31536000; includeSubDomains"
-        }
-      ]
-    }
-  ]
-}
-```
+1. Checks out the code
+2. Runs `npm ci` and `npm run build` (with environment-specific `VITE_*` variables)
+3. Assumes an AWS IAM role via GitHub OIDC federation
+4. Syncs the `build/` output to the correct S3 bucket (`aws s3 sync --delete`)
+5. Invalidates the CloudFront distribution so users get the latest version
 
-### Configure Supabase Auth
+### Build Modes
 
-1. Go to Supabase Dashboard → Authentication → Settings
-2. Enable:
-   - Secure email change
-   - Refresh token rotation
-3. Set JWT expiration to 3600 (1 hour)
+| Branch | Build Command | Mode |
+|--------|---------------|------|
+| `dev` | `npm run build:dev` | development |
+| `stg` | `npm run build:stg` | staging |
+| `main` | `npm run build` | production |
+
+### Environment Variables (set as GitHub environment secrets)
+
+- `VITE_API_URL` -- Backend API base URL for the environment
+- `VITE_COGNITO_REGION` -- AWS region for Cognito
+- `VITE_COGNITO_USER_POOL_ID` -- Cognito user pool ID
+- `VITE_COGNITO_CLIENT_ID` -- Cognito app client ID
+- `AWS_ROLE_ARN` -- IAM role ARN for deploying (OIDC)
+- `CLOUDFRONT_DISTRIBUTION_ID` -- CloudFront distribution to invalidate
+
+### Caching Strategy
+
+- **`index.html`**: `Cache-Control: no-cache, no-store, must-revalidate` (always fetches latest)
+- **All other assets**: `Cache-Control: max-age=31536000, immutable` (Vite hashes filenames, so new deploys get new URLs)
+
+### DNS
+
+- **Route 53 Hosted Zone:** `Z04318478OZHA8Z5EIOY`
+- A ALIAS records point each subdomain to its CloudFront distribution
+- ACM certificate covers `billtup.com` and `*.billtup.com`
+- Nameservers are configured at Namecheap to delegate to Route 53
 
 ---
 
-## Step 3: Stripe Configuration
+## Backend Deployment
 
-### Webhook Setup
+### How It Works
 
-1. Go to Stripe Dashboard → Developers → Webhooks
-2. Add endpoint: `https://xrgywtdjdlqthpthyxwj.supabase.co/functions/v1/make-server-dce439b6/webhooks/stripe`
-3. Select events:
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-   - `charge.refunded`
-4. Copy "Signing secret"
-5. Add to Supabase secrets:
-   ```bash
-   npx supabase secrets set STRIPE_WEBHOOK_SECRET=whsec_...
-   ```
+The backend is a set of AWS Lambda functions defined in `lambda/template.yaml` (SAM template). Each environment has its own CloudFormation stack, API Gateway, DynamoDB tables, and secrets.
 
-### Switch to Live Mode (When Ready)
-
-1. Complete Stripe account activation
-2. Add bank account for payouts
-3. Toggle to "Live" mode in Stripe
-4. Update `STRIPE_SECRET_KEY` with live key
-
----
-
-## Step 4: Monitoring Setup
-
-### Vercel Analytics (Free)
+### Deploy Commands (manual)
 
 ```bash
-npm install @vercel/analytics
+cd lambda
+npm ci && npm run build
+
+# Deploy to dev (default)
+sam deploy
+
+# Deploy to staging
+sam deploy --config-env stg
+
+# Deploy to production
+sam deploy --config-env prod
 ```
 
-```typescript
-// Add to App.tsx
-import { Analytics } from '@vercel/analytics/react';
+### CI/CD
 
-export default function App() {
-  return (
-    <>
-      {/* Your app */}
-      <Analytics />
-    </>
-  );
-}
-```
+GitHub Actions deploys the backend automatically on push to `dev`, `stg`, or `main` branches. The workflow:
 
-### Error Tracking (Optional)
+1. Checks out the code
+2. Installs dependencies and builds
+3. Assumes the environment-specific IAM role via OIDC (`billtup-deploy-dev`, `billtup-deploy-stg`, `billtup-deploy-prod`)
+4. Syncs GitHub environment secrets to AWS Secrets Manager
+5. Runs `sam deploy` with the appropriate `--config-env`
 
-**Sentry** (Free tier: 5,000 errors/month)
+### Infrastructure as Code
 
-```bash
-npm install @sentry/react
-```
+- **`lambda/template.yaml`** -- SAM template defining Lambda functions, API Gateway HTTP API v2, DynamoDB tables, S3 buckets, IAM roles, CloudWatch alarms, and SNS topics
+- **`lambda/samconfig.toml`** -- Multi-environment deployment configuration (stack names, S3 deploy buckets, parameter overrides per env)
 
-```typescript
-import * as Sentry from "@sentry/react";
+### Key Backend Services
 
-Sentry.init({
-  dsn: "your-sentry-dsn",
-  environment: "production",
-  tracesSampleRate: 0.1,
-});
-```
+| Service | Purpose |
+|---------|---------|
+| AWS Lambda | Serverless functions (auth, invoices, clients, payments, etc.) |
+| API Gateway HTTP API v2 | REST API routing (`$default` stage) |
+| DynamoDB | NoSQL database (pay-per-request) |
+| S3 | File/document storage |
+| Cognito | User authentication (direct API, no SDK on frontend) |
+| Secrets Manager | API keys, Stripe keys, third-party credentials |
+| SNS | Alarm notifications |
 
 ---
 
-## Step 5: Pre-Launch Checklist
+## CI/CD
+
+### GitHub Actions Workflows
+
+**Frontend** (`.github/workflows/deploy.yml`):
+- Triggers on push to `dev`, `stg`, `main`
+- Uses `actions/setup-node@v4` with Node 20
+- Assumes AWS role via `aws-actions/configure-aws-credentials@v4` (OIDC)
+- Syncs build output to S3, invalidates CloudFront
+
+**Backend** (in the `billtup` Android/backend repo):
+- Triggers on push to `dev`, `stg`, `main`
+- Syncs secrets from GitHub to AWS Secrets Manager
+- Runs `sam deploy` with the correct config environment
+
+**Branch Protection** (`.github/workflows/enforce-promotion.yml`):
+- Enforces the `dev -> stg -> main` promotion flow
+- Prevents direct pushes that skip stages
+
+### OIDC Federation
+
+GitHub Actions authenticates to AWS without long-lived credentials. Three IAM roles exist:
+
+| Role | Environment | Trusted By |
+|------|-------------|------------|
+| `billtup-deploy-dev` | dev | GitHub `dev` branch |
+| `billtup-deploy-stg` | stg | GitHub `stg` branch |
+| `billtup-deploy-prod` | prod | GitHub `main` branch |
+
+---
+
+## Monitoring
+
+### CloudWatch Alarms
+
+The SAM template provisions CloudWatch alarms per environment:
+
+| Alarm | Threshold | Description |
+|-------|-----------|-------------|
+| API 5xx errors | > 0 in 5 min | Any server error triggers alert |
+| API 4xx spike | > 50 in 5 min | Unusual client error volume |
+| API p95 latency | > 3 seconds | Slow response times |
+| Lambda errors | > 0 in 5 min | Any Lambda invocation failure |
+| DynamoDB throttling | > 0 in 5 min | Read/write capacity exceeded |
+
+All alarms notify an SNS topic per environment. Subscribe an email address or Slack webhook to the topic for notifications.
+
+### Logs
+
+- **Lambda logs**: CloudWatch Log Groups (`/aws/lambda/<function-name>`)
+- **API Gateway logs**: CloudWatch access logs (if enabled in template)
+- **CloudFront logs**: Optional, can be enabled to S3
+
+---
+
+## Pre-Launch Checklist
 
 ### Security
-- [ ] All secrets in environment variables
-- [ ] CORS configured for production domains
-- [ ] Rate limiting enabled (see SECURITY.md)
-- [ ] Security headers configured
-- [ ] Stripe webhooks verified
+- [ ] All secrets stored in AWS Secrets Manager (not in code or env files)
+- [ ] GitHub environment secrets configured for all three environments
+- [ ] CORS configured for production domains only
+- [ ] Rate limiting enabled on API Gateway
+- [ ] Security headers configured (CSP, HSTS, X-Frame-Options, etc.)
+- [ ] Stripe webhooks verified with signing secret
+- [ ] Cognito user pool configured (password policy, MFA optional)
 
 ### Functionality
-- [ ] Sign up/sign in works
-- [ ] Invoice creation works
-- [ ] Payment processing works
+- [ ] Sign up / sign in works end-to-end
+- [ ] Invoice creation, editing, and deletion works
+- [ ] Payment processing works (Stripe test mode, then live)
 - [ ] Email sending works
 - [ ] PDF generation works
+- [ ] File uploads work (S3)
+
+### Infrastructure
+- [ ] All three environments deployed and accessible
+- [ ] CloudFront distributions serving correct S3 origins
+- [ ] Route 53 DNS records resolving correctly
+- [ ] ACM certificate valid and attached to all CloudFront distributions
+- [ ] CloudWatch alarms configured and SNS subscriptions active
+- [ ] GitHub Actions OIDC roles scoped to correct branches
 
 ### Legal
 - [ ] Privacy Policy added
 - [ ] Terms of Service added
 - [ ] Cookie notice implemented
-- [ ] GDPR compliance (data export/deletion)
 
 ### Performance
-- [ ] Page load < 3 seconds
-- [ ] Lighthouse score > 90
+- [ ] Page load under 3 seconds
+- [ ] Lighthouse score above 90
 - [ ] Mobile responsive
 - [ ] Cross-browser tested
 
 ---
 
-## Cost Breakdown
+## Costs
 
-### Starter (0-100 users)
+### AWS Free Tier (small scale, 0-1000 users)
 
-| Service | Plan | Cost |
-|---------|------|------|
-| Vercel | Free | $0/mo |
-| Supabase | Free | $0/mo |
-| Stripe | Pay-per-use | ~2.9% + $0.30 |
-| Domain | Annual | ~$12/year |
-| **Total** | | **$0-1/mo** |
+| Service | Free Tier Allowance | Typical Cost Beyond |
+|---------|--------------------|--------------------|
+| Lambda | 1M requests/month, 400k GB-seconds | $0.20 per 1M requests |
+| API Gateway | 1M HTTP API calls/month | $1.00 per 1M calls |
+| DynamoDB | 25 GB storage, 25 RCU/WCU | Pay-per-request mode |
+| S3 | 5 GB storage | ~$0.023/GB/month |
+| CloudFront | 1 TB transfer/month | $0.085/GB |
+| Cognito | 50,000 MAU | $0.0055/MAU beyond |
+| CloudWatch | 10 alarms free | $0.10/alarm/month |
+| Secrets Manager | -- | $0.40/secret/month |
+| Route 53 | -- | $0.50/hosted zone/month |
 
-### Growing (100-1000 users)
+**Estimated total for small scale:** ~$5-15/month
 
-| Service | Plan | Cost |
-|---------|------|------|
-| Vercel | Pro | $20/mo |
-| Supabase | Pro | $25/mo |
-| Stripe | Pay-per-use | ~2.9% + $0.30 |
-| Monitoring | Sentry Free | $0/mo |
-| **Total** | | **$45/mo** |
+### Stripe (all scales)
 
----
+- 2.9% + $0.30 per successful card charge
+- No monthly fees
 
-## Scaling Strategy
+### Scaling Notes
 
-### 0-100 Users (Months 1-6)
-- Stay on free tiers
-- Monitor usage
-- Gather feedback
-- **Action:** None
-
-### 100-1000 Users (Months 6-12)
-- Upgrade Vercel → Pro ($20/mo)
-- Upgrade Supabase → Pro ($25/mo)
-- Add monitoring
-- **Action:** Upgrade when approaching limits
-
-### 1000+ Users (Year 2+)
-- Consider Supabase Team plan
-- Add CDN caching
-- Implement data archiving
-- **Action:** Plan for optimization
+- Lambda, API Gateway, DynamoDB, and CloudFront scale automatically with no provisioning
+- DynamoDB on-demand mode handles traffic spikes without capacity planning
+- CloudFront caches static assets at edge locations globally
+- No servers to manage, patch, or scale manually
 
 ---
 
-## Disaster Recovery
+## Useful Commands
 
-### Backup Strategy
-
-**Automatic (Supabase):**
-- Daily database snapshots
-- 7-day retention (Free)
-- 30-day retention (Pro)
-
-**Manual (Recommended monthly):**
 ```bash
-# Export user data
-curl https://your-project.supabase.co/functions/v1/make-server-dce439b6/user/export \
-  -H "Authorization: Bearer {token}" \
-  > backup-$(date +%Y%m%d).json
+# Check which environment a branch deploys to
+git branch --show-current   # dev, stg, or main
+
+# Build frontend locally for a specific environment
+npm run build:dev           # dev mode
+npm run build:stg           # staging mode
+npm run build               # production mode
+
+# Start local dev server
+npm run dev -- --host
+
+# Deploy backend manually
+cd lambda
+sam deploy                    # dev
+sam deploy --config-env stg   # staging
+sam deploy --config-env prod  # production
+
+# View CloudFormation stack status
+aws cloudformation describe-stacks --stack-name billtup-dev
+aws cloudformation describe-stacks --stack-name billtup-stg
+aws cloudformation describe-stacks --stack-name billtup-prod
+
+# Invalidate CloudFront cache manually
+aws cloudfront create-invalidation --distribution-id <ID> --paths "/*"
+
+# Tail Lambda logs
+aws logs tail /aws/lambda/<function-name> --follow
 ```
-
-### Recovery Scenarios
-
-1. **Supabase Outage** (< 1 hour)
-   - Display maintenance message
-   - Monitor Supabase status page
-
-2. **Data Corruption**
-   - Restore from Supabase backup
-   - Recovery time: < 1 hour
-
-3. **Stripe Outage** (rare)
-   - Queue payments for retry
-   - Usually < 30 minutes
-
----
-
-## Launch Timeline
-
-### Week 1: Security Hardening
-- [ ] Add rate limiting
-- [ ] Configure security headers
-- [ ] Set up Stripe webhooks
-- [ ] Add legal pages
-
-### Week 2: Deploy to Production
-- [ ] Deploy to Vercel
-- [ ] Test thoroughly
-- [ ] Set up monitoring
-- [ ] Configure custom domain
-
-### Week 3: Soft Launch
-- [ ] Invite 10 beta users
-- [ ] Gather feedback
-- [ ] Fix bugs
-- [ ] Monitor performance
-
-### Week 4: Public Launch
-- [ ] Open registration
-- [ ] Marketing push
-- [ ] Monitor closely
-- [ ] Provide support
 
 ---
 
 ## Support Resources
 
-- **Vercel Docs:** https://vercel.com/docs
-- **Supabase Docs:** https://supabase.com/docs
+- **AWS SAM Docs:** https://docs.aws.amazon.com/serverless-application-model/
+- **CloudFront Docs:** https://docs.aws.amazon.com/cloudfront/
+- **Cognito Docs:** https://docs.aws.amazon.com/cognito/
 - **Stripe Docs:** https://stripe.com/docs
-- **Project Docs:** See `/docs/developers/`
+- **Project Docs:** See `src/docs/developers/`
 
 ---
 
-## Next Steps
-
-1. Review [Security Guide](./SECURITY.md)
-2. Set up monitoring
-3. Test in staging
-4. Deploy to production
-5. Launch! 🚀
-
----
-
-*Last Updated: November 21, 2025*
+*Last Updated: February 2026*

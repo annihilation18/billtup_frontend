@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import {
   Dialog,
   DialogContent,
@@ -14,11 +15,11 @@ interface CustomerAnalyticsModalProps {
 }
 
 export function CustomerAnalyticsModal({ open, onClose, userPlan }: CustomerAnalyticsModalProps) {
+  const navigate = useNavigate();
   const isPremium = userPlan === 'premium';
 
   const handleUpgrade = () => {
-    // Redirect to upgrade page
-    window.location.href = '/#pricing';
+    navigate('/pricing');
   };
 
   if (!isPremium) {

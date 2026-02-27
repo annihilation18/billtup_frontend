@@ -50,7 +50,7 @@ export function DocumentationSection() {
         content: `Welcome to BilltUp! Get started in 3 simple steps:
 
 **Step 1: Create Your Account**
-Sign up for BilltUp using your business email. Start with a 14-day free trial—no credit card required. You'll be asked to choose a plan:
+Sign up for BilltUp using your business email. Start with a 14-day free trial. You'll be asked to choose a plan:
 - Basic ($4.99/month): Core invoicing features, up to 10 invoices/month
 - Premium ($9.99/month): Unlimited invoices, advanced reporting, priority support
 

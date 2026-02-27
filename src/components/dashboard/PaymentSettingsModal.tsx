@@ -4,8 +4,7 @@ import { Card } from '../ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Switch } from '../ui/switch';
 import { CreditCard, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react@0.468.0';
-import { getIdToken } from '../../utils/auth/cognito';
-import { API_CONFIG } from '../../utils/config';
+import { fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, setActiveProvider as setActiveProviderApi, getStripeOAuthUrl, getSquareOAuthUrl, disconnectStripe, disconnectSquare } from '../../utils/dashboard-api';
 import { toast } from 'sonner@2.0.3';
 
 interface PaymentSettingsModalProps {
@@ -33,34 +32,15 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
   const fetchPaymentSettings = async () => {
     try {
       setLoading(true);
-      const token = await getIdToken();
+      const [stripeResult, squareResult, providerResult] = await Promise.all([
+        fetchStripeStatus(),
+        fetchSquareStatus(),
+        fetchActiveProvider(),
+      ]);
 
-      if (!token) {
-        // User not authenticated yet - use default provider
-        setLoading(false);
-        setActiveProvider('stripe');
-        return;
-      }
-
-      // Fetch active payment provider
-      const response = await fetch(
-        `${API_CONFIG.baseUrl}/payment-provider/active`,
-        {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        setActiveProvider(data.provider || 'stripe');
-      } else {
-        console.error('Failed to fetch payment provider:', response.status);
-        setActiveProvider('stripe');
-      }
+      setStripeConnected(stripeResult.connected && stripeResult.chargesEnabled);
+      setSquareConnected(squareResult.connected && squareResult.active);
+      setActiveProvider((providerResult.provider as PaymentProvider) || 'stripe');
     } catch (error) {
       console.error('Error fetching payment settings:', error);
       toast.error('Failed to load payment settings');
@@ -71,79 +51,97 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
   };
 
   const switchProvider = async (newProvider: PaymentProvider) => {
-    console.log('[PaymentSettings] switchProvider called:', { 
-      newProvider, 
-      activeProvider, 
-      switching,
-      isSameProvider: newProvider === activeProvider 
-    });
-    
-    if (newProvider === activeProvider) {
-      console.log('[PaymentSettings] Already using this provider, skipping...');
+    if (newProvider === activeProvider || switching) return;
+
+    if (newProvider === 'stripe' && !stripeConnected) {
+      toast.error('Connect Stripe before switching to it');
       return;
     }
-    
-    if (switching) {
-      console.log('[PaymentSettings] Already switching, skipping...');
+    if (newProvider === 'square' && !squareConnected) {
+      toast.error('Connect Square before switching to it');
       return;
     }
 
     try {
       setSwitching(true);
-      console.log('[PaymentSettings] Getting token...');
-      const token = await getIdToken();
-
-      if (!token) {
-        console.error('[PaymentSettings] No token found');
-        toast.error('Authentication required');
-        setSwitching(false);
-        return;
-      }
-
-      console.log('[PaymentSettings] Making API request to switch provider...');
-      const response = await fetch(
-        `${API_CONFIG.baseUrl}/payment-provider/set`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ provider: newProvider })
-        }
-      );
-
-      console.log('[PaymentSettings] API response status:', response.status);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('[PaymentSettings] API error:', errorData);
-        throw new Error(errorData.error || 'Failed to switch provider');
-      }
-
-      const data = await response.json();
-      console.log('[PaymentSettings] API response data:', data);
-      
+      const data = await setActiveProviderApi(newProvider);
       if (data.success) {
-        setActiveProvider(data.provider);
+        setActiveProvider(data.provider as PaymentProvider);
         toast.success(`Payment provider switched to ${data.provider === 'stripe' ? 'Stripe' : 'Square'}`);
       }
     } catch (error: any) {
-      console.error('[PaymentSettings] Error switching payment provider:', error);
+      console.error('Error switching payment provider:', error);
       toast.error(error.message || 'Failed to switch provider');
     } finally {
       setSwitching(false);
     }
   };
 
-  const handleConnectStripe = () => {
-    // This would redirect to Stripe Connect OAuth flow
-    toast.info('Stripe Connect integration coming soon! This will allow you to accept payments directly through the app.');
+  const [connecting, setConnecting] = useState<'stripe' | 'square' | null>(null);
+  const [disconnecting, setDisconnecting] = useState<'stripe' | 'square' | null>(null);
+
+  const handleConnectStripe = async () => {
+    try {
+      setConnecting('stripe');
+      const { url } = await getStripeOAuthUrl();
+      // Redirect to Stripe OAuth — callback will return to /dashboard/oauth/stripe/callback
+      const callbackUrl = `${window.location.origin}/dashboard/oauth/stripe/callback`;
+      window.location.href = `${url}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    } catch (error: any) {
+      console.error('Error getting Stripe OAuth URL:', error);
+      toast.error(error.message || 'Failed to start Stripe connection');
+      setConnecting(null);
+    }
   };
 
-  const handleConnectSquare = () => {
-    // This would redirect to Square OAuth flow
-    toast.info('Square integration coming soon! This will allow you to accept payments with lower fees.');
+  const handleConnectSquare = async () => {
+    try {
+      setConnecting('square');
+      const { url } = await getSquareOAuthUrl();
+      // Redirect to Square OAuth — callback will return to /dashboard/oauth/square/callback
+      const callbackUrl = `${window.location.origin}/dashboard/oauth/square/callback`;
+      window.location.href = `${url}&redirect_uri=${encodeURIComponent(callbackUrl)}`;
+    } catch (error: any) {
+      console.error('Error getting Square OAuth URL:', error);
+      toast.error(error.message || 'Failed to start Square connection');
+      setConnecting(null);
+    }
+  };
+
+  const handleDisconnectStripe = async () => {
+    try {
+      setDisconnecting('stripe');
+      await disconnectStripe();
+      setStripeConnected(false);
+      if (activeProvider === 'stripe') {
+        setActiveProvider('square');
+      }
+      toast.success('Stripe account disconnected');
+      onDataUpdated();
+    } catch (error: any) {
+      console.error('Error disconnecting Stripe:', error);
+      toast.error(error.message || 'Failed to disconnect Stripe');
+    } finally {
+      setDisconnecting(null);
+    }
+  };
+
+  const handleDisconnectSquare = async () => {
+    try {
+      setDisconnecting('square');
+      await disconnectSquare();
+      setSquareConnected(false);
+      if (activeProvider === 'square') {
+        setActiveProvider('stripe');
+      }
+      toast.success('Square account disconnected');
+      onDataUpdated();
+    } catch (error: any) {
+      console.error('Error disconnecting Square:', error);
+      toast.error(error.message || 'Failed to disconnect Square');
+    } finally {
+      setDisconnecting(null);
+    }
   };
 
   const handleNfcToggle = (enabled: boolean) => {
@@ -250,32 +248,33 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
 
             {/* Fee Comparison Table */}
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
-              <h4 className="text-sm font-semibold mb-3 text-gray-700">
+              <h4 className="text-sm font-semibold mb-1 text-gray-700">
                 Fee Comparison (U.S. Standard)
               </h4>
+              <p className="text-xs text-gray-500 mb-3">Includes BilltUp fee: 0.6% + 20¢</p>
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">Online Card:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '2.9% + 30¢' : '2.6% + 10¢'}
+                    {activeProvider === 'stripe' ? '3.5% + 50¢' : '3.5% + 50¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">In-Person:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '2.7% + 5¢' : '2.6% + 10¢'}
+                    {activeProvider === 'stripe' ? '3.3% + 25¢' : '3.2% + 35¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-gray-200">
                   <span className="text-gray-600">Keyed-In:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '3.4% + 30¢' : '3.5% + 15¢'}
+                    {activeProvider === 'stripe' ? '4.0% + 50¢' : '4.1% + 35¢'}
                   </span>
                 </div>
                 <div className="flex justify-between py-1.5">
                   <span className="text-gray-600">ACH:</span>
                   <span className="font-mono text-gray-900">
-                    {activeProvider === 'stripe' ? '0.8% (max $5)' : '1% (min $1)'}
+                    {activeProvider === 'stripe' ? '1.4% + 20¢ ($5.20 max)' : '1.6% + 20¢ ($5.20 max)'}
                   </span>
                 </div>
               </div>
@@ -283,82 +282,112 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
           </Card>
 
           {/* Stripe Payment Processing */}
-          {activeProvider === 'stripe' && (
-            <Card className="p-6 border-gray-200">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-[#635BFF]/10 flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-6 h-6 text-[#635BFF]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Stripe Payment Processing
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Connect your Stripe account to accept payments from customers. Stripe will handle all payment processing securely.
-                  </p>
-                  
-                  {stripeConnected ? (
-                    <div className="flex items-center gap-2 text-sm text-[#14B8A6] bg-[#14B8A6]/10 px-3 py-2 rounded-lg mb-4">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Stripe account connected</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg mb-4">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>Not connected</span>
-                    </div>
-                  )}
+          <Card className="p-6 border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-[#635BFF]/10 flex items-center justify-center flex-shrink-0">
+                <CreditCard className="w-6 h-6 text-[#635BFF]" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  Stripe Payment Processing
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Connect your Stripe account to accept payments from customers. Stripe will handle all payment processing securely.
+                </p>
 
-                  <Button 
-                    onClick={handleConnectStripe}
-                    className="bg-[#635BFF] hover:bg-[#635BFF]/90 text-white"
-                    disabled={stripeConnected}
-                  >
-                    {stripeConnected ? 'Connected' : 'Connect Stripe Account'}
-                  </Button>
+                {stripeConnected ? (
+                  <div className="flex items-center gap-2 text-sm text-[#14B8A6] bg-[#14B8A6]/10 px-3 py-2 rounded-lg mb-4">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Stripe account connected</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg mb-4">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Not connected</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  {stripeConnected ? (
+                    <Button
+                      onClick={handleDisconnectStripe}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      disabled={disconnecting === 'stripe'}
+                    >
+                      {disconnecting === 'stripe' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                      ) : 'Disconnect Stripe'}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleConnectStripe}
+                      className="bg-[#635BFF] hover:bg-[#635BFF]/90 text-white"
+                      disabled={connecting === 'stripe'}
+                    >
+                      {connecting === 'stripe' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Connecting...</>
+                      ) : 'Connect Stripe'}
+                    </Button>
+                  )}
                 </div>
               </div>
-            </Card>
-          )}
+            </div>
+          </Card>
 
           {/* Square Payment Processing */}
-          {activeProvider === 'square' && (
-            <Card className="p-6 border-gray-200">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <CreditCard className="w-6 h-6 text-black" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Square Payment Processing
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Connect your Square account to accept payments with competitive rates. Square offers lower in-person fees.
-                  </p>
-                  
-                  {squareConnected ? (
-                    <div className="flex items-center gap-2 text-sm text-[#14B8A6] bg-[#14B8A6]/10 px-3 py-2 rounded-lg mb-4">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Square account connected</span>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg mb-4">
-                      <AlertCircle className="w-4 h-4" />
-                      <span>Not connected</span>
-                    </div>
-                  )}
+          <Card className="p-6 border-gray-200">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <CreditCard className="w-6 h-6 text-black" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  Square Payment Processing
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Connect your Square account to accept payments with competitive rates. Square offers lower in-person fees.
+                </p>
 
-                  <Button 
-                    onClick={handleConnectSquare}
-                    className="bg-black hover:bg-gray-800 text-white"
-                    disabled={squareConnected}
-                  >
-                    {squareConnected ? 'Connected' : 'Connect Square Account'}
-                  </Button>
+                {squareConnected ? (
+                  <div className="flex items-center gap-2 text-sm text-[#14B8A6] bg-[#14B8A6]/10 px-3 py-2 rounded-lg mb-4">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Square account connected</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg mb-4">
+                    <AlertCircle className="w-4 h-4" />
+                    <span>Not connected</span>
+                  </div>
+                )}
+
+                <div className="flex gap-2">
+                  {squareConnected ? (
+                    <Button
+                      onClick={handleDisconnectSquare}
+                      variant="outline"
+                      className="border-red-300 text-red-600 hover:bg-red-50"
+                      disabled={disconnecting === 'square'}
+                    >
+                      {disconnecting === 'square' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                      ) : 'Disconnect Square'}
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={handleConnectSquare}
+                      className="bg-black hover:bg-gray-800 text-white"
+                      disabled={connecting === 'square'}
+                    >
+                      {connecting === 'square' ? (
+                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Connecting...</>
+                      ) : 'Connect Square'}
+                    </Button>
+                  )}
                 </div>
               </div>
-            </Card>
-          )}
+            </div>
+          </Card>
 
           {/* Enable NFC Payments */}
           <Card className="p-6 border-gray-200">

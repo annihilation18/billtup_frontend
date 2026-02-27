@@ -221,6 +221,75 @@ export async function deleteInvoice(invoiceId: string) {
   }
 }
 
+// Estimate APIs
+export async function fetchEstimates() {
+  try {
+    return await apiCall('/estimates');
+  } catch (error) {
+    console.error('Error fetching estimates:', error);
+    return [];
+  }
+}
+
+export async function createEstimate(estimateData: any) {
+  try {
+    return await apiCall('/estimates', {
+      method: 'POST',
+      body: JSON.stringify(estimateData),
+    });
+  } catch (error) {
+    console.error('Error creating estimate:', error);
+    throw error;
+  }
+}
+
+export async function updateEstimate(estimateId: string, estimateData: any) {
+  try {
+    return await apiCall(`/estimates/${estimateId}`, {
+      method: 'PUT',
+      body: JSON.stringify(estimateData),
+    });
+  } catch (error) {
+    console.error('Error updating estimate:', error);
+    throw error;
+  }
+}
+
+export async function deleteEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}`, {
+      method: 'DELETE',
+    });
+  } catch (error) {
+    console.error('Error deleting estimate:', error);
+    throw error;
+  }
+}
+
+export async function sendEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}/send`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  } catch (error) {
+    console.error('Error sending estimate:', error);
+    throw error;
+  }
+}
+
+export async function convertEstimate(estimateId: string) {
+  try {
+    return await apiCall(`/estimates/${estimateId}/convert`, {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
+  } catch (error) {
+    console.error('Error converting estimate:', error);
+    throw error;
+  }
+}
+
 // Business Profile APIs
 export async function fetchBusinessProfile() {
   try {
@@ -278,9 +347,11 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
     // Get date ranges for the selected period
     const { startDate, endDate } = getDateRangeForPeriod(period);
 
+    // Helper: net revenue for a paid invoice (subtracts refunds)
+    const invoiceNetRevenue = (inv: any) => inv.total - (inv.refundedAmount || 0);
+
     // Helper function to get the invoice date (try multiple fields for compatibility)
     const getInvoiceDate = (inv: any): Date => {
-      // Try date (invoice date field), then createdAt (system timestamp)
       const dateStr = inv.date || inv.createdAt;
       return dateStr ? new Date(dateStr) : new Date();
     };
@@ -291,14 +362,12 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
       return invDate >= startDate && invDate <= endDate;
     });
 
-    console.log(`[Analytics] Period: ${period}, Range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
-
     // Calculate stats for current period
     const paidInvoices = periodInvoices.filter((inv: any) => inv.status === 'paid');
     const pendingInvoices = periodInvoices.filter((inv: any) => inv.status === 'pending');
     const overdueInvoices = periodInvoices.filter((inv: any) => inv.status === 'overdue');
 
-    const totalRevenue = paidInvoices.reduce((sum: number, inv: any) => sum + inv.total, 0);
+    const totalRevenue = paidInvoices.reduce((sum: number, inv: any) => sum + invoiceNetRevenue(inv), 0);
     const pendingAmount = pendingInvoices.reduce((sum: number, inv: any) => sum + inv.total, 0);
 
     // Get comparison period label
@@ -312,10 +381,18 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
       return custDate >= startDate && custDate <= endDate;
     }).length;
 
+    // Active customers: those with at least one invoice in this period
+    const activeCustomerIds = new Set(
+      periodInvoices.map((inv: any) => inv.customerId).filter(Boolean)
+    );
+    const activeCustomers = activeCustomerIds.size || customers.filter((cust: any) =>
+      periodInvoices.some((inv: any) => inv.customer === cust.name)
+    ).length;
+
     return {
       totalRevenue,
       totalInvoices: periodInvoices.length,
-      totalCustomers: customers.length,
+      totalCustomers: activeCustomers,
       pendingAmount,
       paidCount: paidInvoices.length,
       pendingCount: pendingInvoices.length,
@@ -358,9 +435,9 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
     // Get date ranges for the selected period
     const { startDate, endDate } = getDateRangeForPeriod(period);
 
-    // Helper function to get the invoice date (try multiple fields for compatibility)
+    // Helper function to get the invoice date (consistent with fetchSalesStats)
     const getInvoiceDate = (inv: any): Date => {
-      const dateStr = inv.issueDate || inv.date || inv.createdAt;
+      const dateStr = inv.date || inv.createdAt;
       return dateStr ? new Date(dateStr) : new Date();
     };
 
@@ -370,13 +447,13 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
       return invDate >= startDate && invDate <= endDate;
     });
 
-    // Calculate revenue per customer
+    // Calculate revenue per customer (subtract refunds)
     const customerRevenue = customers.map((customer: any) => {
       const customerInvoices = periodInvoices.filter(
-        (inv: any) => inv.customerId === customer.id && inv.status === 'paid'
+        (inv: any) => (inv.customerId === customer.id || inv.customer === customer.name) && inv.status === 'paid'
       );
       const totalRevenue = customerInvoices.reduce(
-        (sum: number, inv: any) => sum + inv.total,
+        (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
         0
       );
       return {
@@ -432,7 +509,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
         });
 
         const dayRevenue = dayInvoices.reduce(
-          (sum: number, inv: any) => sum + inv.total,
+          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
           0
         );
 
@@ -491,7 +568,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
         });
 
         const dayRevenue = dayInvoices.reduce(
-          (sum: number, inv: any) => sum + inv.total,
+          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
           0
         );
 
@@ -537,7 +614,7 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
       });
 
       const monthRevenue = monthInvoices.reduce(
-        (sum: number, inv: any) => sum + inv.total,
+        (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
         0
       );
 
@@ -600,6 +677,18 @@ export async function cancelSubscription() {
   }
 }
 
+// Reactivate a cancelled subscription (before period end)
+export async function reactivateSubscription() {
+  try {
+    return await apiCall('/subscription/reactivate', {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error reactivating subscription:', error);
+    throw error;
+  }
+}
+
 // Trial Status API
 export async function fetchTrialStatus(): Promise<{
   isInTrial: boolean;
@@ -651,4 +740,158 @@ export async function fetchBillingCycleUsage(): Promise<{ used: number; limit: n
     // Silently return default limits - endpoint doesn't exist yet
     return { used: 0, limit: 50 };
   }
+}
+
+// Payment Provider Status APIs
+export async function fetchStripeStatus(): Promise<{ connected: boolean; chargesEnabled: boolean }> {
+  try {
+    const result = await apiCall('/stripe/account-status');
+    return result;
+  } catch (error) {
+    return { connected: false, chargesEnabled: false };
+  }
+}
+
+export async function fetchSquareStatus(): Promise<{
+  connected: boolean;
+  active: boolean;
+  applicationId?: string;
+  locationId?: string;
+}> {
+  try {
+    const result = await apiCall('/square/account-status');
+    return result;
+  } catch (error) {
+    return { connected: false, active: false };
+  }
+}
+
+export async function fetchActiveProvider(): Promise<{ provider: string }> {
+  try {
+    const result = await apiCall('/payment-provider/active');
+    return result;
+  } catch (error) {
+    return { provider: 'stripe' };
+  }
+}
+
+export async function setActiveProvider(provider: string): Promise<{ success: boolean; provider: string }> {
+  try {
+    const result = await apiCall('/payment-provider/set', {
+      method: 'POST',
+      body: JSON.stringify({ provider }),
+    });
+    return result;
+  } catch (error) {
+    throw error;
+  }
+}
+
+// Payment Processing APIs
+export async function createPaymentIntent(amount: number, invoiceId?: string, customerEmail?: string, invoiceAmount?: number): Promise<{
+  clientSecret: string;
+  paymentIntentId: string;
+}> {
+  return apiCall('/payments/create-intent', {
+    method: 'POST',
+    body: JSON.stringify({ amount, invoiceId, customerEmail, invoiceAmount }),
+  });
+}
+
+export async function updatePaymentIntent(paymentIntentId: string, amount: number, invoiceAmount?: number): Promise<{
+  success: boolean;
+  paymentIntentId: string;
+}> {
+  return apiCall('/payments/update-intent', {
+    method: 'POST',
+    body: JSON.stringify({ paymentIntentId, amount, invoiceAmount }),
+  });
+}
+
+export async function createSquarePayment(
+  amount: number,
+  sourceId: string,
+  invoiceId?: string,
+  customerEmail?: string,
+): Promise<{
+  success: boolean;
+  paymentId: string;
+  status: string;
+  receiptUrl?: string;
+}> {
+  return apiCall('/square/create-payment', {
+    method: 'POST',
+    body: JSON.stringify({ amount, sourceId, invoiceId, customerEmail }),
+  });
+}
+
+// OAuth URL APIs
+export async function getStripeOAuthUrl(): Promise<{ url: string; state: string }> {
+  return apiCall('/stripe/oauth-url');
+}
+
+export async function getSquareOAuthUrl(): Promise<{ url: string; state: string }> {
+  return apiCall('/square/oauth-url');
+}
+
+// OAuth Callback APIs
+export async function stripeOAuthCallback(code: string, state: string): Promise<{
+  success: boolean;
+  accountId: string;
+  chargesEnabled: boolean;
+}> {
+  return apiCall('/stripe/oauth-callback', {
+    method: 'POST',
+    body: JSON.stringify({ code, state }),
+  });
+}
+
+export async function squareOAuthCallback(code: string, state: string): Promise<{
+  success: boolean;
+  merchantId: string;
+}> {
+  return apiCall('/square/oauth-callback', {
+    method: 'POST',
+    body: JSON.stringify({ code, state }),
+  });
+}
+
+// Disconnect APIs
+export async function disconnectStripe(): Promise<{ success: boolean }> {
+  return apiCall('/stripe/disconnect', { method: 'POST' });
+}
+
+export async function disconnectSquare(): Promise<{ success: boolean }> {
+  return apiCall('/square/disconnect', { method: 'POST' });
+}
+
+// Payment Links
+export async function createPaymentLink(invoiceId: string): Promise<{ token: string; paymentUrl: string; expiresAt: string; reused: boolean }> {
+  return apiCall('/payment-links/create', {
+    method: 'POST',
+    body: JSON.stringify({ invoiceId }),
+  });
+}
+
+export async function getPaymentLink(invoiceId: string): Promise<{ exists: boolean; token?: string; paymentUrl?: string; expiresAt?: string }> {
+  return apiCall(`/payment-links/${invoiceId}`);
+}
+
+// ==================== INVOICE PHOTOS ====================
+
+export async function uploadInvoicePhoto(invoiceId: string, photoData: string, fileName?: string): Promise<{ success: boolean; photo: { id: string; url: string; filename: string; uploadedAt: string } }> {
+  return apiCall(`/invoices/${invoiceId}/photos`, {
+    method: 'POST',
+    body: JSON.stringify({ photoData, fileName }),
+  });
+}
+
+export async function getInvoicePhotos(invoiceId: string): Promise<{ photos: Array<{ id: string; url: string; filename: string; uploadedAt: string }> }> {
+  return apiCall(`/invoices/${invoiceId}/photos`);
+}
+
+export async function deleteInvoicePhoto(invoiceId: string, photoId: string): Promise<{ success: boolean }> {
+  return apiCall(`/invoices/${invoiceId}/photos/${photoId}`, {
+    method: 'DELETE',
+  });
 }
