@@ -151,6 +151,10 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
         </div>
       </div>
 
+      <p className="text-xs text-gray-500">
+        Your customer will be charged ${totalCharge.toFixed(2)}. The full invoice amount (${invoiceTotal.toFixed(2)}) will be deposited to your Stripe account.
+      </p>
+
       <div className="space-y-2">
         <label className="text-sm font-medium text-gray-700">Payment method</label>
         <PaymentElement onChange={handlePaymentElementChange} />
@@ -201,12 +205,15 @@ function StripePaymentWrapper({ invoice, onSuccess, onCancel, onBack }: StripeWr
   useEffect(() => {
     const createIntent = async () => {
       try {
-        const amountInCents = Math.round((invoice.total || 0) * 100);
+        const invoiceTotal = invoice.total || 0;
+        const { fee: defaultFee } = calculateStripeFee(invoiceTotal, 'card');
+        const totalChargeCents = Math.round((invoiceTotal + defaultFee) * 100);
+        const invoiceAmountCents = Math.round(invoiceTotal * 100);
         const result = await createPaymentIntent(
-          amountInCents,
+          totalChargeCents,
           invoice.id,
           invoice.customerEmail,
-          amountInCents,
+          invoiceAmountCents,
         );
         setClientSecret(result.clientSecret);
         setPaymentIntentId(result.paymentIntentId);
@@ -507,6 +514,17 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
           );
         })()}
       </div>
+
+      {(() => {
+        const invTotal = invoice.total || 0;
+        const { fee: currentFee } = calculateSquareFee(invTotal, selectedMethod);
+        const platformFee = (invTotal * 0.006) + 0.20;
+        return (
+          <p className="text-xs text-gray-500">
+            Your customer will be charged ${(invTotal + currentFee).toFixed(2)}. Square's processing fee will be deducted from your account. BilltUp's platform fee (${platformFee.toFixed(2)}) is collected separately.
+          </p>
+        );
+      })()}
 
       {/* Method tabs */}
       {availableTabs.length > 1 && (

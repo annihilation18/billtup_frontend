@@ -279,6 +279,22 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
                 </div>
               </div>
             </div>
+
+            {/* Payout Disclosure */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="text-sm font-semibold mb-2 text-gray-700 flex items-center gap-1.5">
+                <AlertCircle className="w-3.5 h-3.5" />
+                How payouts work
+              </h4>
+              <div className="space-y-2 text-xs text-gray-600">
+                <p>
+                  <span className="font-medium text-gray-700">Stripe:</span> Payments are processed through BilltUp and the full invoice amount is deposited into your Stripe account. All processing fees are handled on our end.
+                </p>
+                <p>
+                  <span className="font-medium text-gray-700">Square:</span> Payments go directly to your Square account. Square's standard processing fee is deducted by Square from each transaction. BilltUp's platform fee (0.6% + 20¢) is collected separately. Your net deposit will be slightly less than the invoice amount.
+                </p>
+              </div>
+            </div>
           </Card>
 
           {/* Stripe Payment Processing */}
