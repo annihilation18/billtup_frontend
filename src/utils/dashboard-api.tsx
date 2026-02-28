@@ -642,15 +642,28 @@ export async function fetchPayments() {
   }
 }
 
-// Refund API
-export async function processRefund(invoiceId: string, amount: number, reason: string) {
+// Refund API (Stripe-paid invoices — also handles invoice status update for any provider)
+export async function processRefund(invoiceId: string, amount: number) {
   try {
-    return await apiCall('/refunds', {
+    return await apiCall('/payments/refund', {
       method: 'POST',
-      body: JSON.stringify({ invoiceId, amount, reason }),
+      body: JSON.stringify({ invoiceId, amount }),
     });
   } catch (error) {
     console.error('Error processing refund:', error);
+    throw error;
+  }
+}
+
+// Square Refund API
+export async function processSquareRefund(paymentId: string, amount?: number, reason?: string) {
+  try {
+    return await apiCall('/square/refund', {
+      method: 'POST',
+      body: JSON.stringify({ paymentId, amount, reason }),
+    });
+  } catch (error) {
+    console.error('Error processing Square refund:', error);
     throw error;
   }
 }
@@ -813,6 +826,7 @@ export async function createSquarePayment(
   sourceId: string,
   invoiceId?: string,
   customerEmail?: string,
+  invoiceAmount?: number,
 ): Promise<{
   success: boolean;
   paymentId: string;
@@ -821,7 +835,7 @@ export async function createSquarePayment(
 }> {
   return apiCall('/square/create-payment', {
     method: 'POST',
-    body: JSON.stringify({ amount, sourceId, invoiceId, customerEmail }),
+    body: JSON.stringify({ amount, sourceId, invoiceId, customerEmail, invoiceAmount }),
   });
 }
 
