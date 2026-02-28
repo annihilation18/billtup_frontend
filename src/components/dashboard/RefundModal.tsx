@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
-import { updateInvoice } from '../../utils/dashboard-api';
+import { processRefund, processSquareRefund } from '../../utils/dashboard-api';
 
 interface RefundModalProps {
   invoice: any;
@@ -18,47 +18,47 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
   const [refundType, setRefundType] = useState<'full' | 'partial'>('full');
   const [customAmount, setCustomAmount] = useState('');
 
-  const isPaid = invoice.status === 'paid';
+  const isPaid = invoice.status === 'paid' || invoice.status === 'partially_refunded';
   const totalAmount = invoice.total || 0;
+  const alreadyRefunded = invoice.refundedAmount || 0;
+  const maxRefundable = totalAmount - alreadyRefunded;
 
   const handleRefund = async () => {
-    const refundAmount = refundType === 'full' 
-      ? totalAmount 
+    const refundAmount = refundType === 'full'
+      ? maxRefundable
       : parseFloat(customAmount);
 
     if (refundType === 'partial') {
-      if (!customAmount || refundAmount <= 0 || refundAmount > totalAmount) {
-        toast.error('Please enter a valid refund amount');
+      if (!customAmount || refundAmount <= 0 || refundAmount > maxRefundable) {
+        toast.error(`Please enter a valid refund amount (max $${maxRefundable.toFixed(2)})`);
         return;
       }
     }
 
     setIsProcessing(true);
     try {
-      // Simulate refund processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Update invoice status based on refund type
-      const newStatus = refundType === 'full' ? 'refunded' : 'partially_refunded';
-      await updateInvoice(invoice.id, {
-        ...invoice,
-        status: newStatus,
-        refundedAmount: refundAmount,
-        refundedAt: new Date().toISOString(),
-      });
+      // For Square-paid invoices, call Square refund first, then update invoice
+      if (invoice.paymentProvider === 'square' && invoice.squarePaymentId) {
+        const amountInCents = Math.round(refundAmount * 100);
+        await processSquareRefund(invoice.squarePaymentId, amountInCents);
+      }
 
-      toast.success(`${refundType === 'full' ? 'Full' : 'Partial'} refund processed successfully!`);
+      // Call backend refund endpoint (handles Stripe refund + invoice status update)
+      await processRefund(invoice.id, refundAmount);
+
+      const label = refundType === 'full' ? 'Full' : 'Partial';
+      toast.success(`${label} refund of $${refundAmount.toFixed(2)} processed successfully!`);
       setOpen(false);
       if (onUpdate) {
         onUpdate();
       }
-      
+
       // Reset form
       setRefundType('full');
       setCustomAmount('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error processing refund:', error);
-      toast.error('Failed to process refund. Please try again.');
+      toast.error(error.message || 'Failed to process refund. Please try again.');
     } finally {
       setIsProcessing(false);
     }
@@ -94,6 +94,11 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
             <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
               ${totalAmount.toFixed(2)}
             </p>
+            {alreadyRefunded > 0 && (
+              <p className="text-sm text-orange-600 mt-1">
+                Already refunded: ${alreadyRefunded.toFixed(2)} — Remaining: ${maxRefundable.toFixed(2)}
+              </p>
+            )}
           </div>
 
           {/* Refund Type Selection */}
@@ -111,7 +116,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
               >
                 <p className="text-sm text-gray-900">Full Refund</p>
                 <p className="text-xs text-gray-600 mt-1" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${totalAmount.toFixed(2)}
+                  ${maxRefundable.toFixed(2)}
                 </p>
               </button>
 
@@ -142,7 +147,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
                   id="customAmount"
                   type="number"
                   min="0"
-                  max={totalAmount}
+                  max={maxRefundable}
                   step="0.01"
                   placeholder="0.00"
                   value={customAmount}
@@ -152,7 +157,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
                 />
               </div>
               <p className="text-xs text-gray-500">
-                Maximum: ${totalAmount.toFixed(2)}
+                Maximum: ${maxRefundable.toFixed(2)}
               </p>
             </div>
           )}
@@ -161,7 +166,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
           <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 flex gap-2">
             <AlertTriangle className="w-4 h-4 text-orange-600 flex-shrink-0 mt-0.5" />
             <p className="text-xs text-orange-800">
-              This action will process a {refundType} refund. Make sure you have verified the refund request.
+              This action will process a {refundType} refund via {invoice.paymentProvider === 'square' ? 'Square' : 'Stripe'}. Make sure you have verified the refund request.
             </p>
           </div>
 
