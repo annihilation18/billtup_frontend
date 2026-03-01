@@ -276,8 +276,8 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
 
         {/* Mobile Tab Navigation */}
         <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
-          <nav 
-            className="flex justify-around p-2" 
+          <nav
+            className="flex justify-between px-1 py-2 overflow-x-auto"
             aria-label="Mobile dashboard navigation"
             role="navigation"
           >
@@ -289,7 +289,7 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
                   key={tab.id}
                   onClick={() => !isLocked && setActiveTab(tab.id as any)}
                   disabled={isLocked}
-                  className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-colors ${
+                  className={`flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-lg transition-colors min-w-0 flex-1 ${
                     isActive
                       ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]'
                       : isLocked

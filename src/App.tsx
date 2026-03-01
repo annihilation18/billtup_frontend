@@ -111,7 +111,7 @@ export default function App() {
           });
           if (response.ok) {
             const businessData = await response.json();
-            const userPlanType = businessData?.planType || businessData?.plan || 'basic';
+            const userPlanType = businessData?.subscriptionStatus?.planType || businessData?.planType || businessData?.plan || 'basic';
             plan = (userPlanType === 'premium' || userPlanType === 'trial') ? 'premium' : 'basic';
           }
         } catch {
