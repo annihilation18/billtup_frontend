@@ -210,10 +210,10 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                 <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Due Date
                 </th>
                 <th className="px-3 sm:px-6 py-3 text-right text-xs text-gray-600 uppercase tracking-wider">
@@ -250,17 +250,17 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                         {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
-                        {invoice.date 
+                        {invoice.date
                           ? new Date(invoice.date).toLocaleDateString()
-                          : invoice.createdAt 
-                            ? new Date(invoice.createdAt).toLocaleDateString() 
+                          : invoice.createdAt
+                            ? new Date(invoice.createdAt).toLocaleDateString()
                             : 'N/A'
                         }
                       </span>
                     </td>
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
                         {invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}
                       </span>

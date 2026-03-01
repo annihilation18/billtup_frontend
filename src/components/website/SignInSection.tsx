@@ -53,7 +53,7 @@ export function SignInSection({ onNavigateToSignUp, onSignIn }: SignInSectionPro
         let plan: 'basic' | 'premium' = 'basic';
         if (response.ok) {
           const businessData = await response.json();
-          const userPlanType = businessData?.planType || businessData?.plan || 'basic';
+          const userPlanType = businessData?.subscriptionStatus?.planType || businessData?.planType || businessData?.plan || 'basic';
           plan = (userPlanType === 'premium' || userPlanType === 'trial') ? 'premium' : 'basic';
         }
 
