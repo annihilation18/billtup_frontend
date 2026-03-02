@@ -2,7 +2,7 @@ import { getIdToken } from './auth/cognito';
 import { API_CONFIG } from './config';
 import { captureError } from './errorReporter';
 
-type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year';
+type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year' | 'custom';
 
 // Helper function to get date range for a time period
 function getDateRangeForPeriod(period: TimePeriod): { startDate: Date; endDate: Date } {
@@ -335,7 +335,7 @@ export async function updateUserProfile(userData: any) {
 }
 
 // Analytics APIs
-export async function fetchSalesStats(period: TimePeriod = 'current_month') {
+export async function fetchSalesStats(period: TimePeriod = 'current_month', customStartDate?: string, customEndDate?: string) {
   try {
     const invoicesData = await fetchInvoices();
     const customersData = await fetchCustomers();
@@ -345,7 +345,9 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
     const customers = Array.isArray(customersData) ? customersData : [];
 
     // Get date ranges for the selected period
-    const { startDate, endDate } = getDateRangeForPeriod(period);
+    const { startDate, endDate } = period === 'custom' && customStartDate && customEndDate
+      ? { startDate: new Date(customStartDate), endDate: new Date(customEndDate + 'T23:59:59') }
+      : getDateRangeForPeriod(period as Exclude<TimePeriod, 'custom'>);
 
     // Helper: net revenue for a paid invoice (subtracts refunds)
     const invoiceNetRevenue = (inv: any) => inv.total - (inv.refundedAmount || 0);
@@ -423,7 +425,7 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month') {
 }
 
 // Get top customers by revenue
-export async function fetchTopCustomers(limit: number = 10, period: TimePeriod = 'current_month') {
+export async function fetchTopCustomers(limit: number = 10, period: TimePeriod = 'current_month', customStartDate?: string, customEndDate?: string) {
   try {
     const customersData = await fetchCustomers();
     const invoicesData = await fetchInvoices();
@@ -433,7 +435,9 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
     const invoices = Array.isArray(invoicesData) ? invoicesData : [];
 
     // Get date ranges for the selected period
-    const { startDate, endDate } = getDateRangeForPeriod(period);
+    const { startDate, endDate } = period === 'custom' && customStartDate && customEndDate
+      ? { startDate: new Date(customStartDate), endDate: new Date(customEndDate + 'T23:59:59') }
+      : getDateRangeForPeriod(period as Exclude<TimePeriod, 'custom'>);
 
     // Helper function to get the invoice date (consistent with fetchSalesStats)
     const getInvoiceDate = (inv: any): Date => {
@@ -474,7 +478,7 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
 }
 
 // Get revenue trend data
-export async function fetchRevenueTrend(months: number = 12, period: TimePeriod = 'current_month') {
+export async function fetchRevenueTrend(months: number = 12, period: TimePeriod = 'current_month', customStartDate?: string, customEndDate?: string) {
   try {
     const invoicesData = await fetchInvoices();
 
@@ -582,6 +586,43 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
           label = `${dayDate.toLocaleString('default', { month: 'short' })} ${dayOfMonth}`;
           previousMonth = currentMonth;
         }
+
+        trendData.push({
+          month: label,
+          revenue: dayRevenue,
+          count: dayInvoices.length,
+        });
+      }
+
+      return trendData;
+    }
+
+    // For custom date range, show daily data
+    if (period === 'custom' && customStartDate && customEndDate) {
+      const rangeStart = new Date(customStartDate);
+      const rangeEnd = new Date(customEndDate + 'T23:59:59');
+      const daysDiff = Math.floor((rangeEnd.getTime() - rangeStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+
+      for (let i = 0; i < daysDiff; i++) {
+        const dayDate = new Date(rangeStart);
+        dayDate.setDate(rangeStart.getDate() + i);
+
+        const nextDayDate = new Date(dayDate);
+        nextDayDate.setDate(dayDate.getDate() + 1);
+
+        const dayInvoices = invoices.filter((inv: any) => {
+          const invDate = getInvoiceDate(inv);
+          return invDate >= dayDate && invDate < nextDayDate && inv.status === 'paid';
+        });
+
+        const dayRevenue = dayInvoices.reduce(
+          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
+          0
+        );
+
+        const label = daysDiff <= 31
+          ? `${dayDate.getDate()}`
+          : `${dayDate.toLocaleString('default', { month: 'short' })} ${dayDate.getDate()}`;
 
         trendData.push({
           month: label,

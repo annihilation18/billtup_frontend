@@ -211,7 +211,7 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                   Status
                 </th>
                 <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
-                  Date
+                  Date Created
                 </th>
                 <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Due Date

@@ -42,21 +42,21 @@ const NOTIFICATION_OPTIONS = [
 
 export function EmailNotificationsModal({ open, onClose, userProfile, onDataUpdated }: EmailNotificationsModalProps) {
   const [notifications, setNotifications] = useState({
-    invoicePaid: true,
-    paymentFailed: true,
+    invoicePaid: false,
+    paymentFailed: false,
     newCustomer: false,
-    overdueInvoices: true,
-    weeklySummary: true,
+    overdueInvoices: false,
+    weeklySummary: false,
   });
 
   useEffect(() => {
     if (userProfile?.notifications) {
       setNotifications({
-        invoicePaid: userProfile.notifications.invoicePaid ?? true,
-        paymentFailed: userProfile.notifications.paymentFailed ?? true,
+        invoicePaid: userProfile.notifications.invoicePaid ?? false,
+        paymentFailed: userProfile.notifications.paymentFailed ?? false,
         newCustomer: userProfile.notifications.newCustomer ?? false,
-        overdueInvoices: userProfile.notifications.overdueInvoices ?? true,
-        weeklySummary: userProfile.notifications.weeklySummary ?? true,
+        overdueInvoices: userProfile.notifications.overdueInvoices ?? false,
+        weeklySummary: userProfile.notifications.weeklySummary ?? false,
       });
     }
   }, [userProfile]);

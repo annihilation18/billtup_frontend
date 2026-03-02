@@ -17,7 +17,7 @@ import {
   Trash2,
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
-import { createEstimate, fetchCustomers, fetchEstimates } from '../../utils/dashboard-api';
+import { createEstimate, createCustomer, fetchCustomers, fetchEstimates } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
@@ -44,6 +44,10 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: '', quantity: 1, rate: 0, amount: 0 }
   ]);
+  const [isNewCustomer, setIsNewCustomer] = useState(false);
+  const [newCustomerName, setNewCustomerName] = useState('');
+  const [newCustomerEmail, setNewCustomerEmail] = useState('');
+  const [newCustomerPhone, setNewCustomerPhone] = useState('');
   const [savedItems, setSavedItems] = useState<any[]>([]);
   const [activeAutocomplete, setActiveAutocomplete] = useState<number | null>(null);
 
@@ -129,7 +133,12 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
   };
 
   const handleCreate = async () => {
-    if (!selectedCustomerId) {
+    if (isNewCustomer) {
+      if (!newCustomerName.trim()) {
+        toast.error('Please enter the customer name');
+        return;
+      }
+    } else if (!selectedCustomerId) {
       toast.error('Please select a customer');
       return;
     }
@@ -141,13 +150,30 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
 
     setIsCreating(true);
     try {
-      const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+      let customerId = selectedCustomerId;
+      let customerName = '';
+      let customerEmail = '';
+
+      if (isNewCustomer) {
+        const newCust = await createCustomer({
+          name: newCustomerName.trim(),
+          email: newCustomerEmail.trim() || undefined,
+          phone: newCustomerPhone.trim() || undefined,
+        });
+        customerId = newCust.id;
+        customerName = newCustomerName.trim();
+        customerEmail = newCustomerEmail.trim();
+      } else {
+        const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+        customerName = selectedCustomer?.name || '';
+        customerEmail = selectedCustomer?.email || '';
+      }
 
       await createEstimate({
         number: estimateNumber,
-        customerId: selectedCustomerId,
-        customer: selectedCustomer?.name || '',
-        customerEmail: selectedCustomer?.email || '',
+        customerId,
+        customer: customerName,
+        customerEmail,
         items: lineItems,
         total: calculateTotal(),
         status: 'draft',
@@ -182,6 +208,10 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
 
   const resetForm = () => {
     setSelectedCustomerId('');
+    setIsNewCustomer(false);
+    setNewCustomerName('');
+    setNewCustomerEmail('');
+    setNewCustomerPhone('');
     setEstimateNumber('');
     setDate('');
     setValidUntil('');
@@ -219,19 +249,61 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
               <Label htmlFor="customer">
                 Customer <span className="text-red-500">*</span>
               </Label>
-              <select
-                id="customer"
-                value={selectedCustomerId}
-                onChange={(e) => setSelectedCustomerId(e.target.value)}
-                className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm"
-              >
-                <option value="">Select a customer</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name}
-                  </option>
-                ))}
-              </select>
+              {!isNewCustomer ? (
+                <div className="space-y-2">
+                  <select
+                    id="customer"
+                    value={selectedCustomerId}
+                    onChange={(e) => setSelectedCustomerId(e.target.value)}
+                    className="w-full h-10 px-3 rounded-md border border-gray-300 bg-white text-sm"
+                  >
+                    <option value="">Select a customer</option>
+                    {customers.map((customer) => (
+                      <option key={customer.id} value={customer.id}>
+                        {customer.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => { setIsNewCustomer(true); setSelectedCustomerId(''); }}
+                    className="text-sm text-[#1E3A8A] hover:underline flex items-center gap-1"
+                  >
+                    <Plus className="w-3 h-3" />
+                    Add New Customer
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <Input
+                    placeholder="Customer Name *"
+                    value={newCustomerName}
+                    onChange={(e) => setNewCustomerName(e.target.value)}
+                    className="border-gray-300 bg-white"
+                  />
+                  <Input
+                    placeholder="Email (optional)"
+                    type="email"
+                    value={newCustomerEmail}
+                    onChange={(e) => setNewCustomerEmail(e.target.value)}
+                    className="border-gray-300 bg-white"
+                  />
+                  <Input
+                    placeholder="Phone (optional)"
+                    type="tel"
+                    value={newCustomerPhone}
+                    onChange={(e) => setNewCustomerPhone(e.target.value)}
+                    className="border-gray-300 bg-white"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => { setIsNewCustomer(false); setNewCustomerName(''); setNewCustomerEmail(''); setNewCustomerPhone(''); }}
+                    className="text-sm text-gray-500 hover:underline"
+                  >
+                    Select existing customer instead
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="space-y-2">

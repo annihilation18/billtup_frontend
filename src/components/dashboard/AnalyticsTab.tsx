@@ -58,13 +58,14 @@ interface RevenueTrendData {
   count: number;
 }
 
-type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year';
+type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year' | 'custom';
 
-const TIME_PERIOD_LABELS = {
+const TIME_PERIOD_LABELS: Record<TimePeriod, string> = {
   current_month: 'Current Month',
   billing_cycle: 'Billing Cycle to Date',
   quarter: 'Quarter to Date',
   year: 'Year to Date',
+  custom: 'Custom Range',
 };
 
 export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
@@ -75,20 +76,24 @@ export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
   const [topCustomers, setTopCustomers] = useState<TopCustomer[]>([]);
   const [revenueTrend, setRevenueTrend] = useState<RevenueTrendData[]>([]);
   const [billingCycleDates, setBillingCycleDates] = useState<{ start: Date; end: Date } | null>(null);
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
 
   useEffect(() => {
     if (isPremium) {
+      // Skip loading when custom range is selected but dates aren't set
+      if (timePeriod === 'custom' && (!customStartDate || !customEndDate)) return;
       loadAnalytics();
     }
-  }, [isPremium, timePeriod]);
+  }, [isPremium, timePeriod, customStartDate, customEndDate]);
 
   const loadAnalytics = async () => {
     setLoading(true);
     try {
       const [statsData, customersData, trendData, subscription] = await Promise.all([
-        fetchSalesStats(timePeriod),
-        fetchTopCustomers(4, timePeriod),
-        fetchRevenueTrend(12, timePeriod),
+        fetchSalesStats(timePeriod, customStartDate || undefined, customEndDate || undefined),
+        fetchTopCustomers(4, timePeriod, customStartDate || undefined, customEndDate || undefined),
+        fetchRevenueTrend(12, timePeriod, customStartDate || undefined, customEndDate || undefined),
         fetchSubscription()
       ]);
       
@@ -188,6 +193,35 @@ export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
           </Button>
         </div>
       </div>
+
+      {/* Custom Date Range Picker */}
+      {timePeriod === 'custom' && (
+        <div className="flex flex-wrap items-end gap-3">
+          <div className="space-y-1">
+            <label className="text-xs text-gray-500">Start Date</label>
+            <input
+              type="date"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+              className="h-9 px-3 rounded-md border border-gray-300 bg-white text-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs text-gray-500">End Date</label>
+            <input
+              type="date"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+              className="h-9 px-3 rounded-md border border-gray-300 bg-white text-sm"
+            />
+          </div>
+          {customStartDate && customEndDate && (
+            <p className="text-xs text-gray-500 self-end pb-2">
+              Showing data from {new Date(customStartDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} to {new Date(customEndDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Key Metrics */}
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
