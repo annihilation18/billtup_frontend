@@ -1,23 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { 
-  DollarSign, 
-  FileText, 
-  Users, 
-  TrendingUp, 
+import {
+  DollarSign,
+  FileText,
+  Users,
+  TrendingUp,
   Clock,
   CheckCircle2,
   XCircle,
   ArrowUpRight,
-  Plus,
+  User,
+  Building2,
+  CreditCard,
   Loader2
 } from 'lucide-react@0.468.0';
 import { fetchSalesStats, fetchInvoices, fetchBillingCycleUsage } from '../../utils/dashboard-api';
 
 interface OverviewTabProps {
   userPlan: 'basic' | 'premium';
-  onNavigateToTab?: (tab: 'customers' | 'invoices' | 'analytics') => void;
+  onNavigateToTab?: (tab: 'customers' | 'invoices' | 'analytics' | 'settings') => void;
   onUpgrade?: () => void;
 }
 
@@ -207,22 +209,15 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
             Quick Actions
           </h3>
           <div className="grid grid-cols-2 gap-4">
-            <button 
-              onClick={() => onNavigateToTab?.('invoices')}
+            <button
+              onClick={() => onNavigateToTab?.('settings')}
               className="p-4 bg-gradient-to-br from-[#1E3A8A]/5 to-[#14B8A6]/5 hover:from-[#1E3A8A]/10 hover:to-[#14B8A6]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
             >
-              <FileText className="w-8 h-8 text-[#1E3A8A] mb-2" />
-              <p className="text-sm text-gray-900">Create Invoice</p>
-            </button>
-            <button 
-              onClick={() => onNavigateToTab?.('customers')}
-              className="p-4 bg-gradient-to-br from-[#14B8A6]/5 to-[#F59E0B]/5 hover:from-[#14B8A6]/10 hover:to-[#F59E0B]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
-            >
-              <Users className="w-8 h-8 text-[#14B8A6] mb-2" />
-              <p className="text-sm text-gray-900">Add Customer</p>
+              <User className="w-8 h-8 text-[#1E3A8A] mb-2" />
+              <p className="text-sm text-gray-900">Account Settings</p>
             </button>
             {userPlan === 'premium' ? (
-              <button 
+              <button
                 onClick={() => onNavigateToTab?.('analytics')}
                 className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left"
               >
@@ -230,7 +225,7 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
                 <p className="text-sm text-gray-900">View Reports</p>
               </button>
             ) : (
-              <button 
+              <button
                 onClick={onUpgrade}
                 className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left relative"
               >
@@ -239,12 +234,19 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
                 <span className="absolute top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#1E3A8A] text-white text-xs rounded">Premium</span>
               </button>
             )}
-            <button 
-              onClick={() => onNavigateToTab?.('invoices')}
+            <button
+              onClick={() => onNavigateToTab?.('settings')}
+              className="p-4 bg-gradient-to-br from-[#14B8A6]/5 to-[#F59E0B]/5 hover:from-[#14B8A6]/10 hover:to-[#F59E0B]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
+            >
+              <Building2 className="w-8 h-8 text-[#14B8A6] mb-2" />
+              <p className="text-sm text-gray-900">Business Profile</p>
+            </button>
+            <button
+              onClick={() => onNavigateToTab?.('settings')}
               className="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors text-left"
             >
-              <CheckCircle2 className="w-8 h-8 text-gray-600 mb-2" />
-              <p className="text-sm text-gray-900">Mark Paid</p>
+              <CreditCard className="w-8 h-8 text-gray-600 mb-2" />
+              <p className="text-sm text-gray-900">Payment Settings</p>
             </button>
           </div>
         </Card>
@@ -262,7 +264,7 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
                 Unlock advanced features like analytics, refund management, and custom branding.
               </p>
               <p className="text-xs text-gray-500">
-                You've used {billingUsage?.used || 0} of {billingUsage?.limit || 50} invoices this cycle
+                You've used {billingUsage?.used || 0} of {billingUsage?.limit || 10} invoices this cycle
               </p>
             </div>
             <Button className="bg-gradient-to-r from-[#F59E0B] to-[#1E3A8A] hover:opacity-90 text-white rounded-lg whitespace-nowrap" onClick={onUpgrade}>

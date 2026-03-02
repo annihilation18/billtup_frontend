@@ -3,7 +3,7 @@ import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Switch } from '../ui/switch';
-import { CreditCard, Smartphone, AlertCircle, CheckCircle, Loader2 } from 'lucide-react@0.468.0';
+import { CreditCard, Smartphone, AlertCircle, CheckCircle, Loader2, ExternalLink } from 'lucide-react@0.468.0';
 import { fetchStripeStatus, fetchSquareStatus, fetchActiveProvider, setActiveProvider as setActiveProviderApi, getStripeOAuthUrl, getSquareOAuthUrl, disconnectStripe, disconnectSquare } from '../../utils/dashboard-api';
 import { toast } from 'sonner@2.0.3';
 
@@ -323,18 +323,28 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
                   </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {stripeConnected ? (
-                    <Button
-                      onClick={handleDisconnectStripe}
-                      variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-50"
-                      disabled={disconnecting === 'stripe'}
-                    >
-                      {disconnecting === 'stripe' ? (
-                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
-                      ) : 'Disconnect Stripe'}
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        className="border-gray-300"
+                        onClick={() => window.open('https://dashboard.stripe.com', '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Stripe Dashboard
+                      </Button>
+                      <Button
+                        onClick={handleDisconnectStripe}
+                        variant="outline"
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        disabled={disconnecting === 'stripe'}
+                      >
+                        {disconnecting === 'stripe' ? (
+                          <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                        ) : 'Disconnect Stripe'}
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       onClick={handleConnectStripe}
@@ -377,18 +387,28 @@ export function PaymentSettingsModal({ open, onClose, onDataUpdated }: PaymentSe
                   </div>
                 )}
 
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {squareConnected ? (
-                    <Button
-                      onClick={handleDisconnectSquare}
-                      variant="outline"
-                      className="border-red-300 text-red-600 hover:bg-red-50"
-                      disabled={disconnecting === 'square'}
-                    >
-                      {disconnecting === 'square' ? (
-                        <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
-                      ) : 'Disconnect Square'}
-                    </Button>
+                    <>
+                      <Button
+                        variant="outline"
+                        className="border-gray-300"
+                        onClick={() => window.open('https://squareup.com/dashboard', '_blank')}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Square Dashboard
+                      </Button>
+                      <Button
+                        onClick={handleDisconnectSquare}
+                        variant="outline"
+                        className="border-red-300 text-red-600 hover:bg-red-50"
+                        disabled={disconnecting === 'square'}
+                      >
+                        {disconnecting === 'square' ? (
+                          <><Loader2 className="w-4 h-4 animate-spin mr-2" />Disconnecting...</>
+                        ) : 'Disconnect Square'}
+                      </Button>
+                    </>
                   ) : (
                     <Button
                       onClick={handleConnectSquare}
