@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
-import { 
-  TrendingUp, 
-  DollarSign, 
-  Users, 
+import {
+  TrendingUp,
+  DollarSign,
+  Users,
   FileText,
   Calendar,
   Download,
@@ -19,9 +19,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
-import { 
-  fetchSalesStats, 
-  fetchTopCustomers, 
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
+import {
+  fetchSalesStats,
+  fetchTopCustomers,
   fetchRevenueTrend,
   fetchSubscription
 } from '../../utils/dashboard-api';
@@ -333,28 +342,39 @@ export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
           </div>
         ) : revenueTrend.length > 0 ? (
           <div className="h-64">
-            <div className="h-full flex items-end justify-between gap-2">
-              {(() => {
-                const maxRevenue = Math.max(...revenueTrend.map(d => d.revenue), 1);
-                return revenueTrend.map((data, index) => {
-                  const heightPercentage = maxRevenue > 0 ? (data.revenue / maxRevenue) * 100 : 0;
-                  return (
-                    <div key={index} className="flex-1 flex flex-col items-center gap-2 group relative h-full">
-                      <div className="flex-1 w-full flex flex-col justify-end">
-                        <div
-                          className="w-full bg-gradient-to-t from-[#1E3A8A] to-[#14B8A6] rounded-t-lg hover:opacity-80 transition-opacity cursor-pointer"
-                          style={{ height: `${Math.max(heightPercentage, 5)}%` }}
-                          title={`${data.month}: $${data.revenue.toLocaleString()} (${data.count} invoices)`}
-                        />
-                      </div>
-                      <span className="text-xs text-gray-500">
-                        {data.month}
-                      </span>
-                    </div>
-                  );
-                });
-              })()}
-            </div>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={revenueTrend} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="month"
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  angle={revenueTrend.length > 15 ? -45 : 0}
+                  textAnchor={revenueTrend.length > 15 ? 'end' : 'middle'}
+                  height={revenueTrend.length > 15 ? 60 : 30}
+                  interval={revenueTrend.length > 20 ? Math.floor(revenueTrend.length / 15) : 0}
+                />
+                <YAxis
+                  tick={{ fontSize: 12, fill: '#6b7280' }}
+                  tickFormatter={(value: number) => `$${value.toLocaleString()}`}
+                  width={70}
+                  hide={typeof window !== 'undefined' && window.innerWidth < 640}
+                />
+                <Tooltip
+                  formatter={(value: number, _name: string) => [`$${value.toLocaleString()}`, 'Revenue']}
+                  labelFormatter={(label: string) => label}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #e5e7eb' }}
+                  itemStyle={{ color: '#1E3A8A' }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#1E3A8A"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 5, fill: '#1E3A8A', stroke: '#fff', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         ) : (
           <div className="h-64 flex items-center justify-center text-gray-500">
