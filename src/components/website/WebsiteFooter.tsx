@@ -1,4 +1,4 @@
-import { Mail, Twitter, Facebook, Instagram, Linkedin } from 'lucide-react@0.468.0';
+import { Mail } from 'lucide-react@0.468.0';
 import type { SectionType } from '../../App';
 import { BilltUpLogo } from '../BilltUpLogo';
 
@@ -24,34 +24,10 @@ export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
             <p className="text-gray-400 text-sm mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
               The modern invoicing solution for service businesses. Get paid faster with professional invoices and instant payment processing.
             </p>
-            <div className="flex gap-3" role="group" aria-label="Social media links">
-              <a 
-                href="#" 
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
-                aria-label="Follow us on Twitter"
-              >
-                <Twitter className="w-4 h-4" aria-hidden="true" />
-              </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
-                aria-label="Follow us on Facebook"
-              >
-                <Facebook className="w-4 h-4" aria-hidden="true" />
-              </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
-                aria-label="Follow us on Instagram"
-              >
-                <Instagram className="w-4 h-4" aria-hidden="true" />
-              </a>
-              <a 
-                href="#" 
-                className="w-9 h-9 rounded-lg bg-gray-800 hover:bg-gray-700 flex items-center justify-center transition-colors"
-                aria-label="Connect with us on LinkedIn"
-              >
-                <Linkedin className="w-4 h-4" aria-hidden="true" />
+            <div className="flex items-center gap-2 text-sm text-gray-400">
+              <Mail className="w-4 h-4" aria-hidden="true" />
+              <a href="mailto:support@billtup.com" className="hover:text-white transition-colors">
+                support@billtup.com
               </a>
             </div>
           </div>
