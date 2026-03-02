@@ -100,6 +100,7 @@ function clearTokens(): void {
  * Returns session tokens and user info.
  */
 export async function signIn(email: string, password: string): Promise<CognitoSignInResult> {
+  email = email.toLowerCase().trim();
   const data = await cognitoRequest('InitiateAuth', {
     AuthFlow: 'USER_PASSWORD_AUTH',
     ClientId: COGNITO_CLIENT_ID,
