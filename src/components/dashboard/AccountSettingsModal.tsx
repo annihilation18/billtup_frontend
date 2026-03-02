@@ -34,6 +34,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
   const [isTrial, setIsTrial] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
+  const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
   const [pendingPlan, setPendingPlan] = useState<'basic' | 'premium'>('basic');
 
   // Load subscription status to check for pending cancellation
@@ -52,6 +54,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           setCancelAtPeriodEnd(!!data.cancelAtPeriodEnd);
           setCurrentPeriodEnd(data.currentPeriodEnd || null);
           setIsTrial(!!data.isTrial);
+          setTrialEndsAt(data.trialEndsAt || null);
+          setTrialDaysRemaining(data.daysRemaining || 0);
         }
       } catch {
         // Subscription status not available
@@ -364,12 +368,23 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                     {userProfile?.createdAt ? new Date(userProfile.createdAt).toLocaleDateString() : 'N/A'}
                   </span>
                 </div>
+                {isTrial && trialEndsAt && (
+                  <div className="flex justify-between py-2 border-b border-gray-200">
+                    <span className="text-gray-600">Trial Ends</span>
+                    <span className="text-amber-600">
+                      {new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                      {trialDaysRemaining > 0 && ` (${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left)`}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : 'Next Billing Date'}</span>
+                  <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : isTrial ? 'First Billing Date' : 'Next Billing Date'}</span>
                   <span className={cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-900'}>
-                    {currentPeriodEnd
-                      ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-                      : 'Monthly'}
+                    {isTrial && trialEndsAt
+                      ? new Date(new Date(trialEndsAt).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                      : currentPeriodEnd
+                        ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                        : 'Monthly'}
                   </span>
                 </div>
               </div>
