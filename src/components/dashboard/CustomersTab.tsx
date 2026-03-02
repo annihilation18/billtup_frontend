@@ -244,7 +244,7 @@ export function CustomersTab({ userPlan }: CustomersTabProps) {
       {!isPremium && (
         <Card className="p-4 bg-amber-50 border-amber-200">
           <p className="text-sm text-amber-800">
-            <strong>Basic Plan:</strong> You have {customers.length} of 50 customers. Upgrade to Premium for unlimited customers and advanced features.
+            <strong>Basic Plan:</strong> You have {customers.length} of 10 customers. Upgrade to Premium for unlimited customers and advanced features.
           </p>
         </Card>
       )}

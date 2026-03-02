@@ -235,10 +235,15 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       name: 'Basic',
       price: '$4.99',
       features: [
-        'Up to 10 invoices/month',
+        'Up to 10 invoices per month',
+        'Up to 10 customers',
+        'Stripe & Square payment processing',
+        'Automatic PDF receipts via email',
+        'Estimates & quotes',
+        'Payment links',
         'Basic customer management',
+        'Mobile & web access',
         'Email support',
-        'PDF invoice generation',
       ],
     },
     {
@@ -246,11 +251,16 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       price: '$9.99',
       features: [
         'Unlimited invoices',
-        'Advanced analytics',
-        'Customer insights',
-        'Priority support',
-        'Custom branding',
-        'Tax calculations',
+        'Unlimited customers',
+        'Stripe & Square payment processing',
+        'Automatic PDF receipts via email',
+        'Estimates & quotes',
+        'Payment links',
+        'Advanced customer management',
+        'Sales analytics & reports',
+        'Custom branding & invoice templates',
+        'Mobile & web access',
+        'Priority email support',
       ],
     },
   ];
@@ -608,23 +618,19 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
             <ul className="space-y-2 text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-600" />
-                Unlimited invoices
+                Unlimited invoices & customers
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-600" />
-                Advanced analytics
+                Sales analytics & reports
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-600" />
-                Customer insights
+                Custom branding & invoice templates
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-600" />
-                Priority support
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-600" />
-                Custom branding
+                Priority email support
               </li>
             </ul>
           </div>
