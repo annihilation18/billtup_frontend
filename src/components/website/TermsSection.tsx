@@ -17,7 +17,7 @@ export function TermsSection() {
           </h1>
           
           <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Last updated: November 20, 2024
+            Last updated: March 1, 2026
           </p>
         </div>
 
@@ -43,7 +43,7 @@ export function TermsSection() {
             </h2>
             <div className="space-y-3 text-gray-700 leading-relaxed">
               <p>
-                These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and BilltUp ("Company," "we," "us," or "our") governing your access to and use of the BilltUp platform, including our website, mobile applications, and related services (collectively, the "Service").
+                These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and Omniforge Technologies LLC, doing business as BilltUp ("Company," "we," "us," or "our"), governing your access to and use of the BilltUp platform, including our website, mobile applications, and related services (collectively, the "Service"). The Service allows you to create and send invoices and estimates, collect payments via integrated payment processors, generate payment links and QR codes, manage customer information, and view business analytics and reports.
               </p>
               <p>
                 By creating an account, accessing, or using the Service, you acknowledge that you have read, understood, and agree to be bound by these Terms. If you do not agree to these Terms, you must not access or use the Service.
@@ -117,8 +117,9 @@ export function TermsSection() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">Premium Plan: $9.99/month</p>
                 <ul className="list-disc pl-6 space-y-1 text-sm">
-                  <li>Unlimited invoices</li>
+                  <li>Unlimited invoices and estimates</li>
                   <li>Custom branding and templates</li>
+                  <li>Payment links and QR codes</li>
                   <li>Priority support</li>
                   <li>Advanced reporting and analytics</li>
                 </ul>
@@ -169,10 +170,10 @@ export function TermsSection() {
             </h2>
             <div className="space-y-3 text-gray-700 leading-relaxed">
               <p>
-                New users may be eligible for a 14-day free trial of Premium features. During the trial period, you will have access to all Premium features without charge.
+                New users receive a 14-day free trial with full access to all Premium features. A payment method is collected during sign-up but you will not be charged until the trial ends.
               </p>
               <p>
-                At the end of the trial period, your account will automatically convert to the Basic plan unless you choose to subscribe to a paid plan.
+                At the end of the trial period, your subscription will begin billing automatically at the rate of the plan you selected during sign-up, unless you cancel before the trial ends.
               </p>
               <p>
                 We reserve the right to limit or deny free trials to prevent abuse of the offer.
@@ -481,7 +482,7 @@ export function TermsSection() {
                 If you have any questions about these Terms, please contact us at:
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="font-semibold mb-2">BilltUp Legal Department</p>
+                <p className="font-semibold mb-2">Omniforge Technologies LLC (DBA BilltUp)</p>
                 <p>Email: legal@billtup.com</p>
                 <p>Email (General Support): support@billtup.com</p>
               </div>

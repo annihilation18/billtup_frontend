@@ -597,38 +597,91 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
       return trendData;
     }
 
-    // For custom date range, show daily data
+    // For custom date range, use smart bucketing based on range length
     if (period === 'custom' && customStartDate && customEndDate) {
       const rangeStart = new Date(customStartDate);
       const rangeEnd = new Date(customEndDate + 'T23:59:59');
       const daysDiff = Math.floor((rangeEnd.getTime() - rangeStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
 
-      for (let i = 0; i < daysDiff; i++) {
-        const dayDate = new Date(rangeStart);
-        dayDate.setDate(rangeStart.getDate() + i);
+      if (daysDiff <= 31) {
+        // Daily buckets for short ranges
+        for (let i = 0; i < daysDiff; i++) {
+          const dayDate = new Date(rangeStart);
+          dayDate.setDate(rangeStart.getDate() + i);
 
-        const nextDayDate = new Date(dayDate);
-        nextDayDate.setDate(dayDate.getDate() + 1);
+          const nextDayDate = new Date(dayDate);
+          nextDayDate.setDate(dayDate.getDate() + 1);
 
-        const dayInvoices = invoices.filter((inv: any) => {
-          const invDate = getInvoiceDate(inv);
-          return invDate >= dayDate && invDate < nextDayDate && inv.status === 'paid';
-        });
+          const dayInvoices = invoices.filter((inv: any) => {
+            const invDate = getInvoiceDate(inv);
+            return invDate >= dayDate && invDate < nextDayDate && inv.status === 'paid';
+          });
 
-        const dayRevenue = dayInvoices.reduce(
-          (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
-          0
-        );
+          const dayRevenue = dayInvoices.reduce(
+            (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
+            0
+          );
 
-        const label = daysDiff <= 31
-          ? `${dayDate.getDate()}`
-          : `${dayDate.toLocaleString('default', { month: 'short' })} ${dayDate.getDate()}`;
+          trendData.push({
+            month: `${dayDate.toLocaleString('default', { month: 'short' })} ${dayDate.getDate()}`,
+            revenue: dayRevenue,
+            count: dayInvoices.length,
+          });
+        }
+      } else if (daysDiff <= 90) {
+        // Weekly buckets for medium ranges
+        const weekStart = new Date(rangeStart);
+        while (weekStart <= rangeEnd) {
+          const weekEnd = new Date(weekStart);
+          weekEnd.setDate(weekStart.getDate() + 6);
+          const effectiveEnd = weekEnd > rangeEnd ? rangeEnd : weekEnd;
+          const nextDay = new Date(effectiveEnd);
+          nextDay.setDate(effectiveEnd.getDate() + 1);
 
-        trendData.push({
-          month: label,
-          revenue: dayRevenue,
-          count: dayInvoices.length,
-        });
+          const weekInvoices = invoices.filter((inv: any) => {
+            const invDate = getInvoiceDate(inv);
+            return invDate >= weekStart && invDate < nextDay && inv.status === 'paid';
+          });
+
+          const weekRevenue = weekInvoices.reduce(
+            (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
+            0
+          );
+
+          trendData.push({
+            month: `${weekStart.toLocaleString('default', { month: 'short' })} ${weekStart.getDate()}`,
+            revenue: weekRevenue,
+            count: weekInvoices.length,
+          });
+
+          weekStart.setDate(weekStart.getDate() + 7);
+        }
+      } else {
+        // Monthly buckets for long ranges
+        const cursor = new Date(rangeStart.getFullYear(), rangeStart.getMonth(), 1);
+        while (cursor <= rangeEnd) {
+          const monthStart = new Date(Math.max(cursor.getTime(), rangeStart.getTime()));
+          const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+          const monthEnd = nextMonth > rangeEnd ? new Date(rangeEnd.getTime() + 1) : nextMonth;
+
+          const monthInvoices = invoices.filter((inv: any) => {
+            const invDate = getInvoiceDate(inv);
+            return invDate >= monthStart && invDate < monthEnd && inv.status === 'paid';
+          });
+
+          const monthRevenue = monthInvoices.reduce(
+            (sum: number, inv: any) => sum + inv.total - (inv.refundedAmount || 0),
+            0
+          );
+
+          trendData.push({
+            month: cursor.toLocaleString('default', { month: 'short' }),
+            revenue: monthRevenue,
+            count: monthInvoices.length,
+          });
+
+          cursor.setMonth(cursor.getMonth() + 1);
+        }
       }
 
       return trendData;
