@@ -290,10 +290,10 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
       </Card>
 
       {/* Usage Limit (Basic Plan) */}
-      {!isPremium && billingUsage && (
+      {!isPremium && (
         <Card className="p-4 bg-amber-50 border-amber-200">
           <p className="text-sm text-amber-800">
-            <strong>Basic Plan:</strong> You've used {billingUsage.used} of {billingUsage.limit} invoices this cycle. Upgrade to Premium for unlimited invoices.
+            <strong>Basic Plan:</strong> You have {invoices.length} of 10 invoices. Upgrade to Premium for unlimited invoices.
           </p>
         </Card>
       )}

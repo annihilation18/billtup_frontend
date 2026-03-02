@@ -751,7 +751,7 @@ export async function fetchBillingCycleUsage(): Promise<{ used: number; limit: n
     return result;
   } catch (error) {
     // Silently return default limits - endpoint doesn't exist yet
-    return { used: 0, limit: 50 };
+    return { used: 0, limit: 10 };
   }
 }
 
