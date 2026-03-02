@@ -191,61 +191,8 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
         </div>
       </Card>
 
-      {/* Mobile Estimate Cards */}
-      <div className="sm:hidden space-y-3">
-        {loading ? (
-          <Card className="p-4 border-gray-200 flex justify-center">
-            <Loader2 className="w-5 h-5 animate-spin" />
-          </Card>
-        ) : filteredEstimates.length > 0 ? (
-          filteredEstimates.map((estimate) => (
-            <Card key={estimate.id} className="p-4 border-gray-200">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <p className="text-sm font-medium text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                    {estimate.number || estimate.id}
-                  </p>
-                  <p className="text-sm text-gray-600 mt-0.5">{estimate.customer}</p>
-                </div>
-                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${getStatusColor(estimate.status)}`}>
-                  {getStatusIcon(estimate.status)}
-                  {estimate.status.charAt(0).toUpperCase() + estimate.status.slice(1)}
-                </span>
-              </div>
-              <p className="text-lg font-semibold text-gray-900 mb-2" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                ${(estimate.total || 0).toFixed(2)}
-              </p>
-              <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                <span>
-                  {estimate.date
-                    ? new Date(estimate.date).toLocaleDateString()
-                    : estimate.createdAt
-                      ? new Date(estimate.createdAt).toLocaleDateString()
-                      : 'N/A'}
-                </span>
-                {estimate.validUntil && (
-                  <span>Valid until: {new Date(estimate.validUntil).toLocaleDateString()}</span>
-                )}
-              </div>
-              <Button
-                variant="outline"
-                className="h-8 px-3 text-xs border-gray-300 w-full"
-                onClick={() => setViewingEstimate(estimate)}
-              >
-                <Eye className="w-3 h-3 mr-1" />
-                View
-              </Button>
-            </Card>
-          ))
-        ) : (
-          <Card className="p-4 border-gray-200 text-center text-gray-500 text-sm">
-            No estimates found
-          </Card>
-        )}
-      </div>
-
       {/* Estimates Table */}
-      <Card className="border-gray-200 overflow-hidden hidden sm:block">
+      <Card className="border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
