@@ -303,7 +303,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4" autoComplete="off">
                 {/* Name */}
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
@@ -334,6 +334,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       className="pl-10"
                       required
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -369,6 +370,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                       className="pl-10 pr-10"
                       required
                       minLength={8}
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
@@ -394,6 +396,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                       className="pl-10 pr-10"
                       required
                       minLength={8}
+                      autoComplete="new-password"
                     />
                     <button
                       type="button"
