@@ -184,7 +184,7 @@ export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
                 <ChevronDown className="w-4 h-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="start" className="w-56">
               {(Object.keys(TIME_PERIOD_LABELS) as TimePeriod[]).map((period) => (
                 <DropdownMenuItem
                   key={period}

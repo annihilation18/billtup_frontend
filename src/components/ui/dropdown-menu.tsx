@@ -72,7 +72,7 @@ function DropdownMenuContent({ className, children, align = "center", sideOffset
       ref={contentRef}
       className={cn(
         "absolute z-50 min-w-[8rem] rounded-md border bg-white p-1 shadow-md",
-        align === "end" && "right-0",
+        align === "end" && "right-0 max-sm:right-auto max-sm:left-0",
         align === "start" && "left-0",
         className
       )}
