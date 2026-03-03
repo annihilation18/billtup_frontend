@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { loadStripe } from '@stripe/stripe-js@4.0.0';
-import { 
-  Elements, 
-  CardElement, 
-  useStripe, 
-  useElements 
-} from '@stripe/react-stripe-js@2.8.0';
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  Elements,
+  CardElement,
+  useStripe,
+  useElements
+} from '@stripe/react-stripe-js';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -26,7 +26,7 @@ import {
   CreditCard,
   Shield,
   LockKeyhole
-} from 'lucide-react@0.468.0';
+} from 'lucide-react';
 import { STRIPE_CONFIG } from '../../utils/config';
 
 // Initialize Stripe with publishable key from config
@@ -68,7 +68,6 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
     password: '',
     confirmPassword: '',
     plan: initialPlan as 'basic' | 'premium',
-    billingCycle: 'monthly' as 'monthly' | 'annual',
   });
   
   const [showPassword, setShowPassword] = useState(false);
@@ -156,7 +155,6 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
             name: formData.name.trim(),
             businessName: formData.businessName.trim(),
             plan: formData.plan,
-            billingCycle: formData.billingCycle,
             paymentMethodId: paymentMethod.id, // Send the tokenized payment method
           }),
         }
@@ -182,7 +180,6 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
         password: '',
         confirmPassword: '',
         plan: 'basic' as 'basic' | 'premium',
-        billingCycle: 'monthly' as 'monthly' | 'annual',
       });
       
       // Clear card element
@@ -412,33 +409,6 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                 <div className="space-y-2">
                   <Label>Select Plan</Label>
                   
-                  {/* Billing Cycle Toggle */}
-                  <div className="flex items-center justify-center gap-3 mb-3 bg-gray-100 rounded-lg p-2">
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, billingCycle: 'monthly' })}
-                      className={`px-4 py-2 rounded-md text-sm transition-all ${
-                        formData.billingCycle === 'monthly'
-                          ? 'bg-white text-[#1E3A8A] shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      Monthly
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFormData({ ...formData, billingCycle: 'annual' })}
-                      className={`px-4 py-2 rounded-md text-sm transition-all ${
-                        formData.billingCycle === 'annual'
-                          ? 'bg-white text-[#1E3A8A] shadow-sm'
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <span>Annual</span>
-                      <span className="ml-1.5 text-xs text-green-600">(Save 17%)</span>
-                    </button>
-                  </div>
-                  
                   <div className="grid grid-cols-2 gap-3">
                     <button
                       type="button"
@@ -451,12 +421,9 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                     >
                       <div className="text-sm text-gray-600 mb-1">Basic</div>
                       <div className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        {formData.billingCycle === 'annual' ? '$49.99' : '$4.99'}
+                        $4.99
                       </div>
-                      <div className="text-xs text-gray-500">/{formData.billingCycle === 'annual' ? 'year' : 'month'}</div>
-                      {formData.billingCycle === 'annual' && (
-                        <div className="text-xs text-green-600 mt-1">$4.17/month</div>
-                      )}
+                      <div className="text-xs text-gray-500">/month</div>
                       <div className="text-xs text-gray-600 mt-2">Up to 10 invoices</div>
                     </button>
                     <button
@@ -470,12 +437,9 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                     >
                       <div className="text-sm text-gray-600 mb-1">Premium</div>
                       <div className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        {formData.billingCycle === 'annual' ? '$99.99' : '$9.99'}
+                        $9.99
                       </div>
-                      <div className="text-xs text-gray-500">/{formData.billingCycle === 'annual' ? 'year' : 'month'}</div>
-                      {formData.billingCycle === 'annual' && (
-                        <div className="text-xs text-green-600 mt-1">$8.33/month</div>
-                      )}
+                      <div className="text-xs text-gray-500">/month</div>
                       <div className="text-xs text-gray-600 mt-2">Unlimited invoices</div>
                     </button>
                   </div>
@@ -514,15 +478,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <p className="text-xs text-blue-900">
                     <strong>💳 Start Your Free Trial</strong> – You won't be charged today. Your{' '}
-                    {formData.billingCycle === 'annual' ? (
-                      <>
-                        {formData.plan === 'premium' ? '$99.99/year' : '$49.99/year'} subscription will be charged annually
-                      </>
-                    ) : (
-                      <>
-                        {formData.plan === 'premium' ? '$9.99/month' : '$4.99/month'} subscription will be charged monthly
-                      </>
-                    )}{' '}
+                    {formData.plan === 'premium' ? '$9.99/month' : '$4.99/month'} subscription will be charged monthly{' '}
                     starting after your 14-day trial ends unless you cancel.
                   </p>
                 </div>

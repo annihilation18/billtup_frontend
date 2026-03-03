@@ -1,7 +1,6 @@
-import { Check, Zap, Crown, Star, CreditCard } from 'lucide-react@0.468.0';
+import { Check, Zap, Crown, Star, CreditCard } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { useState } from 'react';
 import type { SectionType } from '../App';
 
 interface PricingSectionProps {
@@ -9,14 +8,11 @@ interface PricingSectionProps {
 }
 
 export function PricingSection({ onNavigate }: PricingSectionProps) {
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('monthly');
-
   const plans = [
     {
       name: 'Basic',
-      price: billingCycle === 'monthly' ? 4.99 : 49.99,
-      period: billingCycle === 'monthly' ? '/month' : '/year',
-      savings: billingCycle === 'annual' ? 'Save $10/year' : null,
+      price: 4.99,
+      period: '/month',
       description: 'Perfect for small businesses and freelancers just getting started',
       color: 'from-[#14B8A6] to-[#1E3A8A]',
       icon: Zap,
@@ -38,9 +34,8 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
     },
     {
       name: 'Premium',
-      price: billingCycle === 'monthly' ? 9.99 : 99.99,
-      period: billingCycle === 'monthly' ? '/month' : '/year',
-      savings: billingCycle === 'annual' ? 'Save $20/year' : null,
+      price: 9.99,
+      period: '/month',
       description: 'For growing businesses that need advanced features and priority support',
       color: 'from-[#F59E0B] to-[#1E3A8A]',
       icon: Crown,
@@ -83,35 +78,6 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
             <br />
             All plans include secure payment processing.
           </p>
-
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center gap-3 bg-gray-100 rounded-xl p-1.5">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2 rounded-lg transition-all ${
-                billingCycle === 'monthly'
-                  ? 'bg-white text-[#1E3A8A] shadow-sm'
-                  : 'text-gray-600'
-              }`}
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              className={`px-6 py-2 rounded-lg transition-all ${
-                billingCycle === 'annual'
-                  ? 'bg-white text-[#1E3A8A] shadow-sm'
-                  : 'text-gray-600'
-              }`}
-              style={{ fontFamily: 'Inter, sans-serif' }}
-            >
-              Annual
-              <span className="ml-2 text-xs bg-[#F59E0B] text-white px-2 py-0.5 rounded-full">
-                Save
-              </span>
-            </button>
-          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -153,9 +119,6 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
                   </span>
                   <span className="text-xl text-gray-600">{plan.period}</span>
                 </div>
-                {plan.savings && (
-                  <p className="text-sm text-green-600 mt-1">{plan.savings}</p>
-                )}
               </div>
 
               {/* Description */}
