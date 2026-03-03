@@ -31,12 +31,10 @@ export const APP_CONFIG = {
 export const PRICING_CONFIG = {
   basic: {
     monthly: 4.99,
-    annual: 49.99,
     invoiceLimit: 25
   },
   premium: {
     monthly: 9.99,
-    annual: 99.99,
     invoiceLimit: Infinity
   },
   taxRate: 0.085, // 8.5%
