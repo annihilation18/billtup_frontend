@@ -369,19 +369,26 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                   </span>
                 </div>
                 {isTrial && trialEndsAt && (
-                  <div className="flex justify-between py-2 border-b border-gray-200">
-                    <span className="text-gray-600">Trial Ends</span>
-                    <span className="text-amber-600">
-                      {new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                      {trialDaysRemaining > 0 && ` (${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left)`}
-                    </span>
-                  </div>
+                  <>
+                    <div className="flex justify-between py-2 border-b border-gray-200">
+                      <span className="text-gray-600">Trial Ends</span>
+                      <span className="text-amber-600">
+                        {new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                        {trialDaysRemaining > 0 && ` (${trialDaysRemaining} day${trialDaysRemaining !== 1 ? 's' : ''} left)`}
+                      </span>
+                    </div>
+                    {trialDaysRemaining <= 1 && (
+                      <div className="py-2 px-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+                        <strong>Last day of your free trial!</strong> Choose a plan to keep your Premium features.
+                      </div>
+                    )}
+                  </>
                 )}
                 <div className="flex justify-between py-2 border-b border-gray-200">
                   <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : isTrial ? 'First Billing Date' : 'Next Billing Date'}</span>
                   <span className={cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-900'}>
                     {isTrial && trialEndsAt
-                      ? new Date(new Date(trialEndsAt).getTime() + 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+                      ? new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                       : currentPeriodEnd
                         ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                         : 'Monthly'}
