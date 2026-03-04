@@ -17,6 +17,7 @@ interface InvoiceViewModalProps {
 export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewModalProps) {
   const [customerEmail, setCustomerEmail] = useState(invoice?.customerEmail || '');
   const [isSending, setIsSending] = useState(false);
+  const [sendStatus, setSendStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [photos, setPhotos] = useState<Array<{ id: string; url: string; filename: string; uploadedAt: string }>>([]);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -39,6 +40,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
     }
 
     setIsSending(true);
+    setSendStatus('idle');
     try {
       const { API_CONFIG } = await import('../../utils/config');
       const { getIdToken } = await import('../../utils/auth/cognito');
@@ -64,9 +66,11 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
         throw new Error('Failed to send email');
       }
 
+      setSendStatus('success');
       toast.success('Invoice sent successfully!');
     } catch (error) {
       console.error('Error sending invoice email:', error);
+      setSendStatus('error');
       toast.error('Failed to send invoice. Please try again.');
     } finally {
       setIsSending(false);
@@ -283,6 +287,18 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
                 </>
               )}
             </Button>
+            {sendStatus === 'success' && (
+              <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                Invoice sent successfully
+              </div>
+            )}
+            {sendStatus === 'error' && (
+              <div className="flex items-center gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                <XCircle className="w-4 h-4 flex-shrink-0" />
+                Unable to send invoice. Please try again.
+              </div>
+            )}
           </div>
 
         </div>
