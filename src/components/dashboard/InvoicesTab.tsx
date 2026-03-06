@@ -192,47 +192,8 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
         </div>
       </Card>
 
-      {/* Mobile Card List */}
-      <div className="sm:hidden space-y-3">
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="w-5 h-5 animate-spin" />
-          </div>
-        ) : filteredInvoices.length > 0 ? (
-          filteredInvoices.map((invoice) => (
-            <Card key={invoice.id} className="p-4 border-gray-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  {invoice.number || invoice.id}
-                </span>
-                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs ${getStatusColor(invoice.status)}`}>
-                  {getStatusIcon(invoice.status)}
-                  {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                </span>
-              </div>
-              <p className="text-sm text-gray-700 mb-3">{invoice.customer}</p>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${(invoice.total || 0).toFixed(2)}
-                </span>
-                <Button
-                  variant="outline"
-                  className="h-8 px-3 text-xs border-gray-300"
-                  onClick={() => setViewingInvoice(invoice)}
-                >
-                  <Eye className="w-3 h-3 mr-1" />
-                  View
-                </Button>
-              </div>
-            </Card>
-          ))
-        ) : (
-          <p className="text-center py-4 text-gray-500">No invoices found</p>
-        )}
-      </div>
-
-      {/* Invoices Table (desktop) */}
-      <Card className="hidden sm:block border-gray-200 overflow-hidden">
+      {/* Invoices Table */}
+      <Card className="border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead className="bg-gray-50 border-b border-gray-200">
