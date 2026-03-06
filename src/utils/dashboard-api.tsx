@@ -352,9 +352,10 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month', cust
     // Helper: net revenue for a paid invoice (subtracts refunds)
     const invoiceNetRevenue = (inv: any) => inv.total - (inv.refundedAmount || 0);
 
-    // Helper function to get the invoice date (try multiple fields for compatibility)
+    // Helper function to get the invoice date for analytics filtering.
+    // Prefer createdAt (ISO timestamp, timezone-safe) over date (locale string, may be off by a day).
     const getInvoiceDate = (inv: any): Date => {
-      const dateStr = inv.date || inv.createdAt;
+      const dateStr = inv.createdAt || inv.date;
       return dateStr ? new Date(dateStr) : new Date();
     };
 
@@ -441,7 +442,7 @@ export async function fetchTopCustomers(limit: number = 10, period: TimePeriod =
 
     // Helper function to get the invoice date (consistent with fetchSalesStats)
     const getInvoiceDate = (inv: any): Date => {
-      const dateStr = inv.date || inv.createdAt;
+      const dateStr = inv.createdAt || inv.date;
       return dateStr ? new Date(dateStr) : new Date();
     };
 
@@ -488,10 +489,9 @@ export async function fetchRevenueTrend(months: number = 12, period: TimePeriod 
 
     const trendData = [];
 
-    // Helper function to get the invoice date (try multiple fields for compatibility)
+    // Helper function to get the invoice date — prefer createdAt (ISO, timezone-safe)
     const getInvoiceDate = (inv: any): Date => {
-      // Try date (invoice date field), then createdAt (system timestamp)
-      const dateStr = inv.date || inv.createdAt;
+      const dateStr = inv.createdAt || inv.date;
       return dateStr ? new Date(dateStr) : new Date();
     };
 
