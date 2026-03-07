@@ -17,6 +17,10 @@ interface PaymentData {
   provider?: string;
   status: string;
   expiresAt: string;
+  fees?: {
+    processingFee: number;
+    totalCharge: number;
+  };
 }
 
 type PageState = 'loading' | 'ready' | 'paid' | 'expired' | 'not_found' | 'error' | 'redirecting';
@@ -194,7 +198,7 @@ export function PaymentPage() {
           <div className="p-6 text-center border-b border-gray-200 bg-gray-50">
             <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Amount Due</p>
             <p className="text-4xl font-bold" style={{ color: brandColor }}>
-              ${data.total.toFixed(2)}
+              ${(data.fees?.totalCharge ?? data.total).toFixed(2)}
             </p>
           </div>
 
@@ -259,9 +263,15 @@ export function PaymentPage() {
                       <span className="font-medium">${data.tax.toFixed(2)}</span>
                     </div>
                   )}
+                  {data.fees && data.fees.processingFee > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Processing Fee</span>
+                      <span className="font-medium">${data.fees.processingFee.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-sm font-bold pt-2 border-t-2 border-gray-200">
                     <span className="text-gray-900">Total Due</span>
-                    <span style={{ color: brandColor }}>${data.total.toFixed(2)}</span>
+                    <span style={{ color: brandColor }}>${(data.fees?.totalCharge ?? data.total).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -286,7 +296,7 @@ export function PaymentPage() {
                 Redirecting to payment...
               </span>
             ) : (
-              `Pay $${data.total.toFixed(2)}`
+              `Pay $${(data.fees?.totalCharge ?? data.total).toFixed(2)}`
             )}
           </button>
         </div>
