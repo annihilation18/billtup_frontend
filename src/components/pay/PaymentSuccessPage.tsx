@@ -11,6 +11,7 @@ export function PaymentSuccessPage() {
     businessName: string;
     brandColor?: string;
     accentColor?: string;
+    fees?: { processingFee: number; totalCharge: number };
   } | null>(null);
 
   useEffect(() => {
@@ -70,7 +71,7 @@ export function PaymentSuccessPage() {
             <div className="flex justify-between">
               <span className="text-gray-500">Amount Paid</span>
               <span className="font-bold" style={{ color: accentColor }}>
-                ${data.total.toFixed(2)}
+                ${(data.fees?.totalCharge ?? data.total).toFixed(2)}
               </span>
             </div>
             <div className="flex justify-between">
