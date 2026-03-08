@@ -378,7 +378,6 @@ Click any customer to see:
 
 **Security:**
 - Change password
-- Enable two-factor authentication (coming soon)
 - Review login activity`,
       },
       {

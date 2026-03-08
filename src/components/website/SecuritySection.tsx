@@ -49,7 +49,7 @@ export function SecuritySection() {
             {[
               'Regular security audits and penetration testing',
               'Automatic security updates and patches',
-              'Two-factor authentication available',
+              'Secure session management',
               'Role-based access control',
               'Comprehensive activity logging',
               'GDPR and CCPA compliant',
