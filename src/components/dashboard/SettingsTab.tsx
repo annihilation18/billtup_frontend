@@ -6,7 +6,7 @@ import {
   Building2,
   TrendingUp,
   CreditCard,
-  Settings2,
+  Palette,
   ChevronRight,
   Loader2,
   HelpCircle,
@@ -20,8 +20,8 @@ import { BusinessProfileModal } from './BusinessProfileModal';
 // CommunicationModal deferred for post-launch (L4.3)
 import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
-import { PreferencesModal } from './PreferencesModal';
 import { EmailNotificationsModal } from './EmailNotificationsModal';
+import { CustomBrandingModal } from './CustomBrandingModal';
 
 interface SettingsTabProps {
   userPlan: 'basic' | 'premium';
@@ -101,12 +101,13 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       bgColor: 'bg-amber-100',
     },
     {
-      id: 'preferences',
-      icon: Settings2,
-      title: 'Preferences',
-      subtitle: 'Security settings',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-100',
+      id: 'branding',
+      icon: Palette,
+      title: 'Custom Branding',
+      subtitle: 'Logo, colors & invoice templates',
+      color: 'text-pink-600',
+      bgColor: 'bg-pink-100',
+      premium: true,
     },
     {
       id: 'help',
@@ -232,11 +233,12 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         userProfile={userProfile}
         onDataUpdated={loadData}
       />
-      <PreferencesModal
-        open={activeModal === 'preferences'}
+      <CustomBrandingModal
+        open={activeModal === 'branding'}
         onClose={() => setActiveModal(null)}
-        userProfile={userProfile}
+        businessProfile={businessProfile}
         onDataUpdated={loadData}
+        userPlan={userPlan}
       />
       <Dialog open={activeModal === 'help'} onOpenChange={() => setActiveModal(null)}>
         <DialogContent className="max-w-md">
