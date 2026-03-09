@@ -447,7 +447,7 @@ export function CustomBrandingModal({
                   }`}
                 >
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
-                    <img src={logoPreview} alt="Circle" className="max-w-full max-h-full object-contain" />
+                    <img src={logoPreview} alt="Circle" className="w-full h-full object-cover" />
                   </div>
                   <span className="text-xs font-medium flex items-center gap-1">
                     <Circle className="w-3 h-3" />
