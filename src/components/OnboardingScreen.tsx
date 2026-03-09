@@ -21,6 +21,7 @@ export interface BusinessData {
   chargeTax: boolean;
   defaultTaxRate: string;
   logo?: string;
+  logoShape?: 'square' | 'circle';
   bankName: string;
   accountHolderName: string;
   accountNumber: string;

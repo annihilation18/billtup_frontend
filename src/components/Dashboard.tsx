@@ -25,9 +25,10 @@ interface DashboardProps {
   onTabChange: (tab: string) => void;
   businessLogo?: string;
   businessName?: string;
+  logoShape?: 'square' | 'circle';
 }
 
-export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab, onTabChange, businessLogo, businessName }: DashboardProps) {
+export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab, onTabChange, businessLogo, businessName, logoShape }: DashboardProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "paid">("all");
 
@@ -84,7 +85,7 @@ export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab
       <div className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           {businessLogo && (
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-foreground">
+            <div className={`w-10 h-10 overflow-hidden border-2 border-primary-foreground ${logoShape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
               <img src={businessLogo} alt={businessName || "Logo"} className="w-full h-full object-cover" />
             </div>
           )}
