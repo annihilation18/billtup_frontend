@@ -21,9 +21,12 @@ interface PaymentData {
     processingFee: number;
     totalCharge: number;
   };
+  paymentType?: 'deposit' | 'balance' | 'full';
+  invoiceTotal?: number;
+  chargeAmount?: number;
 }
 
-type PageState = 'loading' | 'ready' | 'paid' | 'expired' | 'not_found' | 'error' | 'redirecting';
+type PageState = 'loading' | 'ready' | 'paid' | 'expired' | 'not_found' | 'error' | 'redirecting' | 'deposit_already_paid';
 
 export function PaymentPage() {
   const { token } = useParams<{ token: string }>();
@@ -50,6 +53,8 @@ export function PaymentPage() {
 
         if (json.status === 'paid') {
           setState('paid');
+        } else if (json.status === 'deposit_paid' && json.paymentType === 'deposit') {
+          setState('deposit_already_paid');
         } else if (new Date(json.expiresAt) <= new Date()) {
           setState('expired');
         } else {
@@ -171,6 +176,26 @@ export function PaymentPage() {
     );
   }
 
+  // Deposit already paid (customer clicked a deposit link but deposit was already collected)
+  if (state === 'deposit_already_paid') {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: `${accentColor}20` }}>
+            <svg className="w-8 h-8" style={{ color: accentColor }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h1 className="text-xl font-bold text-gray-900 mb-2">Deposit Already Paid</h1>
+          <p className="text-gray-500">The deposit for this invoice has already been received. The business will contact you about the remaining balance.</p>
+          {data && (
+            <p className="text-sm text-gray-400 mt-4">Invoice {data.invoiceNumber} - {data.businessName}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   // Ready to pay (or redirecting)
   if (!data) return null;
 
@@ -196,10 +221,18 @@ export function PaymentPage() {
         <div className="bg-white border-x border-gray-200">
           {/* Amount Due */}
           <div className="p-6 text-center border-b border-gray-200 bg-gray-50">
-            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">Amount Due</p>
-            <p className="text-4xl font-bold" style={{ color: brandColor }}>
-              ${(data.fees?.totalCharge ?? data.total).toFixed(2)}
+            <p className="text-xs uppercase tracking-wide text-gray-500 mb-1">
+              {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Amount Due'}
             </p>
+            <p className="text-4xl font-bold" style={{ color: brandColor }}>
+              ${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}
+            </p>
+            {data.paymentType === 'deposit' && data.invoiceTotal && (
+              <p className="text-sm text-gray-400 mt-1">of ${data.invoiceTotal.toFixed(2)} total</p>
+            )}
+            {data.paymentType === 'balance' && data.invoiceTotal && (
+              <p className="text-sm text-gray-400 mt-1">remaining balance of ${data.invoiceTotal.toFixed(2)} invoice</p>
+            )}
           </div>
 
           {/* Invoice Info */}
@@ -270,8 +303,10 @@ export function PaymentPage() {
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-2 border-t-2 border-gray-200">
-                    <span className="text-gray-900">Total Due</span>
-                    <span style={{ color: brandColor }}>${(data.fees?.totalCharge ?? data.total).toFixed(2)}</span>
+                    <span className="text-gray-900">
+                      {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Total Due'}
+                    </span>
+                    <span style={{ color: brandColor }}>${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}</span>
                   </div>
                 </div>
               </div>
@@ -296,7 +331,11 @@ export function PaymentPage() {
                 Redirecting to payment...
               </span>
             ) : (
-              `Pay $${(data.fees?.totalCharge ?? data.total).toFixed(2)}`
+              data.paymentType === 'deposit'
+                ? `Pay Deposit $${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}`
+                : data.paymentType === 'balance'
+                  ? `Pay Balance $${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}`
+                  : `Pay $${(data.fees?.totalCharge ?? data.total).toFixed(2)}`
             )}
           </button>
         </div>

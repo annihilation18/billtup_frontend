@@ -28,6 +28,7 @@ import { OAuthCallbackPage } from './components/dashboard/OAuthCallbackPage';
 import { PaymentPage } from './components/pay/PaymentPage';
 import { PaymentSuccessPage } from './components/pay/PaymentSuccessPage';
 import { EstimateApprovalPage } from './components/estimate/EstimateApprovalPage';
+import { SignPage } from './components/sign/SignPage';
 import { Toaster } from './components/ui/sonner';
 import { getSession, signOut as cognitoSignOut, getUserId, getUserEmail } from './utils/auth/cognito';
 import { API_CONFIG } from './utils/config';
@@ -86,8 +87,8 @@ export default function App() {
 
   // Check session on mount; auto-redirect to dashboard only from public pages
   useEffect(() => {
-    // Reset-password and payment pages don't need a session check
-    if (location.pathname === '/reset-password' || location.pathname.startsWith('/pay/') || location.pathname.startsWith('/estimate/')) {
+    // Reset-password, payment, and sign pages don't need a session check
+    if (location.pathname === '/reset-password' || location.pathname.startsWith('/pay/') || location.pathname.startsWith('/estimate/') || location.pathname.startsWith('/sign/')) {
       setAuthChecked(true);
       return;
     }
@@ -308,6 +309,9 @@ export default function App() {
 
       {/* Public estimate approval page — no header/footer, branded by business */}
       <Route path="/estimate/:token" element={<><EstimateApprovalPage /><Toaster /></>} />
+
+      {/* Public signature collection page — no header/footer, branded by business */}
+      <Route path="/sign/:token" element={<><SignPage /><Toaster /></>} />
 
       {/* OAuth callback routes — auth-guarded, process code/state then redirect to dashboard */}
       <Route
