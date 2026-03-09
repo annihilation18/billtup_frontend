@@ -251,7 +251,7 @@ export function SettingsScreen({ businessData, currentTab, onTabChange, onLogout
       <div className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="max-w-4xl mx-auto flex items-center gap-3">
           {businessData.logo && (
-            <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-foreground">
+            <div className={`w-10 h-10 overflow-hidden border-2 border-primary-foreground ${businessData.logoShape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
               <img src={businessData.logo} alt={businessData.businessName || "Logo"} className="w-full h-full object-cover" />
             </div>
           )}

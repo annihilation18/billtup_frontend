@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { 
-  Palette, 
-  Upload, 
-  Loader2, 
+import {
+  Palette,
+  Upload,
+  Loader2,
   Check,
   Sparkles,
   X,
   Eye,
-  FileText
+  FileText,
+  Square,
+  Circle
 } from 'lucide-react@0.468.0';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
@@ -62,6 +64,7 @@ export function CustomBrandingModal({
   const [invoiceTemplate, setInvoiceTemplate] = useState<string>('modern');
   const [customLogo, setCustomLogo] = useState('');
   const [logoPreview, setLogoPreview] = useState('');
+  const [logoShape, setLogoShape] = useState<'square' | 'circle'>('square');
   const [logoRemoved, setLogoRemoved] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -76,6 +79,7 @@ export function CustomBrandingModal({
       setInvoiceTemplate(businessProfile.invoiceTemplate || 'modern');
       setCustomLogo(businessProfile.customLogo || businessProfile.logo || '');
       setLogoPreview(businessProfile.customLogo || businessProfile.logo || '');
+      setLogoShape(businessProfile.logoShape || 'square');
       setLogoRemoved(false);
     }
   }, [businessProfile, open]);
@@ -170,6 +174,7 @@ export function CustomBrandingModal({
         accentColor,
         invoiceTemplate,
         customLogo: logoUrl,
+        logoShape,
       };
       if (logoRemoved) {
         // User explicitly removed the logo - clear both fields
@@ -352,7 +357,7 @@ export function CustomBrandingModal({
             
             <div className="flex items-center gap-4">
               {logoPreview ? (
-                <div className="relative w-24 h-24 rounded-lg border-2 border-[#14B8A6] overflow-hidden bg-gray-50">
+                <div className={`relative w-24 h-24 border-2 border-[#14B8A6] overflow-hidden bg-gray-50 ${logoShape === 'circle' ? 'rounded-full' : 'rounded-lg'}`}>
                   <img 
                     src={logoPreview} 
                     alt="Logo preview" 
@@ -407,6 +412,51 @@ export function CustomBrandingModal({
               </div>
             </div>
           </div>
+
+          {/* Logo Shape Toggle */}
+          {logoPreview && (
+            <div className="space-y-3">
+              <Label className="text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Logo Shape
+              </Label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setLogoShape('square')}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all flex-1 ${
+                    logoShape === 'square'
+                      ? 'border-[#1E3A8A] bg-[#1E3A8A]/5'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <img src={logoPreview} alt="Square" className="max-w-full max-h-full object-contain" />
+                  </div>
+                  <span className="text-xs font-medium flex items-center gap-1">
+                    <Square className="w-3 h-3" />
+                    Square
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLogoShape('circle')}
+                  className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all flex-1 ${
+                    logoShape === 'circle'
+                      ? 'border-[#1E3A8A] bg-[#1E3A8A]/5'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+                    <img src={logoPreview} alt="Circle" className="max-w-full max-h-full object-contain" />
+                  </div>
+                  <span className="text-xs font-medium flex items-center gap-1">
+                    <Circle className="w-3 h-3" />
+                    Circle
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Brand Colors */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
