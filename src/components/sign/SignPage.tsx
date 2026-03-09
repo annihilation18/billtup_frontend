@@ -164,7 +164,7 @@ export function SignPage() {
       canvas.removeEventListener('touchmove', onTouchMove);
       canvas.removeEventListener('touchend', onTouchEnd);
     };
-  }, [getCanvasCoords]);
+  }, [getCanvasCoords, state]);
 
   const handleClear = () => {
     const canvas = canvasRef.current;
