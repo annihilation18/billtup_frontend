@@ -121,38 +121,50 @@ export function SignPage() {
     isDrawingRef.current = false;
   }, []);
 
-  // Touch handlers
-  const handleTouchStart = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
+  // Native touch handlers attached with { passive: false } to allow preventDefault
+  // React synthetic touch events are passive by default and cannot prevent scrolling
+  useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const touch = e.touches[0];
-    const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    isDrawingRef.current = true;
-    setHasDrawn(true);
-  }, [getCanvasCoords]);
 
-  const handleTouchMove = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    if (!isDrawingRef.current) return;
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const touch = e.touches[0];
-    const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  }, [getCanvasCoords]);
+    const onTouchStart = (e: TouchEvent) => {
+      e.preventDefault();
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const touch = e.touches[0];
+      const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      isDrawingRef.current = true;
+      setHasDrawn(true);
+    };
 
-  const handleTouchEnd = useCallback((e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    isDrawingRef.current = false;
-  }, []);
+    const onTouchMove = (e: TouchEvent) => {
+      e.preventDefault();
+      if (!isDrawingRef.current) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      const touch = e.touches[0];
+      const { x, y } = getCanvasCoords(touch.clientX, touch.clientY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      e.preventDefault();
+      isDrawingRef.current = false;
+    };
+
+    canvas.addEventListener('touchstart', onTouchStart, { passive: false });
+    canvas.addEventListener('touchmove', onTouchMove, { passive: false });
+    canvas.addEventListener('touchend', onTouchEnd, { passive: false });
+
+    return () => {
+      canvas.removeEventListener('touchstart', onTouchStart);
+      canvas.removeEventListener('touchmove', onTouchMove);
+      canvas.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [getCanvasCoords]);
 
   const handleClear = () => {
     const canvas = canvasRef.current;
@@ -405,9 +417,6 @@ export function SignPage() {
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUp}
                 onMouseLeave={handleMouseUp}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
               />
             </div>
             <p className="text-xs text-gray-400 mt-2 text-center">Draw your signature above</p>
