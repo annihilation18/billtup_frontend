@@ -209,10 +209,10 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                 <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Status
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Date
                 </th>
-                <th className="px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
+                <th className="hidden md:table-cell px-3 sm:px-6 py-3 text-left text-xs text-gray-600 uppercase tracking-wider">
                   Valid Until
                 </th>
                 <th className="px-3 sm:px-6 py-3 text-right text-xs text-gray-600 uppercase tracking-wider">
@@ -249,7 +249,7 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                         {estimate.status.charAt(0).toUpperCase() + estimate.status.slice(1)}
                       </span>
                     </td>
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
                         {estimate.date
                           ? new Date(estimate.date).toLocaleDateString()
@@ -259,7 +259,7 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                         }
                       </span>
                     </td>
-                    <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
+                    <td className="hidden md:table-cell px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-600">
                         {estimate.validUntil ? new Date(estimate.validUntil).toLocaleDateString() : 'N/A'}
                       </span>
