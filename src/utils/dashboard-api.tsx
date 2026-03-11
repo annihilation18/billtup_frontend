@@ -809,6 +809,22 @@ export async function updateSubscriptionPlan(planType: 'basic' | 'premium') {
   }
 }
 
+// Validate a promo code
+export async function validatePromo(code: string) {
+  return apiCall('/subscription/validate-promo', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+// Apply a promo code to an existing subscription
+export async function applyPromo(code: string) {
+  return apiCall('/subscription/apply-promo', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
 // Cancel a pending downgrade
 export async function cancelDowngrade() {
   try {
