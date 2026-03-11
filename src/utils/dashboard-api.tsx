@@ -796,6 +796,31 @@ export async function reactivateSubscription() {
   }
 }
 
+// Update subscription plan (upgrade/downgrade)
+export async function updateSubscriptionPlan(planType: 'basic' | 'premium') {
+  try {
+    return await apiCall('/subscription/update-plan', {
+      method: 'POST',
+      body: JSON.stringify({ planType }),
+    });
+  } catch (error) {
+    console.error('Error updating subscription plan:', error);
+    throw error;
+  }
+}
+
+// Cancel a pending downgrade
+export async function cancelDowngrade() {
+  try {
+    return await apiCall('/subscription/cancel-downgrade', {
+      method: 'POST',
+    });
+  } catch (error) {
+    console.error('Error cancelling downgrade:', error);
+    throw error;
+  }
+}
+
 // Trial Status API
 export async function fetchTrialStatus(): Promise<{
   isInTrial: boolean;
