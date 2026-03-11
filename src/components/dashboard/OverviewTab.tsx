@@ -2,30 +2,22 @@ import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import {
-  DollarSign,
-  FileText,
-  Users,
   TrendingUp,
-  Clock,
-  CheckCircle2,
-  XCircle,
-  ArrowUpRight,
   User,
   Building2,
   CreditCard,
-  Loader2
+  Loader2,
+  Smartphone
 } from 'lucide-react@0.468.0';
-import { fetchSalesStats, fetchInvoices, fetchBillingCycleUsage } from '../../utils/dashboard-api';
+import { fetchBillingCycleUsage } from '../../utils/dashboard-api';
 
 interface OverviewTabProps {
   userPlan: 'basic' | 'premium';
-  onNavigateToTab?: (tab: 'customers' | 'invoices' | 'analytics' | 'settings') => void;
+  onNavigateToTab?: (tab: 'analytics' | 'settings') => void;
   onUpgrade?: () => void;
 }
 
 export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTabProps) {
-  const [stats, setStats] = useState<any>(null);
-  const [recentInvoices, setRecentInvoices] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [billingUsage, setBillingUsage] = useState<{ used: number; limit: number } | null>(null);
 
@@ -36,20 +28,7 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statsData, invoicesData, usageData] = await Promise.all([
-        fetchSalesStats(),
-        fetchInvoices(),
-        fetchBillingCycleUsage(),
-      ]);
-      
-      setStats(statsData);
-      
-      // Get 4 most recent invoices
-      const sorted = invoicesData
-        .sort((a: any, b: any) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-        .slice(0, 4);
-      setRecentInvoices(sorted);
-
+      const usageData = await fetchBillingCycleUsage();
       setBillingUsage(usageData);
     } catch (error) {
       console.error('Error loading overview data:', error);
@@ -69,188 +48,106 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
     );
   }
 
-  const statCards = [
-    {
-      label: 'Total Revenue',
-      value: `$${stats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
-      change: stats?.revenueChange || '0%',
-      icon: DollarSign,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
-    },
-    {
-      label: 'Invoices',
-      value: stats?.totalInvoices?.toString() || '0',
-      change: `+${stats?.newInvoicesThisMonth || 0} this month`,
-      icon: FileText,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
-    },
-    {
-      label: 'Customers',
-      value: stats?.totalCustomers?.toString() || '0',
-      change: `+${stats?.newCustomersThisMonth || 0} new`,
-      icon: Users,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
-    },
-    {
-      label: 'Pending',
-      value: `$${stats?.pendingAmount?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`,
-      change: `${stats?.pendingCount || 0} invoices`,
-      icon: Clock,
-      color: 'text-amber-600',
-      bgColor: 'bg-amber-100',
-    },
-  ];
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 60) return `${diffMins} ${diffMins === 1 ? 'minute' : 'minutes'} ago`;
-    if (diffHours < 24) return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`;
-    if (diffDays === 1) return '1 day ago';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Dashboard Overview
+            Account Overview
           </h2>
           <p className="text-gray-600 mt-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Track your business performance at a glance
+            Manage your account settings and subscription
           </p>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((stat, index) => (
-          <Card key={index} className="p-6 border-gray-200">
-            <div className="flex items-center justify-between mb-4">
-              <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
-                <stat.icon className={`w-6 h-6 ${stat.color}`} />
-              </div>
-              <ArrowUpRight className="w-4 h-4 text-gray-400" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600 mb-1" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {stat.label}
-              </p>
-              <p className="text-2xl sm:text-3xl text-gray-900 mb-1" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                {stat.value}
-              </p>
-              <p className="text-xs text-gray-500">{stat.change}</p>
-            </div>
-          </Card>
-        ))}
-      </div>
+      {/* Quick Actions */}
+      <Card className="p-6 border-gray-200">
+        <h3 className="text-lg text-gray-900 mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-2 gap-4">
+          <button
+            onClick={() => onNavigateToTab?.('settings')}
+            className="p-4 bg-gradient-to-br from-[#1E3A8A]/5 to-[#14B8A6]/5 hover:from-[#1E3A8A]/10 hover:to-[#14B8A6]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
+          >
+            <User className="w-8 h-8 text-[#1E3A8A] mb-2" />
+            <p className="text-sm text-gray-900">Account Settings</p>
+          </button>
+          {userPlan === 'premium' ? (
+            <button
+              onClick={() => onNavigateToTab?.('analytics')}
+              className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left"
+            >
+              <TrendingUp className="w-8 h-8 text-[#F59E0B] mb-2" />
+              <p className="text-sm text-gray-900">View Reports</p>
+            </button>
+          ) : (
+            <button
+              onClick={onUpgrade}
+              className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left relative"
+            >
+              <TrendingUp className="w-8 h-8 text-[#F59E0B] mb-2 opacity-40" />
+              <p className="text-sm text-gray-900 opacity-40">View Reports</p>
+              <span className="absolute top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#1E3A8A] text-white text-xs rounded">Premium</span>
+            </button>
+          )}
+          <button
+            onClick={() => onNavigateToTab?.('settings')}
+            className="p-4 bg-gradient-to-br from-[#14B8A6]/5 to-[#F59E0B]/5 hover:from-[#14B8A6]/10 hover:to-[#F59E0B]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
+          >
+            <Building2 className="w-8 h-8 text-[#14B8A6] mb-2" />
+            <p className="text-sm text-gray-900">Business Profile</p>
+          </button>
+          <button
+            onClick={() => onNavigateToTab?.('settings')}
+            className="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors text-left"
+          >
+            <CreditCard className="w-8 h-8 text-gray-600 mb-2" />
+            <p className="text-sm text-gray-900">Payment Settings</p>
+          </button>
+        </div>
+      </Card>
 
-      {/* Recent Activity */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Recent Invoices */}
-        <Card className="p-6 border-gray-200">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Recent Invoices
+      {/* Mobile App Promo */}
+      <Card className="p-6 border-gray-200">
+        <div className="flex items-start gap-4">
+          <div className="w-12 h-12 rounded-xl bg-[#14B8A6]/10 flex items-center justify-center flex-shrink-0">
+            <Smartphone className="w-6 h-6 text-[#14B8A6]" />
+          </div>
+          <div>
+            <h3 className="text-lg text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Manage Your Business on the Go
             </h3>
-            <Button 
-              onClick={() => onNavigateToTab?.('invoices')}
-              variant="outline" 
-              className="h-9 text-sm border-gray-300"
-            >
-              View All
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {recentInvoices.map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <p className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                      {invoice.number || invoice.id}
-                    </p>
-                    <span className={`px-2 py-0.5 rounded-full text-xs ${
-                      invoice.status === 'paid' 
-                        ? 'bg-green-100 text-green-700'
-                        : invoice.status === 'pending'
-                        ? 'bg-amber-100 text-amber-700'
-                        : 'bg-red-100 text-red-700'
-                    }`}>
-                      {invoice.status}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600">{invoice.customer}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                    ${invoice.total?.toFixed(2) || '0.00'}
-                  </p>
-                  <p className="text-xs text-gray-500">{formatDate(invoice.createdAt)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card className="p-6 border-gray-200">
-          <h3 className="text-lg text-gray-900 mb-6" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Quick Actions
-          </h3>
-          <div className="grid grid-cols-2 gap-4">
-            <button
-              onClick={() => onNavigateToTab?.('settings')}
-              className="p-4 bg-gradient-to-br from-[#1E3A8A]/5 to-[#14B8A6]/5 hover:from-[#1E3A8A]/10 hover:to-[#14B8A6]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
-            >
-              <User className="w-8 h-8 text-[#1E3A8A] mb-2" />
-              <p className="text-sm text-gray-900">Account Settings</p>
-            </button>
-            {userPlan === 'premium' ? (
-              <button
-                onClick={() => onNavigateToTab?.('analytics')}
-                className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left"
+            <p className="text-sm text-gray-600 mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Create invoices, estimates, manage customers, take payments, and more from the BilltUp mobile app.
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="h-9 text-sm border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+                onClick={() => window.open('https://apps.apple.com/app/billtup', '_blank')}
               >
-                <TrendingUp className="w-8 h-8 text-[#F59E0B] mb-2" />
-                <p className="text-sm text-gray-900">View Reports</p>
-              </button>
-            ) : (
-              <button
-                onClick={onUpgrade}
-                className="p-4 bg-gradient-to-br from-[#F59E0B]/5 to-[#1E3A8A]/5 hover:from-[#F59E0B]/10 hover:to-[#1E3A8A]/10 rounded-xl border border-[#F59E0B]/20 transition-colors text-left relative"
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+                App Store
+              </Button>
+              <Button
+                variant="outline"
+                className="h-9 text-sm border-gray-300 hover:bg-gray-50 flex items-center gap-2"
+                onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup', '_blank')}
               >
-                <TrendingUp className="w-8 h-8 text-[#F59E0B] mb-2 opacity-40" />
-                <p className="text-sm text-gray-900 opacity-40">View Reports</p>
-                <span className="absolute top-2 right-2 px-2 py-0.5 bg-gradient-to-r from-[#F59E0B] to-[#1E3A8A] text-white text-xs rounded">Premium</span>
-              </button>
-            )}
-            <button
-              onClick={() => onNavigateToTab?.('settings')}
-              className="p-4 bg-gradient-to-br from-[#14B8A6]/5 to-[#F59E0B]/5 hover:from-[#14B8A6]/10 hover:to-[#F59E0B]/10 rounded-xl border border-[#14B8A6]/20 transition-colors text-left"
-            >
-              <Building2 className="w-8 h-8 text-[#14B8A6] mb-2" />
-              <p className="text-sm text-gray-900">Business Profile</p>
-            </button>
-            <button
-              onClick={() => onNavigateToTab?.('settings')}
-              className="p-4 bg-gray-50 hover:bg-gray-100 rounded-xl border border-gray-200 transition-colors text-left"
-            >
-              <CreditCard className="w-8 h-8 text-gray-600 mb-2" />
-              <p className="text-sm text-gray-900">Payment Settings</p>
-            </button>
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.916V2.73a1 1 0 0 1 .609-.916zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.802 8.99l-2.303 2.303-8.635-8.635z"/>
+                </svg>
+                Google Play
+              </Button>
+            </div>
           </div>
-        </Card>
-      </div>
+        </div>
+      </Card>
 
       {/* Plan Info (if Basic) */}
       {userPlan === 'basic' && (
@@ -261,7 +158,7 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
                 Upgrade to Premium
               </h3>
               <p className="text-sm text-gray-600 mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Unlock advanced features like analytics, refund management, and custom branding.
+                Unlock advanced features like analytics, custom branding, and more.
               </p>
               <p className="text-xs text-gray-500">
                 You've used {billingUsage?.used || 0} of {billingUsage?.limit || 10} invoices this cycle

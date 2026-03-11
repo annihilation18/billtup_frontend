@@ -2,28 +2,20 @@ import { useState, useEffect, useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
-  Users,
-  FileText,
   Settings,
   TrendingUp,
-  RefreshCw,
   Crown,
-  LogOut,
   Menu,
   X,
   Smartphone,
   Clock,
   Sparkles,
-  ClipboardList
 } from 'lucide-react@0.468.0';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
-import { CustomersTab } from './CustomersTab';
-import { InvoicesTab } from './InvoicesTab';
 import { AnalyticsTab } from './AnalyticsTab';
 import { SettingsTab } from './SettingsTab';
 import { OverviewTab } from './OverviewTab';
-import { EstimatesTab } from './EstimatesTab';
 import { BilltUpLogo } from '../BilltUpLogo';
 import { UserMenu } from './UserMenu';
 import { fetchTrialStatus } from '../../utils/dashboard-api';
@@ -68,9 +60,6 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-    { id: 'customers', label: 'Customers', icon: Users },
-    { id: 'estimates', label: 'Estimates', icon: ClipboardList },
-    { id: 'invoices', label: 'Invoices', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: TrendingUp, premiumOnly: true },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
@@ -321,9 +310,6 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
           aria-labelledby="dashboard-title"
         >
           {activeTab === 'overview' && <OverviewTab userPlan={effectivePlan} onNavigateToTab={setActiveTab} onUpgrade={handleUpgrade} />}
-          {activeTab === 'customers' && <CustomersTab userPlan={effectivePlan} />}
-          {activeTab === 'invoices' && <InvoicesTab userPlan={effectivePlan} />}
-          {activeTab === 'estimates' && <EstimatesTab userPlan={effectivePlan} />}
           {activeTab === 'analytics' && <AnalyticsTab userPlan={effectivePlan} />}
           {activeTab === 'settings' && <SettingsTab userPlan={effectivePlan} onSignOut={onSignOut} onPlanChange={onPlanChange} />}
         </main>

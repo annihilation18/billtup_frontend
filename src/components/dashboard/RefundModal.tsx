@@ -64,7 +64,9 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
     }
   };
 
-  if (!isPaid) {
+  // Hide refund button if invoice isn't paid or was paid manually (outside of Stripe/Square)
+  const hasPaidViaProcessor = !!(invoice.paymentIntentId || invoice.squarePaymentId);
+  if (!isPaid || !hasPaidViaProcessor) {
     return null;
   }
 
