@@ -31,8 +31,11 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [isCancelling, setIsCancelling] = useState(false);
   const [isReactivating, setIsReactivating] = useState(false);
+  const [isCancellingDowngrade, setIsCancellingDowngrade] = useState(false);
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
   const [currentPeriodEnd, setCurrentPeriodEnd] = useState<string | null>(null);
+  const [pendingDowngrade, setPendingDowngrade] = useState<string | null>(null);
+  const [downgradeEffectiveDate, setDowngradeEffectiveDate] = useState<string | null>(null);
   const [isTrial, setIsTrial] = useState(false);
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
@@ -56,6 +59,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           setIsTrial(!!data.isTrial);
           setTrialEndsAt(data.trialEndsAt || null);
           setTrialDaysRemaining(data.daysRemaining || 0);
+          setPendingDowngrade(data.pendingDowngrade || null);
+          setDowngradeEffectiveDate(data.downgradeEffectiveDate || null);
         }
       } catch {
         // Subscription status not available
@@ -100,66 +105,55 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
     console.log('[Plan Change] Starting plan change to:', newPlan);
     setIsChangingPlan(true);
     try {
-      const { getIdToken } = await import('../../utils/auth/cognito');
-      const token = await getIdToken();
-
-      if (!token) {
-        console.error('[Plan Change] No token found');
-        throw new Error('Not authenticated. Please sign in again.');
-      }
-
-      console.log('[Plan Change] Got token, making API call...');
-
-      // Update the plan in the business profile
-      const response = await fetch(`${API_CONFIG.baseUrl}/business`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          plan: newPlan,
-          planType: newPlan,
-          isTrial: false, // End trial when user changes plan
-        }),
-      });
-
-      console.log('[Plan Change] API response status:', response.status);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('[Plan Change] API error:', errorData);
-        throw new Error(errorData.error || 'Failed to update plan');
-      }
-
-      const responseData = await response.json();
-      console.log('[Plan Change] Plan updated successfully:', responseData);
+      const { updateSubscriptionPlan } = await import('../../utils/dashboard-api');
+      const result = await updateSubscriptionPlan(newPlan);
 
       const { toast } = await import('../ui/sonner');
-      toast.success(`Successfully ${newPlan === 'premium' ? 'upgraded to' : 'changed to'} ${newPlan} plan!`);
-      
-      console.log('[Plan Change] Updating app state...');
-      
-      // Update the plan via callback
-      if (onPlanChange) {
-        onPlanChange(newPlan);
+
+      if (result.deferred) {
+        toast.success(result.message || `Your plan will switch to Basic at the end of your billing period.`);
+        setPendingDowngrade(result.subscription?.pendingDowngrade || 'basic');
+        setDowngradeEffectiveDate(result.subscription?.downgradeEffectiveDate || null);
+        setShowDowngradeConfirm(false);
+      } else {
+        toast.success(`Successfully ${newPlan === 'premium' ? 'upgraded to' : 'changed to'} ${newPlan} plan!`);
+        // Clear pending downgrade if upgrading back
+        if (newPlan === 'premium') {
+          setPendingDowngrade(null);
+          setDowngradeEffectiveDate(null);
+        }
+        if (onPlanChange) {
+          onPlanChange(newPlan);
+        }
+        if (onDataUpdated) {
+          onDataUpdated();
+        }
+        onClose();
       }
-      
-      // Refresh data
-      if (onDataUpdated) {
-        onDataUpdated();
-      }
-      
-      // Close modal
-      onClose();
-      
-      console.log('[Plan Change] Plan change completed successfully');
+
       setIsChangingPlan(false);
     } catch (error) {
       console.error('[Plan Change] Error:', error);
       const { toast } = await import('../ui/sonner');
       toast.error(`Failed to change plan: ${error instanceof Error ? error.message : 'Please try again.'}`);
       setIsChangingPlan(false);
+    }
+  };
+
+  const handleCancelDowngrade = async () => {
+    setIsCancellingDowngrade(true);
+    try {
+      const { cancelDowngrade } = await import('../../utils/dashboard-api');
+      await cancelDowngrade();
+      const { toast } = await import('../ui/sonner');
+      toast.success("Downgrade cancelled. You'll continue on Premium.");
+      setPendingDowngrade(null);
+      setDowngradeEffectiveDate(null);
+    } catch (error) {
+      const { toast } = await import('../ui/sonner');
+      toast.error('Failed to cancel downgrade');
+    } finally {
+      setIsCancellingDowngrade(false);
     }
   };
 
@@ -495,6 +489,33 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                     >
                       Cancel Subscription
                     </Button>
+                  </div>
+                )}
+
+                {/* Pending Downgrade Notice */}
+                {pendingDowngrade && downgradeEffectiveDate && (
+                  <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg mt-4">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-sm text-amber-900 font-medium">Downgrade Scheduled</p>
+                      <p className="text-sm text-amber-800 mt-1">
+                        Your plan will switch to Basic on {new Date(downgradeEffectiveDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}.
+                        You'll keep all Premium features until then.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="mt-3 bg-amber-600 hover:bg-amber-700 text-white"
+                        onClick={handleCancelDowngrade}
+                        disabled={isCancellingDowngrade}
+                      >
+                        {isCancellingDowngrade ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Cancelling...
+                          </>
+                        ) : 'Keep Premium'}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </Card>

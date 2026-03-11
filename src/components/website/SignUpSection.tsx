@@ -77,6 +77,8 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [showReactivation, setShowReactivation] = useState(false);
+  const [reactivating, setReactivating] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -164,6 +166,11 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
 
       if (!response.ok) {
         console.error('[Sign Up] Error:', result);
+        if (response.status === 409 && result.error === 'account_cancelled' && result.reactivationAvailable) {
+          setShowReactivation(true);
+          setLoading(false);
+          return;
+        }
         setError(result.error || 'Failed to create account. Please try again.');
         setLoading(false);
         return;
@@ -191,6 +198,145 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
       setLoading(false);
     }
   };
+
+  const handleReactivation = async () => {
+    setReactivating(true);
+    setError('');
+    try {
+      const { API_CONFIG } = await import('../../utils/config');
+
+      // Need to create a payment method first
+      if (!stripe || !elements) {
+        setError('Payment form is still loading. Please wait.');
+        setReactivating(false);
+        return;
+      }
+      const cardElement = elements.getElement(CardElement);
+      if (!cardElement) {
+        setError('Card element not found');
+        setReactivating(false);
+        return;
+      }
+      const { error: stripeError, paymentMethod } = await stripe.createPaymentMethod({
+        type: 'card',
+        card: cardElement,
+        billing_details: { email: formData.email.trim() },
+      });
+      if (stripeError || !paymentMethod) {
+        setError(stripeError?.message || 'Failed to process payment method');
+        setReactivating(false);
+        return;
+      }
+
+      const response = await fetch(`${API_CONFIG.baseUrl}/auth/reactivate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: formData.email.trim(),
+          password: formData.password,
+          plan: formData.plan,
+          paymentMethodId: paymentMethod.id,
+        }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        setError(result.error || 'Failed to reactivate account');
+        setReactivating(false);
+        return;
+      }
+
+      setSuccess(true);
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+    } finally {
+      setReactivating(false);
+    }
+  };
+
+  if (showReactivation) {
+    return (
+      <section className="py-20 bg-gradient-to-br from-[#1E3A8A] via-[#14B8A6] to-[#F59E0B] min-h-screen flex items-center">
+        <div className="max-w-md mx-auto px-4 w-full">
+          <Card className="p-8">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                Welcome Back!
+              </h2>
+              <p className="text-gray-600 text-sm" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Your account was previously cancelled. Choose a plan and reactivate to pick up where you left off.
+              </p>
+            </div>
+
+            {/* Plan Selection */}
+            <div className="space-y-3 mb-4">
+              <label className="text-sm font-medium">Select Plan</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, plan: 'basic' }))}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    formData.plan === 'basic'
+                      ? 'border-[#1E3A8A] bg-[#1E3A8A]/5'
+                      : 'border-gray-200 hover:border-[#1E3A8A]/30'
+                  }`}
+                >
+                  <p className="font-medium text-sm">Basic</p>
+                  <p className="text-lg font-bold">$4.99<span className="text-xs text-gray-500">/mo</span></p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData(prev => ({ ...prev, plan: 'premium' }))}
+                  className={`p-3 rounded-lg border-2 text-left transition-all ${
+                    formData.plan === 'premium'
+                      ? 'border-[#F59E0B] bg-[#F59E0B]/5'
+                      : 'border-gray-200 hover:border-[#F59E0B]/30'
+                  }`}
+                >
+                  <p className="font-medium text-sm">Premium</p>
+                  <p className="text-lg font-bold">$9.99<span className="text-xs text-gray-500">/mo</span></p>
+                </button>
+              </div>
+              <p className="text-xs text-gray-500 text-center">No free trial — billing starts immediately.</p>
+            </div>
+
+            {/* Payment */}
+            <div className="space-y-2 mb-4">
+              <label className="text-sm font-medium">Payment Method</label>
+              <div className="border rounded-lg p-3 bg-white">
+                <CardElement options={cardElementOptions} />
+              </div>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2 mb-4">
+                <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-red-800">{error}</p>
+              </div>
+            )}
+
+            <Button
+              className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 h-12 rounded-xl"
+              onClick={handleReactivation}
+              disabled={reactivating}
+            >
+              {reactivating ? 'Reactivating...' : 'Reactivate Account'}
+            </Button>
+
+            <div className="mt-4 text-center">
+              <button
+                type="button"
+                onClick={() => setShowReactivation(false)}
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Back to sign up
+              </button>
+            </div>
+          </Card>
+        </div>
+      </section>
+    );
+  }
 
   if (success) {
     return (
