@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle } from 'lucide-react@0.468.0';
+import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp } from 'lucide-react@0.468.0';
 import { API_CONFIG } from '../../utils/config';
 
 interface AccountSettingsModalProps {
@@ -40,6 +40,13 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
   const [pendingPlan, setPendingPlan] = useState<'basic' | 'premium'>('basic');
+  const [promoCode, setPromoCode] = useState('');
+  const [promoApplied, setPromoApplied] = useState<string | null>(null);
+  const [promoType, setPromoType] = useState<string | null>(null);
+  const [promoValue, setPromoValue] = useState<number | null>(null);
+  const [showPromoInput, setShowPromoInput] = useState(false);
+  const [promoError, setPromoError] = useState('');
+  const [applyingPromo, setApplyingPromo] = useState(false);
 
   // Load subscription status to check for pending cancellation
   useEffect(() => {
@@ -61,6 +68,9 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           setTrialDaysRemaining(data.daysRemaining || 0);
           setPendingDowngrade(data.pendingDowngrade || null);
           setDowngradeEffectiveDate(data.downgradeEffectiveDate || null);
+          setPromoApplied(data.promoCode || null);
+          setPromoType(data.promoType || null);
+          setPromoValue(data.promoValue || null);
         }
       } catch {
         // Subscription status not available
@@ -154,6 +164,27 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       toast.error('Failed to cancel downgrade');
     } finally {
       setIsCancellingDowngrade(false);
+    }
+  };
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setApplyingPromo(true);
+    setPromoError('');
+    try {
+      const { applyPromo } = await import('../../utils/dashboard-api');
+      const result = await applyPromo(promoCode.trim());
+      const { toast } = await import('../ui/sonner');
+      toast.success(`Promo applied: ${result.description}`);
+      setPromoApplied(result.promoCode);
+      setPromoType(result.promoType);
+      setPromoValue(result.promoValue);
+      setPromoCode('');
+      setShowPromoInput(false);
+    } catch (error: any) {
+      setPromoError(error.message || 'Failed to apply promo code');
+    } finally {
+      setApplyingPromo(false);
     }
   };
 
@@ -518,6 +549,60 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                     </div>
                   </div>
                 )}
+
+                {/* Promo Code Section */}
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  {promoApplied ? (
+                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <Gift className="w-4 h-4 text-green-600" />
+                      <div className="flex-1">
+                        <span className="text-xs font-medium bg-green-100 text-green-800 px-2 py-0.5 rounded">Promo Applied</span>
+                        <span className="text-sm text-green-700 ml-2">
+                          {promoApplied} - {promoType === 'free_months'
+                            ? `${promoValue} month${promoValue! > 1 ? 's' : ''} free`
+                            : `${promoValue}% off`}
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div>
+                      <button
+                        type="button"
+                        className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors w-full"
+                        onClick={() => setShowPromoInput(!showPromoInput)}
+                      >
+                        <Gift className="w-4 h-4" />
+                        <span>Have a promo code?</span>
+                        {showPromoInput ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                      </button>
+
+                      {showPromoInput && (
+                        <div className="mt-3 space-y-2">
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Enter promo code"
+                              value={promoCode}
+                              onChange={(e) => { setPromoCode(e.target.value); setPromoError(''); }}
+                              className="flex-1"
+                              onKeyDown={(e) => e.key === 'Enter' && handleApplyPromo()}
+                            />
+                            <Button
+                              variant="outline"
+                              onClick={handleApplyPromo}
+                              disabled={applyingPromo || !promoCode.trim()}
+                              className="px-4"
+                            >
+                              {applyingPromo ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                            </Button>
+                          </div>
+                          {promoError && (
+                            <p className="text-xs text-red-600">{promoError}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </Card>
             )}
 

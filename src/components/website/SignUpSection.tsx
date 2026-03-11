@@ -13,19 +13,23 @@ import { Card } from '../ui/card';
 import { Checkbox } from '../ui/checkbox';
 import { Separator } from '../ui/separator';
 import type { SectionType } from '../../App';
-import { 
-  Mail, 
-  Lock, 
-  User, 
-  Building2, 
-  CheckCircle2, 
+import {
+  Mail,
+  Lock,
+  User,
+  Building2,
+  CheckCircle2,
   AlertCircle,
   Eye,
   EyeOff,
   Sparkles,
   CreditCard,
   Shield,
-  LockKeyhole
+  LockKeyhole,
+  Gift,
+  ChevronDown,
+  ChevronUp,
+  Loader2
 } from 'lucide-react';
 import { STRIPE_CONFIG } from '../../utils/config';
 
@@ -79,6 +83,41 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
   const [success, setSuccess] = useState(false);
   const [showReactivation, setShowReactivation] = useState(false);
   const [reactivating, setReactivating] = useState(false);
+  const [showPromoInput, setShowPromoInput] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [promoValidating, setPromoValidating] = useState(false);
+  const [validatedPromo, setValidatedPromo] = useState<{ code: string; type: string; value: number; description: string } | null>(null);
+  const [promoError, setPromoError] = useState('');
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) return;
+    setPromoValidating(true);
+    setPromoError('');
+    setValidatedPromo(null);
+    try {
+      const { API_CONFIG } = await import('../../utils/config');
+      const response = await fetch(`${API_CONFIG.baseUrl}/subscription/validate-promo`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: promoCode.trim() }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setPromoError(result.error || 'Invalid promo code');
+      } else if (result.valid) {
+        setValidatedPromo({
+          code: promoCode.trim().toUpperCase(),
+          type: result.type,
+          value: result.value,
+          description: result.description,
+        });
+      }
+    } catch {
+      setPromoError('Failed to validate promo code');
+    } finally {
+      setPromoValidating(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,6 +197,7 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
             businessName: formData.businessName.trim(),
             plan: formData.plan,
             paymentMethodId: paymentMethod.id, // Send the tokenized payment method
+            ...(validatedPromo ? { promoCode: validatedPromo.code } : {}),
           }),
         }
       );
@@ -589,6 +629,64 @@ function SignUpForm({ onNavigateToSignIn, onNavigate, initialPlan = 'basic' }: S
                       <div className="text-xs text-gray-600 mt-2">Unlimited invoices</div>
                     </button>
                   </div>
+                </div>
+
+                {/* Promo Code Section */}
+                <div className="border rounded-lg p-3">
+                  <button
+                    type="button"
+                    className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-700 transition-colors w-full"
+                    onClick={() => setShowPromoInput(!showPromoInput)}
+                  >
+                    <Gift className="w-4 h-4" />
+                    <span>Have a promo code?</span>
+                    {showPromoInput ? <ChevronUp className="w-4 h-4 ml-auto" /> : <ChevronDown className="w-4 h-4 ml-auto" />}
+                  </button>
+
+                  {showPromoInput && (
+                    <div className="mt-3 space-y-2">
+                      {validatedPromo ? (
+                        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                          <Gift className="w-4 h-4 text-green-600" />
+                          <div className="flex-1">
+                            <span className="text-sm font-medium text-green-800">{validatedPromo.code}</span>
+                            <span className="text-sm text-green-700 ml-2">- {validatedPromo.description}</span>
+                          </div>
+                          <button
+                            type="button"
+                            className="text-xs text-green-600 hover:text-green-800"
+                            onClick={() => { setValidatedPromo(null); setPromoCode(''); }}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Enter promo code"
+                              value={promoCode}
+                              onChange={(e) => { setPromoCode(e.target.value); setPromoError(''); }}
+                              className="flex-1"
+                              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleApplyPromo(); } }}
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              onClick={handleApplyPromo}
+                              disabled={promoValidating || !promoCode.trim()}
+                              className="px-4"
+                            >
+                              {promoValidating ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Apply'}
+                            </Button>
+                          </div>
+                          {promoError && (
+                            <p className="text-xs text-red-600">{promoError}</p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
