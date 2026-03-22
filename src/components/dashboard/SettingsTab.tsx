@@ -11,7 +11,8 @@ import {
   Loader2,
   HelpCircle,
   ExternalLink,
-  Bell
+  Bell,
+  ClipboardList
 } from 'lucide-react@0.468.0';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
@@ -22,6 +23,7 @@ import { CustomerAnalyticsModal } from './CustomerAnalyticsModal';
 import { PaymentSettingsModal } from './PaymentSettingsModal';
 import { EmailNotificationsModal } from './EmailNotificationsModal';
 import { CustomBrandingModal } from './CustomBrandingModal';
+import { SavedItemsModal } from './SavedItemsModal';
 
 interface SettingsTabProps {
   userPlan: 'basic' | 'premium';
@@ -99,6 +101,14 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
       subtitle: 'Choose which emails you receive',
       color: 'text-amber-600',
       bgColor: 'bg-amber-100',
+    },
+    {
+      id: 'saved-items',
+      icon: ClipboardList,
+      title: 'Saved Items & Discounts',
+      subtitle: 'Manage reusable line items and discounts',
+      color: 'text-cyan-600',
+      bgColor: 'bg-cyan-100',
     },
     {
       id: 'branding',
@@ -232,6 +242,10 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
         onClose={() => setActiveModal(null)}
         userProfile={userProfile}
         onDataUpdated={loadData}
+      />
+      <SavedItemsModal
+        open={activeModal === 'saved-items'}
+        onClose={() => setActiveModal(null)}
       />
       <CustomBrandingModal
         open={activeModal === 'branding'}
