@@ -356,30 +356,23 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0F172A] via-[#1E3A8A] to-[#0F172A]">
-      {/* Header */}
-      <div className="bg-white/10 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] rounded-2xl flex items-center justify-center">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
-            <div>
-              <h1 className="text-white text-3xl" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                BilltUp Visual User Guide
-              </h1>
-              <p className="text-white/70" style={{ fontFamily: 'Inter, sans-serif' }}>
-                Step-by-step instructions with iPhone mockups
-              </p>
-            </div>
+    <section className="py-20 bg-white min-h-screen">
+      <div className="max-w-6xl mx-auto px-4">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="w-14 h-14 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <FileText className="w-8 h-8 text-white" />
           </div>
+          <h1 className="text-3xl sm:text-4xl text-gray-900 mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            User Guide
+          </h1>
+          <p className="text-gray-600 max-w-xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
+            Step-by-step instructions to help you get the most out of BilltUp
+          </p>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
         {/* Introduction */}
-        <Card className="mb-8 bg-white/95 backdrop-blur-sm border-white/20">
+        <Card className="mb-8 border-gray-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-3" style={{ fontFamily: 'Poppins, sans-serif' }}>
               <div className="w-12 h-12 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] rounded-xl flex items-center justify-center">
@@ -685,33 +678,33 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
 
         {/* Footer */}
         <div className="text-center mt-12 pb-8">
-          <p className="text-white/70 text-lg mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-gray-700 text-lg mb-2" style={{ fontFamily: 'Inter, sans-serif' }}>
             Need more help?
           </p>
-          <p className="text-white/50 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-gray-500 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
             Check the FAQ section for common questions
           </p>
           <div className="flex gap-4 justify-center">
             <Button
               variant="outline"
-              className="bg-white/10 text-white border-white/20 hover:bg-white/20"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50"
               onClick={() => onNavigate?.('faq')}
             >
               View FAQ
             </Button>
-            <Button 
-              className="bg-gradient-to-r from-[#1E3A8A] to-[#14B8A6]"
+            <Button
+              className="bg-gradient-to-r from-[#1E3A8A] to-[#14B8A6] text-white"
               onClick={() => onNavigate?.('contact')}
             >
               Contact Support
             </Button>
           </div>
-          <p className="text-white/50 mt-8" style={{ fontFamily: 'Inter, sans-serif' }}>
+          <p className="text-gray-400 mt-8" style={{ fontFamily: 'Inter, sans-serif' }}>
             BilltUp v1.0.0 • © 2025 BilltUp. All rights
             reserved.
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 }
