@@ -191,6 +191,7 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
             name: item.description,
             price: item.rate,
             quantity: item.quantity,
+            skipUsageCount: true,
           }).catch(() => {}))
       );
 

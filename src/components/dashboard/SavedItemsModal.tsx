@@ -64,6 +64,7 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
   const [itemNotes, setItemNotes] = useState('');
   const [itemPrice, setItemPrice] = useState('');
   const [itemQuantity, setItemQuantity] = useState('1');
+  const [bulletMode, setBulletMode] = useState(false);
 
   const [discounts, setDiscounts] = useState<SavedDiscount[]>([]);
   const [showAddDiscount, setShowAddDiscount] = useState(false);
@@ -95,7 +96,7 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
 
   const resetItemForm = () => {
     setItemName(''); setItemNotes(''); setItemPrice(''); setItemQuantity('1');
-    setEditingItem(null); setShowAddItem(false);
+    setEditingItem(null); setShowAddItem(false); setBulletMode(false);
   };
 
   const openEditItem = (item: SavedLineItem) => {
@@ -210,21 +211,67 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
                   <div>
                     <div className="flex items-center justify-between mb-1">
                       <Label className="text-xs text-gray-500">Notes (optional)</Label>
-                      <Button type="button" variant="ghost" size="sm" className="h-6 px-2 text-xs text-gray-500"
+                      <button
+                        type="button"
                         onClick={() => {
-                          const ta = document.getElementById('web-item-notes') as HTMLTextAreaElement;
-                          if (!ta) return;
-                          const s = ta.selectionStart, e = ta.selectionEnd;
-                          const before = itemNotes.substring(0, s), after = itemNotes.substring(e);
-                          const prefix = before.length > 0 && !before.endsWith('\n') ? '\n' : '';
-                          setItemNotes(before + prefix + '• ' + after);
-                          setTimeout(() => { ta.selectionStart = ta.selectionEnd = s + prefix.length + 2; ta.focus(); }, 0);
+                          const newMode = !bulletMode;
+                          setBulletMode(newMode);
+                          if (newMode && !itemNotes) {
+                            setItemNotes('• ');
+                            setTimeout(() => {
+                              const ta = document.getElementById('web-item-notes') as HTMLTextAreaElement;
+                              if (ta) { ta.selectionStart = ta.selectionEnd = 2; ta.focus(); }
+                            }, 0);
+                          } else if (newMode && itemNotes) {
+                            // Convert existing lines to bullets
+                            const converted = itemNotes.split('\n').map(line => {
+                              const trimmed = line.replace(/^[•\-*]\s*/, '').trim();
+                              return trimmed ? `• ${trimmed}` : '';
+                            }).filter(Boolean).join('\n');
+                            setItemNotes(converted);
+                          } else if (!newMode && itemNotes) {
+                            // Remove bullets from all lines
+                            const plain = itemNotes.split('\n').map(line => line.replace(/^[•]\s*/, '')).join('\n');
+                            setItemNotes(plain);
+                          }
                         }}
+                        className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors ${bulletMode ? 'bg-blue-100 text-blue-700 border border-blue-300' : 'text-gray-500 hover:bg-gray-100 border border-transparent'}`}
                       >
-                        <List className="w-3 h-3 mr-1" /> Bullet
-                      </Button>
+                        <List className="w-3 h-3" />
+                        {bulletMode ? 'Bullets On' : 'Bullets Off'}
+                      </button>
                     </div>
-                    <Textarea id="web-item-notes" placeholder="Add notes, bullet lists, or descriptions..." value={itemNotes} onChange={e => setItemNotes(e.target.value)} rows={3} className="text-sm resize-y" />
+                    <Textarea
+                      id="web-item-notes"
+                      placeholder={bulletMode ? 'Type your first item...' : 'Add notes, bullet lists, or descriptions...'}
+                      value={itemNotes}
+                      onChange={e => setItemNotes(e.target.value)}
+                      onKeyDown={e => {
+                        if (e.key === 'Enter' && bulletMode) {
+                          const ta = e.target as HTMLTextAreaElement;
+                          const pos = ta.selectionStart;
+                          const textBefore = itemNotes.substring(0, pos);
+                          const currentLine = textBefore.split('\n').pop() || '';
+                          if (currentLine.trim() === '•' || currentLine.trim() === '') {
+                            // Empty bullet — remove it and exit
+                            e.preventDefault();
+                            const before = textBefore.substring(0, textBefore.length - currentLine.length);
+                            const after = itemNotes.substring(pos);
+                            setItemNotes(before + after);
+                            setBulletMode(false);
+                            setTimeout(() => { ta.selectionStart = ta.selectionEnd = before.length; }, 0);
+                          } else {
+                            // Continue with next bullet
+                            e.preventDefault();
+                            const after = itemNotes.substring(pos);
+                            setItemNotes(textBefore + '\n• ' + after);
+                            setTimeout(() => { ta.selectionStart = ta.selectionEnd = pos + 3; }, 0);
+                          }
+                        }
+                      }}
+                      rows={3}
+                      className="text-sm resize-y"
+                    />
                   </div>
                   <div className="flex gap-2">
                     <div className="flex-1">
@@ -293,15 +340,19 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
                     <Button variant="ghost" size="icon" onClick={resetDiscountForm} className="h-7 w-7"><X className="w-4 h-4" /></Button>
                   </div>
                   <Input placeholder="Discount name *" value={discLabel} onChange={e => setDiscLabel(e.target.value)} autoFocus />
-                  <div className="flex gap-2">
+                  <div>
+                    <Label className="text-xs text-gray-500 mb-1 block">Type</Label>
                     <Select value={discType} onValueChange={v => setDiscType(v as 'dollar' | 'percent')}>
-                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                      <SelectContent>
+                      <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                      <SelectContent className="z-[200] bg-white border shadow-lg">
                         <SelectItem value="percent">% Percent</SelectItem>
                         <SelectItem value="dollar">$ Amount</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Input type="number" placeholder="0" min="0" max={discType === 'percent' ? 100 : undefined} step={discType === 'percent' ? 1 : 0.01} value={discValue} onChange={e => setDiscValue(e.target.value)} className="flex-1" />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-gray-500 mb-1 block">{discType === 'percent' ? 'Percentage (%)' : 'Amount ($)'}</Label>
+                    <Input type="number" placeholder={discType === 'percent' ? 'e.g. 10' : 'e.g. 25.00'} min="0" max={discType === 'percent' ? 100 : undefined} step={discType === 'percent' ? 1 : 0.01} value={discValue} onChange={e => setDiscValue(e.target.value)} className="w-full" />
                   </div>
                   <Button className="w-full" onClick={handleSaveDiscount}>
                     <Check className="w-4 h-4 mr-1" /> {editingDiscount ? 'Update' : 'Save'}
