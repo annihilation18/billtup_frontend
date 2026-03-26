@@ -7,6 +7,10 @@ interface PaymentData {
   customer: string;
   lineItems: Array<{ name: string; quantity: number; price: number; notes?: string; description?: string }>;
   subtotal: number;
+  discountAmount?: number;
+  discountLabel?: string;
+  discountType?: string;
+  discountValue?: number;
   tax: number;
   total: number;
   date?: string;
@@ -290,6 +294,14 @@ export function PaymentPage() {
                     <span className="text-gray-500">Subtotal</span>
                     <span className="font-medium">${data.subtotal.toFixed(2)}</span>
                   </div>
+                  {data.discountAmount != null && data.discountAmount > 0 && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">
+                        Discount{data.discountLabel ? ` (${data.discountLabel})` : data.discountType === 'percent' && data.discountValue ? ` (${data.discountValue}%)` : ''}
+                      </span>
+                      <span className="font-medium text-green-600">-${data.discountAmount.toFixed(2)}</span>
+                    </div>
+                  )}
                   {data.tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Tax</span>
