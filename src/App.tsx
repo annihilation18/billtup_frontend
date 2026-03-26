@@ -18,6 +18,7 @@ import { ContactSection } from './components/website/ContactSection';
 import { PrivacySection } from './components/website/PrivacySection';
 import { TermsSection } from './components/website/TermsSection';
 import { SecuritySection } from './components/website/SecuritySection';
+import { DeleteAccountSection } from './components/website/DeleteAccountSection';
 import { RoadmapSection } from './components/website/RoadmapSection';
 import { ChangelogSection } from './components/website/ChangelogSection';
 import { HelpCenterSection } from './components/website/HelpCenterSection';
@@ -400,6 +401,7 @@ export default function App() {
                 <Route path="/privacy" element={<PrivacySection />} />
                 <Route path="/terms" element={<TermsSection />} />
                 <Route path="/security" element={<SecuritySection />} />
+                <Route path="/delete-account" element={<DeleteAccountSection />} />
                 <Route path="/logo-export" element={<BilltUpLogoExport />} />
                 {/* Auth-guarded paths that slip through — redirect to signin */}
                 <Route path="/dashboard/*" element={<Navigate to={`/signin?redirect=${encodeURIComponent(location.pathname)}`} replace />} />
