@@ -321,7 +321,7 @@ export const savedLineItemsApi = {
     return apiRequest('/line-items');
   },
 
-  async save(item: { name: string; notes?: string; price?: number; quantity?: number }) {
+  async save(item: { name: string; notes?: string; price?: number; quantity?: number; skipUsageCount?: boolean }) {
     return apiRequest('/line-items', {
       method: 'POST',
       body: JSON.stringify(item),
