@@ -17,7 +17,7 @@ export function TermsSection() {
           </h1>
           
           <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Last updated: March 1, 2026
+            Last updated: September 30, 2026
           </p>
         </div>
 
@@ -170,10 +170,10 @@ export function TermsSection() {
             </h2>
             <div className="space-y-3 text-gray-700 leading-relaxed">
               <p>
-                New users receive a 14-day free trial with full access to all Premium features. A payment method is collected during sign-up but you will not be charged until the trial ends.
+                New users receive a 14-day free trial with full access to all Premium features. No payment method is required to start the trial.
               </p>
               <p>
-                At the end of the trial period, your subscription will begin billing automatically at the rate of the plan you selected during sign-up, unless you cancel before the trial ends.
+                To continue creating and editing invoices, estimates, customers and settings after the trial, you must subscribe to a paid plan. If you subscribe during the trial, billing begins when the trial ends (subscriptions purchased through the Apple App Store begin billing at purchase). If you do not subscribe, your account becomes read-only: you can still view your existing data, send existing invoices and receive payments, but you cannot create or change content until you subscribe.
               </p>
               <p>
                 We reserve the right to limit or deny free trials to prevent abuse of the offer.

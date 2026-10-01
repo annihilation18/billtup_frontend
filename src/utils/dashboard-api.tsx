@@ -2,6 +2,17 @@ import { getIdToken } from './auth/cognito';
 import { API_CONFIG } from './config';
 import { captureError } from './errorReporter';
 
+/** Error code the API returns (HTTP 402) when a read-only account (trial ended) tries to change data */
+export const SUBSCRIPTION_REQUIRED = 'SUBSCRIPTION_REQUIRED';
+/** Window event fired when the API rejects a request because a subscription is required */
+export const SUBSCRIPTION_REQUIRED_EVENT = 'billtup:subscription-required';
+/** Window event that opens the Subscribe dialog (detail: optional plan) */
+export const OPEN_SUBSCRIBE_EVENT = 'billtup:open-subscribe';
+
+export function openSubscribe(plan?: 'basic' | 'premium') {
+  window.dispatchEvent(new CustomEvent(OPEN_SUBSCRIBE_EVENT, { detail: plan }));
+}
+
 type TimePeriod = 'current_month' | 'billing_cycle' | 'quarter' | 'year' | 'custom';
 
 // Helper function to get date range for a time period
@@ -87,6 +98,16 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    // Trial ended without a subscription: expected, not an error to report
+    if (response.status === 402) {
+      let body: any = null;
+      try { body = JSON.parse(errorText); } catch { /* not JSON */ }
+      if (body?.code === SUBSCRIPTION_REQUIRED) {
+        window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REQUIRED_EVENT, { detail: body.error }));
+        throw new Error(body.error);
+      }
+    }
     // Only log errors for endpoints we expect to exist
     if (response.status !== 404) {
       console.error(`API Error [${endpoint}]:`, errorText);
@@ -794,6 +815,22 @@ export async function reactivateSubscription() {
     console.error('Error reactivating subscription:', error);
     throw error;
   }
+}
+
+// Start a Stripe SetupIntent to collect a card for a new subscription
+export async function createSetupIntent(planType: 'basic' | 'premium'): Promise<{ clientSecret: string; customerId: string }> {
+  return apiCall('/subscription/create-setup-intent', {
+    method: 'POST',
+    body: JSON.stringify({ planType }),
+  });
+}
+
+// Create the subscription with the confirmed card. Billing starts when the trial ends (or now).
+export async function activateSubscription(planType: 'basic' | 'premium', paymentMethodId: string, promoCode?: string) {
+  return apiCall('/subscription/activate', {
+    method: 'POST',
+    body: JSON.stringify({ planType, paymentMethodId, ...(promoCode ? { promoCode } : {}) }),
+  });
 }
 
 // Update subscription plan (upgrade/downgrade)

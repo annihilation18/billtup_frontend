@@ -10,6 +10,7 @@ import {
   Smartphone,
   Clock,
   Sparkles,
+  Lock,
 } from 'lucide-react@0.468.0';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
@@ -18,7 +19,9 @@ import { SettingsTab } from './SettingsTab';
 import { OverviewTab } from './OverviewTab';
 import { BilltUpLogo } from '../BilltUpLogo';
 import { UserMenu } from './UserMenu';
-import { fetchTrialStatus } from '../../utils/dashboard-api';
+import { fetchSubscription, SUBSCRIPTION_REQUIRED_EVENT, OPEN_SUBSCRIBE_EVENT, openSubscribe } from '../../utils/dashboard-api';
+import { SubscribeModal } from './SubscribeModal';
+import { toast } from '../ui/sonner';
 import { pathToTab, tabToPath } from '../../utils/routes';
 import type { DashboardTab } from '../../utils/routes';
 
@@ -36,26 +39,58 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
     navigate(tabToPath(tab));
   }, [navigate]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [trialStatus, setTrialStatus] = useState<{
     isInTrial: boolean;
     daysRemaining: number;
+    trialEndsAt: string | null;
+    /** Trial ended without a subscription: read-only until the user subscribes */
+    isLocked: boolean;
+    /** A paid subscription starts automatically when the trial ends */
+    hasPaymentSetup: boolean;
   } | null>(null);
+  const [subscribePlan, setSubscribePlan] = useState<'basic' | 'premium' | null>(null);
 
   useEffect(() => {
     loadTrialStatus();
   }, []);
 
   const loadTrialStatus = async () => {
-    const status = await fetchTrialStatus();
+    const sub = await fetchSubscription();
+    if (!sub) return;
     setTrialStatus({
-      isInTrial: status.isInTrial,
-      daysRemaining: status.daysRemaining,
+      isInTrial: !!sub.isTrial,
+      daysRemaining: sub.daysRemaining ?? 0,
+      trialEndsAt: sub.trialEndsAt ?? null,
+      isLocked: !!sub.isLocked,
+      hasPaymentSetup: !!sub.hasPaymentSetup,
     });
   };
 
+  useEffect(() => {
+    // The API refused a change because the trial ended without a subscription
+    const onSubscriptionRequired = (e: Event) => {
+      setTrialStatus((prev) => (prev ? { ...prev, isLocked: true, isInTrial: false } : prev));
+      toast.error((e as CustomEvent<string>).detail || 'Your free trial has ended.', {
+        action: { label: 'Choose a plan', onClick: () => openSubscribe() },
+      });
+    };
+    const onOpenSubscribe = (e: Event) => setSubscribePlan((e as CustomEvent<'basic' | 'premium' | undefined>).detail || 'premium');
+    window.addEventListener(SUBSCRIPTION_REQUIRED_EVENT, onSubscriptionRequired);
+    window.addEventListener(OPEN_SUBSCRIBE_EVENT, onOpenSubscribe);
+    return () => {
+      window.removeEventListener(SUBSCRIPTION_REQUIRED_EVENT, onSubscriptionRequired);
+      window.removeEventListener(OPEN_SUBSCRIBE_EVENT, onOpenSubscribe);
+    };
+  }, []);
+
   const handleUpgrade = () => {
-    setShowUpgradeModal(true);
+    // Paying subscribers change plans in Account settings; everyone else subscribes
+    if (trialStatus?.hasPaymentSetup) {
+      setActiveTab('settings');
+      toast.info('Open Account to change your plan.');
+      return;
+    }
+    openSubscribe('premium');
   };
 
   const tabs = [
@@ -64,9 +99,11 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
-  const isPremium = userPlan === 'premium';
-  // If user is in trial, treat them as premium for features
-  const effectivePlan = trialStatus?.isInTrial ? 'premium' : userPlan;
+  const isLocked = !!trialStatus?.isLocked;
+  const isPremium = userPlan === 'premium' && !isLocked;
+  // Trial users get premium features; a locked (trial ended) account gets none
+  const effectivePlan = isLocked ? 'basic' : trialStatus?.isInTrial ? 'premium' : userPlan;
+  const needsPlan = isLocked || (!!trialStatus?.isInTrial && !trialStatus.hasPaymentSetup);
   const isPremiumOrTrial = effectivePlan === 'premium';
 
   return (
@@ -79,6 +116,21 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
         Skip to dashboard content
       </a>
 
+      {/* Trial ended: read-only until subscribed */}
+      {isLocked && (
+        <div className="bg-amber-50 border-b border-amber-200 py-3 px-4 sm:px-6 lg:px-8" role="alert">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+            <Lock className="w-5 h-5 text-amber-600" aria-hidden="true" />
+            <p className="text-sm sm:text-base text-amber-900" style={{ fontFamily: 'Inter, sans-serif' }}>
+              <strong>Your free trial has ended.</strong> Your invoices, quotes and customers are still here — choose a plan to keep creating and editing.
+            </p>
+            <Button size="sm" className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90" onClick={() => openSubscribe()}>
+              Choose a plan
+            </Button>
+          </div>
+        </div>
+      )}
+
       {/* Trial Banner */}
       {trialStatus?.isInTrial && (
         <div 
@@ -90,9 +142,14 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
             <Sparkles className="w-5 h-5" aria-hidden="true" />
             <p className="text-sm sm:text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               <strong>Trial Active:</strong> You have {trialStatus.daysRemaining} day{trialStatus.daysRemaining !== 1 ? 's' : ''} remaining in your Premium trial
-              {userPlan === 'basic' && ' – Enjoying Premium features!'}
+              {trialStatus.hasPaymentSetup ? ' – your subscription starts when it ends.' : ' – no payment info needed until then.'}
             </p>
             <Clock className="w-5 h-5" aria-hidden="true" />
+            {needsPlan && (
+              <Button size="sm" variant="outline" className="bg-white/10 text-white border-white/40 hover:bg-white/20" onClick={() => openSubscribe()}>
+                Choose a plan
+              </Button>
+            )}
           </div>
         </div>
       )}
@@ -313,6 +370,19 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
           {activeTab === 'analytics' && <AnalyticsTab userPlan={effectivePlan} />}
           {activeTab === 'settings' && <SettingsTab userPlan={effectivePlan} onSignOut={onSignOut} onPlanChange={onPlanChange} />}
         </main>
+
+        <SubscribeModal
+          open={subscribePlan !== null}
+          initialPlan={subscribePlan ?? 'premium'}
+          trialEndsAt={trialStatus?.isInTrial ? trialStatus.trialEndsAt : null}
+          onClose={() => setSubscribePlan(null)}
+          onSubscribed={() => {
+            const plan = subscribePlan ?? 'premium';
+            setSubscribePlan(null);
+            loadTrialStatus();
+            onPlanChange?.(plan);
+          }}
+        />
       </div>
     </div>
   );

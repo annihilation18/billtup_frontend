@@ -12,7 +12,8 @@ import {
   HelpCircle,
   ExternalLink,
   Bell,
-  ClipboardList
+  ClipboardList,
+  Crown
 } from 'lucide-react@0.468.0';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { fetchBusinessProfile, fetchUserProfile } from '../../utils/dashboard-api';
@@ -163,7 +164,8 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
 
       {/* Settings Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {settingsCards.map((card) => {
+        {/* Premium-only settings are hidden on Basic and read-only (trial ended) accounts */}
+        {settingsCards.filter((card) => !card.premium || isPremium).map((card) => {
           return (
             <Card
               key={card.id}
@@ -194,6 +196,24 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
             </Card>
           );
         })}
+        {!isPremium && (
+          <Card
+            // Account settings handles both: subscribe (no plan yet) or upgrade an existing plan
+            onClick={() => setActiveModal('account')}
+            className="p-6 border-dashed border-amber-300 hover:shadow-md transition-all cursor-pointer hover:border-[#F59E0B]"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div className="w-12 h-12 rounded-lg bg-amber-100 flex items-center justify-center">
+                <Crown className="w-6 h-6 text-[#F59E0B]" />
+              </div>
+              <ChevronRight className="w-5 h-5 text-gray-400" />
+            </div>
+            <h3 className="text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>Upgrade to Premium</h3>
+            <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
+              Custom branding, invoice templates, customer analytics and more
+            </p>
+          </Card>
+        )}
       </div>
 
       {/* App Info */}
