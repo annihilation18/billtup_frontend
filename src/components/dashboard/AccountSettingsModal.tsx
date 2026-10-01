@@ -6,6 +6,7 @@ import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp } from 'lucide-react@0.468.0';
 import { API_CONFIG } from '../../utils/config';
+import { openSubscribe } from '../../utils/dashboard-api';
 
 interface AccountSettingsModalProps {
   open: boolean;
@@ -39,6 +40,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [isTrial, setIsTrial] = useState(false);
   const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [trialDaysRemaining, setTrialDaysRemaining] = useState(0);
+  // No paid subscription yet (trial without payment, or trial ended): choosing a plan subscribes
+  const [hasPaymentSetup, setHasPaymentSetup] = useState(true);
   const [pendingPlan, setPendingPlan] = useState<'basic' | 'premium'>('basic');
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState<string | null>(null);
@@ -64,6 +67,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           setCancelAtPeriodEnd(!!data.cancelAtPeriodEnd);
           setCurrentPeriodEnd(data.currentPeriodEnd || null);
           setIsTrial(!!data.isTrial);
+          setHasPaymentSetup(!!data.hasPaymentSetup);
           setTrialEndsAt(data.trialEndsAt || null);
           setTrialDaysRemaining(data.daysRemaining || 0);
           setPendingDowngrade(data.pendingDowngrade || null);
@@ -324,7 +328,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
             {/* Plan Comparison */}
             <div className="grid md:grid-cols-2 gap-4">
               {plans.map((plan) => {
-                const isCurrentPlan = (isPremium && plan.name === 'Premium') || (!isPremium && plan.name === 'Basic');
+                const isCurrentPlan = hasPaymentSetup && ((isPremium && plan.name === 'Premium') || (!isPremium && plan.name === 'Basic'));
                 return (
                   <Card key={plan.name} className={`p-6 ${isCurrentPlan ? 'border-[#1E3A8A] border-2' : 'border-gray-200'}`}>
                     <div className="flex items-center justify-between mb-4">
@@ -353,7 +357,14 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                       <Button 
                         className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
                         onClick={() => {
-                          setPendingPlan(plan.name.toLowerCase() as 'basic' | 'premium');
+                          const chosen = plan.name.toLowerCase() as 'basic' | 'premium';
+                          if (!hasPaymentSetup) {
+                            // No subscription to change yet — subscribe with a card instead
+                            onClose();
+                            openSubscribe(chosen);
+                            return;
+                          }
+                          setPendingPlan(chosen);
                           if (plan.name === 'Premium') {
                             setShowUpgradeConfirm(true);
                           } else {
@@ -368,7 +379,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                             Updating...
                           </>
                         ) : (
-                          plan.name === 'Premium' ? 'Upgrade Now' : 'Downgrade'
+                          !hasPaymentSetup ? `Choose ${plan.name}` : plan.name === 'Premium' ? 'Upgrade Now' : 'Downgrade'
                         )}
                       </Button>
                     )}
@@ -410,9 +421,11 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                   </>
                 )}
                 <div className="flex justify-between py-2 border-b border-gray-200">
-                  <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : isTrial ? 'First Billing Date' : 'Next Billing Date'}</span>
+                  <span className="text-gray-600">{cancelAtPeriodEnd ? 'Access Until' : !hasPaymentSetup ? 'Billing' : isTrial ? 'First Billing Date' : 'Next Billing Date'}</span>
                   <span className={cancelAtPeriodEnd ? 'text-amber-600' : 'text-gray-900'}>
-                    {isTrial && trialEndsAt
+                    {!hasPaymentSetup
+                      ? 'Not set up — choose a plan above'
+                      : isTrial && trialEndsAt
                       ? new Date(trialEndsAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
                       : currentPeriodEnd
                         ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
@@ -510,16 +523,20 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <p className="text-sm text-gray-600">
-                        Cancel your subscription. You'll keep access until the end of your current billing period.
+                        {hasPaymentSetup
+                          ? "Cancel your subscription. You'll keep access until the end of your current billing period."
+                          : "You don't have a paid subscription yet, so there's nothing to cancel."}
                       </p>
                     </div>
-                    <Button
-                      variant="outline"
-                      className="ml-4 border-red-300 text-red-600 hover:bg-red-50"
-                      onClick={() => setShowCancelConfirm(true)}
-                    >
-                      Cancel Subscription
-                    </Button>
+                    {hasPaymentSetup && (
+                      <Button
+                        variant="outline"
+                        className="ml-4 border-red-300 text-red-600 hover:bg-red-50"
+                        onClick={() => setShowCancelConfirm(true)}
+                      >
+                        Cancel Subscription
+                      </Button>
+                    )}
                   </div>
                 )}
 
