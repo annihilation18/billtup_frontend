@@ -137,7 +137,7 @@ export function OverviewTab({ userPlan, onNavigateToTab, onUpgrade }: OverviewTa
               <Button
                 variant="outline"
                 className="h-9 text-sm border-gray-300 hover:bg-gray-50 flex items-center gap-2"
-                onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup', '_blank')}
+                onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup.app', '_blank')}
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M3.609 1.814L13.792 12 3.61 22.186a.996.996 0 0 1-.61-.916V2.73a1 1 0 0 1 .609-.916zm10.89 10.893l2.302 2.302-10.937 6.333 8.635-8.635zm3.199-3.198l2.807 1.626a1 1 0 0 1 0 1.73l-2.808 1.626L15.206 12l2.492-2.491zM5.864 2.658L16.802 8.99l-2.303 2.303-8.635-8.635z"/>
