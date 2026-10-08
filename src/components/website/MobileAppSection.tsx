@@ -45,7 +45,7 @@ export function MobileAppSection() {
                 {/* Google Play Button */}
                 <button
                   className="bg-white text-gray-900 hover:bg-gray-100 rounded-xl h-16 px-6 flex items-center gap-3 transition-colors shadow-lg"
-                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup', '_blank')}
+                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup.app', '_blank')}
                   aria-label="Get BilltUp on Google Play"
                 >
                   <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
