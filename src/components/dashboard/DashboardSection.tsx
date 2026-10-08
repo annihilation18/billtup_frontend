@@ -307,7 +307,7 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
                 <Button 
                   variant="outline" 
                   className="w-full h-9 text-xs border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2"
-                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup', '_blank')}
+                  onClick={() => window.open('https://play.google.com/store/apps/details?id=com.billtup.app', '_blank')}
                   aria-label="Get BilltUp on Google Play"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
