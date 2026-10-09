@@ -124,8 +124,9 @@ export default function App() {
         setUserPlan(plan);
         setIsAuthenticated(true);
 
-        // Only auto-redirect to dashboard from public pages
-        if (!location.pathname.startsWith('/dashboard')) {
+        // Only auto-redirect to dashboard from the landing and sign-in/up pages, so a signed-in
+        // user can still open help, docs and legal pages
+        if (['/', '/signin', '/signup'].includes(location.pathname)) {
           navigate('/dashboard', { replace: true });
         }
       } catch {

@@ -39,7 +39,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
               accept payments via Stripe & Square, and manage customers—all from your Android or iOS device.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <Button
                 onClick={onGetStarted}
                 size="lg"
@@ -49,6 +49,37 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 Start Your Trial
                 <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </Button>
+            </div>
+
+            {/* App store links */}
+            <div className="flex flex-col sm:flex-row gap-3 mb-10">
+              <a
+                href="https://play.google.com/store/apps/details?id=com.billtup.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-5 inline-flex items-center gap-3 transition-colors"
+                aria-label="Get BilltUp on Google Play"
+              >
+                <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.6 3,21.09 3,20.5M16.81,15.12L6.05,21.34L14.54,12.85L16.81,15.12M20.16,10.81C20.5,11.08 20.75,11.5 20.75,12C20.75,12.5 20.53,12.9 20.18,13.18L17.89,14.5L15.39,12L17.89,9.5L20.16,10.81M6.05,2.66L16.81,8.88L14.54,11.15L6.05,2.66Z"/>
+                </svg>
+                <span className="text-left">
+                  <span className="block text-[10px] uppercase tracking-wide text-white/80">Get it on</span>
+                  <span className="block text-base font-semibold leading-tight">Google Play</span>
+                </span>
+              </a>
+              <div
+                className="bg-black/20 border border-white/20 rounded-xl h-14 px-5 inline-flex items-center gap-3 text-white/80"
+                aria-label="BilltUp for iPhone is coming soon to the App Store"
+              >
+                <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
+                </svg>
+                <span className="text-left">
+                  <span className="block text-[10px] uppercase tracking-wide">Coming soon to the</span>
+                  <span className="block text-base font-semibold leading-tight">App Store</span>
+                </span>
+              </div>
             </div>
 
             {/* Trust badges */}

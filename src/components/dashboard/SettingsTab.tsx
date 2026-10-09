@@ -302,6 +302,8 @@ export function SettingsTab({ userPlan, onSignOut, onPlanChange }: SettingsTabPr
               </p>
               <a
                 href="/help"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm text-[#1E3A8A] hover:underline font-medium"
               >
                 Visit Help Center
