@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** The site no longer deploys to Namecheap/cPanel. It runs on AWS S3 + CloudFront; see src/docs/developers/DEPLOYMENT.md. Kept for history only; not maintained.
+
 # BilltUp Deployment Guide - Namecheap Stellar Hosting
 
 Complete setup guide for deploying to your Namecheap Stellar hosting with GitLab CI/CD.

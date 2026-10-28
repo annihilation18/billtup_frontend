@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Point-in-time implementation summary (early 2026). Kept for history only; not maintained.
+
 # Payment Settings - Implementation Summary
 
 ## ✅ Implementation Complete

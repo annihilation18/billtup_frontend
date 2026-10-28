@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Merged into src/docs/ACCESSIBILITY.md (How to test). Kept for history only; not maintained.
+
 # BilltUp Accessibility Testing Guide
 
 ## Overview

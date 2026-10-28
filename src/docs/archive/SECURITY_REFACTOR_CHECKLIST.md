@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Checklist for the v1.1.0 refactor (November 2025), before the AWS migration. Kept for history only; not maintained.
+
 # Implementation Checklist - Security & Efficiency Refactoring
 
 This checklist helps track the implementation status of all recommended improvements from the refactoring.

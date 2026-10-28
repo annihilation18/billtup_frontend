@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** The website has no database. The BilltUp API (app repo) owns the data and its schema. Kept for history only; not maintained.
+
 # Database Schema
 
 Complete database schema and data model documentation.

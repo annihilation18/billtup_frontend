@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Fix notes for the old Supabase edge-function server, which no longer exists. Kept for history only; not maintained.
+
 # Server Error Fixes - HTTP Connection Closed
 
 ## Problem

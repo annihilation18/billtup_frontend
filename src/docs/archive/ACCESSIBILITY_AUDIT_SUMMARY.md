@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Point-in-time report from early 2026; superseded by the current docs in src/docs/. See src/docs/ACCESSIBILITY.md. Kept for history only; not maintained.
+
 # BilltUp Accessibility Audit Summary
 
 **Date:** December 2024  
