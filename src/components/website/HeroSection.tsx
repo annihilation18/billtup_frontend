@@ -68,18 +68,21 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                   <span className="block text-base font-semibold leading-tight">Google Play</span>
                 </span>
               </a>
-              <div
-                className="bg-black/20 border border-white/20 rounded-xl h-14 px-5 inline-flex items-center gap-3 text-white/80"
-                aria-label="BilltUp for iPhone is coming soon to the App Store"
+              <a
+                href="https://apps.apple.com/app/billtup/id6762327635"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-5 inline-flex items-center gap-3 transition-colors"
+                aria-label="Download BilltUp on the App Store"
               >
                 <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09l.01-.01zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
                 </svg>
                 <span className="text-left">
-                  <span className="block text-[10px] uppercase tracking-wide">Coming soon to the</span>
+                  <span className="block text-[10px] uppercase tracking-wide text-white/80">Download on the</span>
                   <span className="block text-base font-semibold leading-tight">App Store</span>
                 </span>
-              </div>
+              </a>
             </div>
 
             {/* Trust badges */}
