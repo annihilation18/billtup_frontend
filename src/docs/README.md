@@ -1,64 +1,33 @@
-# BilltUp Documentation
+# BilltUp Website Docs
 
-Welcome to the BilltUp documentation. This documentation is organized into three main sections:
+Docs for the billtup.com website. The mobile app and the API have their own repo and docs.
 
-## 📚 Documentation Sections
+Start with the [root README](../../README.md) for what the site is and how to run it.
 
-### [Developer Documentation](./developers/README.md)
-Technical documentation for developers working on the BilltUp platform.
-- Architecture & System Design
-- API Reference
-- Setup & Configuration
-- Security & Best Practices
-- Testing & Deployment
+## Developers
 
-### [User Documentation](./users/README.md)
-Guides and tutorials for BilltUp users.
-- Getting Started
-- Features Guide
-- Account Management
-- Billing & Subscriptions
-- FAQ & Troubleshooting
+- [Quick Start](./developers/QUICK_START.md): set up, run, build, and common problems.
+- [Architecture](./developers/ARCHITECTURE.md): routes, dashboard, auth, API access, project structure.
+- [Deployment](./developers/DEPLOYMENT.md): environments, branch flow, and what the deploy workflow does.
+- [Security](./developers/SECURITY.md): secrets, auth, payments, and rules for contributors.
+- [Stripe and Square](./developers/STRIPE_SETUP.md): subscriptions, invoice payments, OAuth connect, test cards.
+- [Testing](./developers/TESTING.md): the build check and the manual smoke test.
 
-### [Accessibility Documentation](./ACCESSIBILITY.md)
-Comprehensive accessibility guidelines and implementation details.
-- WCAG 2.1 Compliance
-- Screen Reader Support
-- Keyboard Navigation
-- ARIA Implementation
-- Testing Procedures
-- Quick Reference Guide
+## Accessibility
 
-### [Changelog](./changelog/README.md)
-Release notes and version history.
-- Latest Updates
-- Version History
-- Migration Guides
+- [Accessibility](./ACCESSIBILITY.md): what the site does and how to test.
 
-## Quick Links
+## Users
 
-### For Developers
-- [Quick Start Guide](./developers/QUICK_START.md)
-- [API Documentation](./developers/API_REFERENCE.md)
-- [Security Guide](./developers/SECURITY.md)
+- [User Guide](./users/README.md): where to do what, plans, and help.
+- [Getting Started](./users/GETTING_STARTED.md): from sign-up to first invoice.
 
-### For Users
-- [User Getting Started](./users/GETTING_STARTED.md)
-- [Latest Changelog](./changelog/LATEST.md)
+## Other
 
-### For Accessibility
-- [Accessibility Overview](./ACCESSIBILITY.md) - Complete accessibility guide
-- [Testing Guide](./ACCESSIBILITY_TESTING.md) - Testing procedures and tools
-- [Audit Summary](./ACCESSIBILITY_AUDIT_SUMMARY.md) - Current compliance status
-- [Quick Reference](./ACCESSIBILITY_QUICK_REFERENCE.md) - Developer cheat sheet
+- [Changelog](../../CHANGELOG.md): website releases by date.
+- [Attributions](../Attributions.md): third-party components and photos.
+- [Archive](./archive/README.md): old reports and guides, kept for history only.
 
 ## Support
 
-For additional help or questions:
-- Email: support@billtup.com
-- Accessibility: accessibility@billtup.com
-- Documentation Issues: [Submit an issue](https://github.com/billtup/docs/issues)
-
----
-
-*Last Updated: February 2026*
+support@billtup.com
