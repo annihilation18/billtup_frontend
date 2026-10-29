@@ -4,6 +4,7 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- App Store subscribers see "Billed through the App Store" in account settings, with the renewal date, how to turn off renewal at account.apple.com, and that they can subscribe by card once it ends; the card plan and cancel buttons are hidden for them (app repo BACKLOG N.29, P2.7).
 - Terms of Service and Privacy Policy rewritten (last updated October 28, 2026): $4.99/$9.99 card and App Store billing and cancellation, processing fee paid by the customer, account deletion, Apple's app terms, Arizona law; the Privacy Policy lists every service that receives personal data. Waiting for the owner's approval of the wording (app repo BACKLOG N.20).
 
 ## 2026-10-28

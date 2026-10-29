@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '../ui/button';
+import { Button, buttonVariants } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp } from 'lucide-react@0.468.0';
+import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp, Smartphone } from 'lucide-react@0.468.0';
 import { API_CONFIG } from '../../utils/config';
 import { openSubscribe } from '../../utils/dashboard-api';
 
@@ -23,6 +23,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
+  // Billed through the App Store (and not lapsed): plan changes happen on an Apple device (app repo BACKLOG N.29)
+  const [isAppleBilled, setIsAppleBilled] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [passwordResetStatus, setPasswordResetStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [passwordResetMessage, setPasswordResetMessage] = useState('');
@@ -68,6 +70,7 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
           setCurrentPeriodEnd(data.currentPeriodEnd || null);
           setIsTrial(!!data.isTrial);
           setHasPaymentSetup(!!data.hasPaymentSetup);
+          setIsAppleBilled(data.provider === 'apple' && !data.isLocked);
           setTrialEndsAt(data.trialEndsAt || null);
           setTrialDaysRemaining(data.daysRemaining || 0);
           setPendingDowngrade(data.pendingDowngrade || null);
@@ -325,6 +328,44 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
               </p>
             </div>
 
+            {/* Billed through the App Store */}
+            {isAppleBilled && (
+              <Card className="p-6 border-blue-200 bg-blue-50">
+                <div className="flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
+                    <Smartphone className="w-5 h-5 text-blue-700" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                      Billed through the App Store
+                    </h3>
+                    {cancelAtPeriodEnd ? (
+                      <p className="text-sm text-gray-700">
+                        Your App Store subscription ends on <strong>{currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'the end of the period'}</strong>. You keep your plan until then. After that, subscribe by card here to keep creating invoices. Your data stays.
+                      </p>
+                    ) : (
+                      <>
+                        <p className="text-sm text-gray-700">
+                          Your subscription is billed through your Apple Account and renews on <strong>{currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'the end of the period'}</strong>. Change or cancel it on your iPhone or iPad in Settings → your name → Subscriptions.
+                        </p>
+                        <p className="text-sm text-gray-700 mt-2">
+                          No Apple device anymore? Turn off renewal at account.apple.com. You keep your plan until {currentPeriodEnd ? new Date(currentPeriodEnd).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'the end of the period'}, then subscribe by card here. Your data stays.
+                        </p>
+                        <a
+                          href="https://account.apple.com"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={buttonVariants({ variant: 'outline', className: 'mt-3' })}
+                        >
+                          Open account.apple.com
+                        </a>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Plan Comparison */}
             <div className="grid md:grid-cols-2 gap-4">
               {plans.map((plan) => {
@@ -353,7 +394,12 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                         </li>
                       ))}
                     </ul>
-                    {!isCurrentPlan && (
+                    {!isCurrentPlan && isAppleBilled && (
+                      <p className="text-sm text-gray-500 text-center">
+                        {cancelAtPeriodEnd ? 'Available by card after your App Store subscription ends' : 'Change your plan on your iPhone or iPad'}
+                      </p>
+                    )}
+                    {!isCurrentPlan && !isAppleBilled && (
                       <Button 
                         className="w-full bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white"
                         onClick={() => {
@@ -488,8 +534,8 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
               </div>
             </Card>
 
-            {/* Subscription Management */}
-            {isPremium && (
+            {/* Subscription Management (card subscriptions; App Store ones are managed by Apple) */}
+            {isPremium && !isAppleBilled && (
               <Card className="p-6 border-gray-200">
                 <h3 className="text-lg mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
                   Subscription
