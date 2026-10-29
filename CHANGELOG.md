@@ -4,8 +4,12 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- Home page: the Google Play and App Store buttons have side padding again, so "Google Play" and "Download on the" no longer touch the edge. The buttons used `px-5`, which the pre-built stylesheet (`src/index.css`) doesn't include; they now use `px-6`. They also get the dark see-through background they were designed with (`bg-black/30`, darker on hover), added by hand to the stylesheet.
+
+## 2026-10-28 (2)
+
 - App Store subscribers see "Billed through the App Store" in account settings, with the renewal date, how to turn off renewal at account.apple.com, and that they can subscribe by card once it ends; the card plan and cancel buttons are hidden for them (app repo BACKLOG N.29, P2.7).
-- Terms of Service and Privacy Policy rewritten (last updated October 28, 2026): $4.99/$9.99 card and App Store billing and cancellation, processing fee paid by the customer, account deletion, Apple's app terms, Arizona law; the Privacy Policy lists every service that receives personal data. Waiting for the owner's approval of the wording (app repo BACKLOG N.20).
+- Terms of Service and Privacy Policy rewritten (last updated October 28, 2026): $4.99/$9.99 card and App Store billing and cancellation, processing fee paid by the customer, account deletion, Apple's app terms, Arizona law; the Privacy Policy lists every service that receives personal data. Wording approved by the owner (app repo BACKLOG N.20).
 
 ## 2026-10-28
 
