@@ -4,7 +4,7 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
-- Home page: the Google Play and App Store buttons have side padding again, so "Google Play" and "Download on the" no longer touch the edge. The buttons used `px-5`, which the pre-built stylesheet (`src/index.css`) doesn't include; they now use `px-6`.
+- Home page: the Google Play and App Store buttons have side padding again, so "Google Play" and "Download on the" no longer touch the edge. The buttons used `px-5`, which the pre-built stylesheet (`src/index.css`) doesn't include; they now use `px-6`. They also get the dark see-through background they were designed with (`bg-black/30`, darker on hover), added by hand to the stylesheet.
 
 ## 2026-10-28 (2)
 
