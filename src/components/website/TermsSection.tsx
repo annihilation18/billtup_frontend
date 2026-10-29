@@ -426,7 +426,7 @@ export function TermsSection() {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Cancels any card subscription immediately, without a refund for the rest of the current period</li>
                 <li>Disconnects your Stripe or Square account from BilltUp</li>
-                <li>Permanently deletes your business profile, customers, invoices, estimates, saved items, photos and documents. Deleted data cannot be recovered, so if you need a copy of your data, get one first: Download My Data in your account settings on our website, or Email My Data in the app's Settings (app version 1.0.6 and later)</li>
+                <li>Permanently deletes your business profile, customers, invoices, estimates, saved items, photos and documents. Deleted data cannot be recovered, so if you need a copy of your data, ask us for one at privacy@billtup.com before deleting</li>
                 <li>Does not cancel an App Store subscription; cancel it with Apple as described in Section 4.2</li>
               </ul>
               <p>

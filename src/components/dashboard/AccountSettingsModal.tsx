@@ -4,7 +4,7 @@ import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '../ui/dialog';
-import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp, Download } from 'lucide-react@0.468.0';
+import { Crown, Check, Trash2, AlertTriangle, Loader2, Mail, Lock, CheckCircle, XCircle, AlertCircle, Gift, ChevronDown, ChevronUp } from 'lucide-react@0.468.0';
 import { API_CONFIG } from '../../utils/config';
 import { openSubscribe } from '../../utils/dashboard-api';
 
@@ -23,7 +23,6 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [isExporting, setIsExporting] = useState(false);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [passwordResetStatus, setPasswordResetStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [passwordResetMessage, setPasswordResetMessage] = useState('');
@@ -82,30 +81,6 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       }
     })();
   }, [open]);
-
-  // Downloads everything stored for the account as a JSON file (right of access).
-  const handleDownloadData = async () => {
-    setIsExporting(true);
-    const { toast } = await import('../ui/sonner');
-    try {
-      const { userDataApi } = await import('../../utils/api');
-      const data = await userDataApi.exportData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `billtup-data-${new Date().toISOString().slice(0, 10)}.json`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      URL.revokeObjectURL(url);
-      toast.success('Your data has been downloaded');
-    } catch (error: any) {
-      toast.error(error?.message || 'Could not download your data. Please try again.');
-    } finally {
-      setIsExporting(false);
-    }
-  };
 
   const handleCancelSubscription = async () => {
     setIsCancelling(true);
@@ -647,27 +622,6 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
                 </div>
               </Card>
             )}
-
-            {/* Your Data */}
-            <Card className="p-6">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-lg bg-[#1E3A8A]/10 flex items-center justify-center flex-shrink-0">
-                  <Download className="w-5 h-5 text-[#1E3A8A]" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-gray-900 mb-1" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                    Your Data
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-4">
-                    Download a copy of everything stored for your account: business profile, customers, invoices, estimates, saved items and discounts (JSON file).
-                  </p>
-                  <Button onClick={handleDownloadData} variant="outline" disabled={isExporting}>
-                    {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
-                    {isExporting ? 'Preparing…' : 'Download My Data'}
-                  </Button>
-                </div>
-              </div>
-            </Card>
 
             {/* Danger Zone */}
             <Card className="p-6 border-red-200 bg-red-50/50">

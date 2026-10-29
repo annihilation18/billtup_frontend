@@ -4,7 +4,6 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
-- "Your Data" card in account settings: Download My Data saves everything stored for the account as a JSON file (app repo BACKLOG N.27).
 - Terms of Service and Privacy Policy rewritten (last updated October 28, 2026): $4.99/$9.99 card and App Store billing and cancellation, processing fee paid by the customer, account deletion, Apple's app terms, Arizona law; the Privacy Policy lists every service that receives personal data. Waiting for the owner's approval of the wording (app repo BACKLOG N.20).
 
 ## 2026-10-28
