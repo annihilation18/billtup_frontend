@@ -57,7 +57,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 href="https://play.google.com/store/apps/details?id=com.billtup.app"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-5 inline-flex items-center gap-3 transition-colors"
+                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-6 inline-flex items-center gap-3 transition-colors"
                 aria-label="Get BilltUp on Google Play"
               >
                 <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -72,7 +72,7 @@ export function HeroSection({ onGetStarted }: HeroSectionProps) {
                 href="https://apps.apple.com/app/billtup/id6762327635"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-5 inline-flex items-center gap-3 transition-colors"
+                className="bg-black/30 hover:bg-black/40 backdrop-blur-sm border border-white/30 rounded-xl h-14 px-6 inline-flex items-center gap-3 transition-colors"
                 aria-label="Download BilltUp on the App Store"
               >
                 <svg className="w-7 h-7 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
