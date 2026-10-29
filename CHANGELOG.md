@@ -2,6 +2,16 @@
 
 Website releases to production (billtup.com), by the date they reached `main`. Older history from before the move to AWS is in `src/docs/archive/changelog/`.
 
+## Unreleased
+
+- Terms of Service and Privacy Policy rewritten (last updated October 28, 2026): $4.99/$9.99 card and App Store billing and cancellation, processing fee paid by the customer, account deletion, Apple's app terms, Arizona law; the Privacy Policy lists every service that receives personal data. Waiting for the owner's approval of the wording (app repo BACKLOG N.20).
+
+## 2026-10-28
+
+- Subscribing on billtup.com uses the live Stripe key (production had a test key, so the card form could not load). App repo BACKLOG N.17.
+- App Store buttons and the hero badge open BilltUp on the App Store.
+- Docs rewritten to match the code; stale reports archived.
+
 ## 2026-10-08
 
 - Home page hero links to the App Store and Google Play.
