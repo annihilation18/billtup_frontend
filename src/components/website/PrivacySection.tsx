@@ -259,7 +259,7 @@ export function PrivacySection() {
                 <li><strong>Opt out</strong> of optional notification emails</li>
               </ul>
               <p>
-                You can delete your account in the app's Settings or in your account settings on our website, and turn off optional emails in Settings. For anything else, including a copy of your data, contact us at <a href="mailto:privacy@billtup.com" className="text-[#1E3A8A] hover:underline">privacy@billtup.com</a>. We will respond within 45 days and will not treat you differently for exercising your rights.
+                You can get a copy of your data with Download My Data in your account settings on our website, or Email My Data in the app's Settings (app version 1.0.6 and later), which emails it to your account's address. You can delete your account in the app's Settings or in your account settings on our website, and turn off optional emails in Settings. For anything else, contact us at <a href="mailto:privacy@billtup.com" className="text-[#1E3A8A] hover:underline">privacy@billtup.com</a>. We will respond within 45 days and will not treat you differently for exercising your rights.
               </p>
             </div>
           </section>
