@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** API reference snapshot. The API lives in the app repo and this copy is not kept in sync. Kept for history only; not maintained.
+
 # BilltUp API Documentation
 
 ## Overview

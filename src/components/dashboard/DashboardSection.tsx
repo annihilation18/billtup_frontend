@@ -296,7 +296,7 @@ export function DashboardSection({ userPlan, onSignOut, onPlanChange }: Dashboar
                 <Button 
                   variant="outline" 
                   className="w-full h-9 text-xs border-gray-300 hover:bg-gray-50 flex items-center justify-center gap-2"
-                  onClick={() => window.open('https://apps.apple.com/app/billtup', '_blank')}
+                  onClick={() => window.open('https://apps.apple.com/app/billtup/id6762327635', '_blank')}
                   aria-label="Download BilltUp on the App Store"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

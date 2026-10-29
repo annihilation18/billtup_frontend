@@ -30,7 +30,7 @@ export function MobileAppSection() {
                 {/* App Store Button */}
                 <button
                   className="bg-white text-gray-900 hover:bg-gray-100 rounded-xl h-16 px-6 flex items-center gap-3 transition-colors shadow-lg"
-                  onClick={() => window.open('https://apps.apple.com/app/billtup', '_blank')}
+                  onClick={() => window.open('https://apps.apple.com/app/billtup/id6762327635', '_blank')}
                   aria-label="Download BilltUp on the App Store"
                 >
                   <svg className="w-8 h-8 flex-shrink-0" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

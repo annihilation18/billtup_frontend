@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Temporary implementation guide (January 2026); the work is done. Kept for history only; not maintained.
+
 # Payment Provider API Integration Guide (Website)
 
 **For**: Website Development Team  

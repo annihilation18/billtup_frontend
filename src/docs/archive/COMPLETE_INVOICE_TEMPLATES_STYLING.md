@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Template styling notes copied from the mobile app. The templates are owned by the app repo. Kept for history only; not maintained.
+
 # Complete Invoice Templates Styling Guide - EXACT FROM APP
 
 This document contains the **EXACT HTML/CSS** extracted from the BilltUp mobile app code for all 15 invoice templates, converted from Tailwind CSS to pure CSS for website implementation.

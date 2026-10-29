@@ -14,9 +14,11 @@ export const API_CONFIG = {
 
 // Stripe Configuration
 // Note: Stripe publishable key is safe to expose in frontend
-// Must match the same Stripe account as the backend STRIPE_SECRET_KEY
+// Must match the same Stripe account (and mode) as the backend STRIPE_SECRET_KEY:
+// the live key in production, the test key in dev and stg. Set per environment by
+// VITE_STRIPE_PUBLISHABLE_KEY in .github/workflows/deploy.yml; the fallback is the test key.
 export const STRIPE_CONFIG = {
-  publishableKey: 'pk_test_51T2zFZBGag0rnP6cKdXxNyisEJadY8SsyXxmippSLIfGhFmXJgenz7VQcc3dWO1FymZqJ47AgtOu8HOAeKqsdhwo00bdjtWzRo'
+  publishableKey: import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51T2zFZBGag0rnP6cKdXxNyisEJadY8SsyXxmippSLIfGhFmXJgenz7VQcc3dWO1FymZqJ47AgtOu8HOAeKqsdhwo00bdjtWzRo'
 } as const;
 
 // App Configuration

@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Completed checklist for the Stripe/Square provider selection work (early 2026). Kept for history only; not maintained.
+
 # Payment Provider Implementation - Final Checklist
 
 ## ✅ All Tasks Complete

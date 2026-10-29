@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Release notes from November 2025. Website releases are now listed in the root CHANGELOG.md. Kept for history only; not maintained.
+
 # Latest Changes - November 21, 2025
 
 ## Version 1.1.0 - Security & Documentation Overhaul

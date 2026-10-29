@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Point-in-time implementation summary (early 2026). Mentions Supabase, which is no longer used. Kept for history only; not maintained.
+
 # Payment Provider Implementation - Complete
 
 ## Overview

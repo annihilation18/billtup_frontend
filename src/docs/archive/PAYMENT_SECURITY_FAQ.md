@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Merged into src/docs/developers/SECURITY.md (Payments). Kept for history only; not maintained.
+
 # Payment Security FAQ
 
 **Frequently Asked Questions about Payment Data Handling and PCI DSS Compliance**

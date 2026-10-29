@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Describes the mobile app and API, which live in the app repo. Mentions Supabase, which is no longer used. Kept for history only; not maintained.
+
 # Custom Branding API Documentation for BilltUp
 
 This document provides comprehensive information about the Custom Branding feature implementation in the BilltUp mobile app, including all APIs, data structures, and templates needed to replicate this functionality on the website.
