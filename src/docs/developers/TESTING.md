@@ -1,300 +1,69 @@
-# Testing Guide
+# Testing
 
-Complete guide for testing BilltUp functionality end-to-end.
+## What exists today
 
-## Prerequisites
+- There are no automated tests in this repo: no test runner, no test files, and no `test` script.
+- There is no lint or type-check step. There is no `tsconfig.json`, and Vite does not report type errors.
+- `npm run build` is the only check. The deploy workflow runs it on every push, so a build error stops the deploy.
 
-✅ User account created and logged in  
-✅ Business profile completed  
-✅ Stripe test key configured  
-✅ Email service configured
+So test by hand on a local dev server or on dev.billtup.com before promoting to `stg`, and again on stg.billtup.com before promoting to `main`.
 
----
+## Before every push
 
-## Test Scenario 1: Complete Invoice Workflow
-
-### Step 1: Add a Test Customer
-
-1. Navigate to **Customers** tab
-2. Click **"+ New Customer"**
-3. Fill in details:
-   ```
-   Name: John Smith
-   Email: your-email@example.com (use your real email)
-   Phone: (555) 123-4567
-   Address: 123 Main St, Anytown, ST 12345
-   ```
-4. Click **Save**
-5. ✅ Verify customer appears in list
-
-### Step 2: Create an Invoice
-
-1. Navigate to **Invoices** tab
-2. Click **"+ New Invoice"**
-3. Select **"John Smith"** from dropdown
-4. ✅ Verify email auto-fills
-5. Add line items:
-
-   **Line Item 1:**
-   ```
-   Item: Premium Car Detailing
-   Quantity: 1
-   Price: $150.00
-   ```
-
-   **Line Item 2:**
-   ```
-   Item: Interior Deep Clean
-   Quantity: 1
-   Price: $75.00
-   ```
-
-6. ✅ Verify totals:
-   ```
-   Subtotal: $225.00
-   Tax (8.5%): $19.13
-   Total: $244.13
-   ```
-
-7. Draw signature in signature pad
-8. Click **"Preview PDF"**
-9. ✅ Verify invoice looks correct
-10. Click **"Create Invoice"**
-
-### Step 3: Process Payment
-
-1. On payment screen, click **"Enter Card Details"**
-2. Use Stripe test card:
-   ```
-   Card Number: 4242 4242 4242 4242
-   Expiry: 12/25
-   CVV: 123
-   Name: John Smith
-   ```
-3. Click **"Pay $244.13"**
-4. ✅ Payment should succeed in 2-3 seconds
-
-**Expected Results:**
-- ✅ Payment success notification
-- ✅ Redirected to receipt screen
-- ✅ Invoice status is "Paid"
-
-### Step 4: Send Invoice Email
-
-1. On receipt screen, verify transaction details
-2. Email field should be pre-filled
-3. Click **"Send Invoice via Email"**
-4. ✅ Success message appears
-5. ✅ Check your email inbox (may be in spam)
-
-### Step 5: Verify Email Content
-
-Email should contain:
-- ✅ Subject: "Invoice #INV-001 from [Your Business]"
-- ✅ Business logo (if uploaded)
-- ✅ Business contact information
-- ✅ Invoice number and date
-- ✅ Customer details
-- ✅ Line items table
-- ✅ Subtotal, tax, and total
-- ✅ Signature image
-- ✅ Professional formatting
-
-### Step 6: Verify Dashboard
-
-1. Return to dashboard
-2. ✅ New invoice appears in list
-3. ✅ Shows "Paid" status
-4. ✅ Correct amount displayed
-5. ✅ Customer name visible
-
----
-
-## Test Scenario 2: Multiple Invoices
-
-1. Create 3-5 more invoices with different:
-   - Customers
-   - Line items
-   - Amounts
-
-2. Verify in dashboard:
-   - ✅ All invoices appear
-   - ✅ Unique invoice numbers (INV-001, INV-002, etc.)
-   - ✅ Correct statuses
-   - ✅ Search functionality works
-
----
-
-## Test Scenario 3: Customer Management
-
-1. Navigate to **Customers** tab
-2. Add multiple customers
-3. ✅ All customers appear in list
-4. Create invoices for different customers
-5. ✅ Customer selection works in invoice builder
-
----
-
-## Test Scenario 4: Settings & Logout
-
-1. Navigate to **Settings** tab
-2. ✅ Verify business information displayed correctly
-3. Click **"Sign Out"**
-4. ✅ Redirected to home page
-5. Sign in again
-6. ✅ All invoices and customers still there
-
----
-
-## Common Issues & Solutions
-
-### Issue: Email Not Received
-
-**Possible Causes:**
-1. Email in spam folder
-2. Email service not configured
-3. Using unverified email (Resend free tier)
-
-**Solutions:**
-- Check spam folder
-- Verify email service credentials
-- Use verified email address
-- Check email service logs
-
-### Issue: Payment Fails
-
-**Possible Causes:**
-1. Stripe key not configured
-2. Network error
-3. Invalid card details
-
-**Solutions:**
-- Verify `STRIPE_SECRET_KEY` is set
-- Use test card: 4242 4242 4242 4242
-- Check browser console
-- Test internet connection
-
-### Issue: Invoice Not Saved
-
-**Possible Causes:**
-1. Network error
-2. Authentication expired
-3. Backend error
-
-**Solutions:**
-- Check browser console
-- Refresh page
-- Sign out and sign in
-- Verify backend is running
-
----
-
-## Performance Testing
-
-### Load Testing
-1. Create 20+ invoices rapidly
-2. ✅ All saved correctly
-3. ✅ Search works with many invoices
-4. ✅ Scrolling smooth
-
-### Browser Testing
-
-Test in multiple browsers:
-- ✅ Chrome/Edge
-- ✅ Firefox
-- ✅ Safari
-- ✅ Mobile browsers
-
-### Responsive Testing
-
-Test on different screen sizes:
-- ✅ Desktop (1920x1080)
-- ✅ Tablet (768x1024)
-- ✅ Mobile (375x667)
-
----
-
-## API Testing
-
-Use browser Network tab to verify:
-
-- ✅ `POST /auth/signup` (201)
-- ✅ `POST /auth/signin` (200)
-- ✅ `GET /business` (200)
-- ✅ `POST /customers` (201)
-- ✅ `GET /customers` (200)
-- ✅ `POST /invoices` (201)
-- ✅ `GET /invoices` (200)
-- ✅ `POST /payments/create-intent` (200)
-- ✅ `POST /invoices/send-email` (200)
-
-All should return successful status codes.
-
----
-
-## Success Criteria
-
-Your app is working correctly if:
-
-✅ Users can create accounts  
-✅ Business onboarding saves data  
-✅ Customers can be added  
-✅ Invoices can be created  
-✅ Signature pad works  
-✅ PDF preview shows correctly  
-✅ Payments process successfully  
-✅ Invoices saved with unique numbers  
-✅ Dashboard displays invoices  
-✅ Emails send successfully  
-✅ Email contains all details  
-✅ Search/filter works  
-✅ Sign out/sign in preserves data
-
----
-
-## Test Card Numbers
-
-### Successful Payments
-
-```
-4242 4242 4242 4242 - Visa
-5555 5555 5555 4444 - Mastercard
-3782 822463 10005 - American Express
+```bash
+npm run build
 ```
 
-### Declined Payments
+Fix any error. Chunk-size warnings are expected.
 
-```
-4000 0000 0000 0002 - Generic decline
-4000 0000 0000 9995 - Insufficient funds
-4000 0000 0000 9987 - Lost card
-4000 0000 0000 9979 - Stolen card
-```
+## Smoke test
 
-### 3D Secure
+Run the parts that your change touches. Before a release to `main`, run all of it on stg.billtup.com.
 
-```
-4000 0027 6000 3184 - Requires authentication
-```
+### Public pages
 
-**Use any:**
-- Future expiry date (e.g., 12/25)
-- 3-digit CVV (e.g., 123)
-- Any cardholder name
+- [ ] Home, Features, Pricing, FAQ, Docs, Help, About, Contact, Integrations, Roadmap, Changelog load from the header and footer links.
+- [ ] Privacy, Terms, Security, and `/delete-account` load.
+- [ ] An unknown path (for example `/nope`) goes to the home page.
+- [ ] Reloading a deep link (for example `/pricing` or `/dashboard/settings`) loads the right page.
+- [ ] The pages work at phone width (about 375 px).
 
----
+### Sign-up and sign-in
 
-## Next Steps
+- [ ] Sign up with a new email. The page says the 14-day trial has started and no card is needed.
+- [ ] Sign in. You land on `/dashboard`. The trial banner shows the days left.
+- [ ] Open `/dashboard/settings` while signed out. You go to `/signin`, and after signing in you come back to `/dashboard/settings`.
+- [ ] Settings → Account → reset password sends an email, and the link in it opens `/reset-password`, which sets a new password. (The "Forgot password?" button on the sign-in page has no action yet.)
+- [ ] Sign out from the user menu.
 
-After successful testing:
+### Dashboard
 
-1. ✅ Test with Stripe test mode
-2. ✅ Test edge cases
-3. ✅ Prepare for production
-4. ✅ See [Deployment Guide](./DEPLOYMENT.md)
+- [ ] Overview shows the billing cycle usage.
+- [ ] Analytics loads for a trial or Premium account, and the period filter changes the numbers. It is locked for Basic.
+- [ ] Each Settings card opens and saves: Account, Business Profile, Customer Analytics, Payment Settings, Email Notifications, Saved Items & Discounts, Custom Branding, Help & Support.
+- [ ] Custom Branding: change the logo, logo shape, colors, and template, then reload and check they stuck.
 
----
+### Subscriptions (test mode only)
 
-*Happy Testing! 🚀*
+- [ ] During the trial, "Choose a plan" opens the Subscribe dialog. Subscribe with a Stripe test card (see [Stripe and Square](./STRIPE_SETUP.md#testing)).
+- [ ] Settings → Account shows the plan. Change plan, cancel, and reactivate work.
+- [ ] A promo code can be applied.
+- [ ] A trial-ended account without a plan shows the "Your free trial has ended" banner and stays read-only. Saving a change shows the "Choose a plan" toast.
 
-*Last Updated: February 2026*
+### Customer pages
+
+Create an invoice, estimate, or signature request in the mobile app against the dev API to get a link.
+
+- [ ] `/pay/<token>` shows the invoice and opens Stripe or Square checkout. After paying, the success page shows.
+- [ ] An already-paid or expired link shows the right message.
+- [ ] `/estimate/<token>` can approve and reject.
+- [ ] `/sign/<token>` accepts a signature with mouse and touch.
+
+### Payment Settings
+
+- [ ] Connect and disconnect Stripe (test account) and Square (sandbox). The OAuth callback returns to the dashboard.
+- [ ] Switching the active provider saves.
+
+## Accessibility checks
+
+See [Accessibility](../ACCESSIBILITY.md#how-to-test).

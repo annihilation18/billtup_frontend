@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Old developer index. Superseded by src/docs/README.md. Kept for history only; not maintained.
+
 # Developer Documentation
 
 Technical documentation for developers working on the BilltUp platform.

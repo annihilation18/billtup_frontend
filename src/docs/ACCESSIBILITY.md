@@ -1,443 +1,80 @@
-# BilltUp Accessibility Documentation
+# Accessibility
 
-## Overview
+Our goal is WCAG 2.1 Level AA. The site has not had a formal audit, so we do not claim it meets that level. This page lists what the code does today and how to test it.
 
-BilltUp is committed to providing an accessible experience for all users, including those who rely on assistive technologies such as screen readers, keyboard navigation, and other accessibility tools. This document outlines the accessibility features implemented across the platform.
+## What the site does
 
-## Table of Contents
+### Structure
 
-- [WCAG Compliance](#wcag-compliance)
-- [Implemented Features](#implemented-features)
-- [Semantic HTML](#semantic-html)
-- [ARIA Attributes](#aria-attributes)
-- [Keyboard Navigation](#keyboard-navigation)
-- [Screen Reader Support](#screen-reader-support)
-- [Focus Management](#focus-management)
-- [Testing Tools](#testing-tools)
-- [Future Improvements](#future-improvements)
+- `index.html` sets `lang="en"`.
+- Public pages have a "Skip to main content" link that jumps to `<main id="main-content">` (`src/App.tsx`).
+- The dashboard has a "Skip to dashboard content" link that jumps to `#dashboard-main-content` (`DashboardSection.tsx`).
+- Pages use `header`, `nav` (with `aria-label`), `main`, and `footer` landmarks.
 
-## WCAG Compliance
+### Navigation
 
-BilltUp aims to meet WCAG 2.1 Level AA standards. Key areas of focus include:
+- The site header and the dashboard navigation mark the current page with `aria-current="page"`.
+- Mobile menu buttons have `aria-label`, `aria-expanded`, and `aria-controls`.
+- Premium-only dashboard tabs are disabled for Basic accounts. They have `aria-disabled` and say "(Premium only)" in their label.
 
-- **Perceivable**: Content is presented in ways users can perceive
-- **Operable**: Interface components and navigation are operable
-- **Understandable**: Information and operation of the interface are understandable
-- **Robust**: Content works with current and future technologies
+### Dialogs, menus, and form controls
 
-## Implemented Features
+- Dialogs, dropdown menus, tabs, selects, switches, and checkboxes come from Radix UI (through `src/components/ui/`). Radix handles keyboard use, focus trapping in dialogs, focus return on close, and the matching ARIA roles.
+- Form fields on sign-in and sign-up use `<label>` elements.
 
-### 1. Skip Links
+### Status and alerts
 
-All pages include a "Skip to main content" link that appears on keyboard focus, allowing users to bypass repetitive navigation:
+- The "free trial has ended" banner has `role="alert"`.
+- Plan badges have `role="status"` and an `aria-label` with the plan name.
+- Toasts come from Sonner, which announces them to screen readers.
+- Decorative icons have `aria-hidden="true"`.
 
-```tsx
-<a
-  href="#main-content"
-  className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50"
->
-  Skip to main content
-</a>
-```
+### Visual
 
-### 2. Landmark Regions
+- Keyboard focus shows a visible ring (`:focus-visible` in `src/index.css`).
+- `prefers-reduced-motion: reduce` turns transitions and animations down to near zero.
+- `prefers-contrast: high` makes borders thicker.
 
-Proper HTML5 semantic elements and ARIA landmarks are used throughout:
+## Known gaps
 
-- `<header role="banner">` - Site header
-- `<nav aria-label="Main navigation">` - Primary navigation
-- `<main id="main-content" role="main">` - Main content
-- `<footer role="contentinfo">` - Site footer
-- `<nav aria-labelledby="heading-id">` - Section navigation
+- The customer pages (`/pay`, `/estimate`, `/sign`) have no ARIA attributes. They rely on plain HTML. The signature canvas on `/sign` cannot be used with a keyboard.
+- Not every image and icon-only button has been checked for a text alternative.
+- Color contrast has not been measured across all pages.
+- `src/utils/accessibility.ts` and `src/styles/globals.css` contain helpers that nothing imports.
 
-### 3. Heading Hierarchy
+## How to test
 
-Proper heading structure (h1-h6) is maintained throughout the site:
+Run these before a release that changes the UI.
 
-- One `<h1>` per page identifying the main content
-- Headings follow sequential order without skipping levels
-- Headings have descriptive, unique IDs for navigation
+### Automated
 
-### 4. Focus Indicators
+- Run Lighthouse (Chrome DevTools → Lighthouse → Accessibility) on the home page, `/pricing`, `/signup`, `/signin`, `/dashboard`, and a `/pay/<token>` page.
+- Or install the axe DevTools browser extension and scan the same pages.
 
-Enhanced focus styles for keyboard navigation:
+Fix anything rated serious or critical.
 
-```css
-*:focus-visible {
-  @apply ring-2 ring-ring ring-offset-2 ring-offset-background;
-}
-```
+### Keyboard
 
-All interactive elements have visible focus indicators with sufficient contrast.
+- Use only Tab, Shift+Tab, Enter, Space, the arrow keys, and Esc.
+- The first Tab on a page shows the skip link, and Enter on it moves focus to the main content.
+- Every link, button, and field can be reached and used, in a sensible order.
+- Focus is always visible.
+- Dialogs keep focus inside, close with Esc, and return focus to the button that opened them.
 
-### 5. Color Contrast
+### Screen reader
 
-All text meets WCAG AA contrast requirements:
+Use NVDA (Windows), VoiceOver (macOS or iOS), or TalkBack (Android).
 
-- Normal text: Minimum 4.5:1 contrast ratio
-- Large text: Minimum 3:1 contrast ratio
-- Interactive elements: Minimum 3:1 contrast ratio
+- Page landmarks and headings make sense when listed.
+- Buttons and links say what they do.
+- Form errors and toasts are read out.
+- The trial banner and plan badge are read.
 
-### 6. Responsive Design
+### Visual
 
-The site is fully responsive and works across all device sizes, with special considerations for:
+- Zoom to 200%. Nothing is cut off and there is no sideways scrolling at phone width.
+- Turn on "reduce motion" in the OS. Animations stop.
 
-- Touch target sizes (minimum 44x44px)
-- Readable text sizes (minimum 16px base)
-- Flexible layouts that adapt to zoom levels up to 200%
+## Reporting a problem
 
-## Semantic HTML
-
-### Proper Element Usage
-
-- Buttons use `<button>` elements (not divs)
-- Links use `<a>` elements with proper href attributes
-- Forms use `<form>`, `<label>`, `<input>` elements
-- Lists use `<ul>`, `<ol>`, `<li>` elements
-- Tables use proper table markup when displaying tabular data
-
-### Example Structure
-
-```tsx
-<nav aria-label="Main navigation">
-  <ul role="list">
-    <li>
-      <button aria-current="page">Home</button>
-    </li>
-  </ul>
-</nav>
-```
-
-## ARIA Attributes
-
-### ARIA Labels
-
-All interactive elements without visible text have descriptive labels:
-
-```tsx
-<button aria-label="Close menu">
-  <X className="w-6 h-6" />
-</button>
-```
-
-### ARIA Expanded
-
-Toggle buttons indicate their state:
-
-```tsx
-<button 
-  aria-expanded={isOpen}
-  aria-controls="menu-id"
->
-  Menu
-</button>
-```
-
-### ARIA Current
-
-Navigation items indicate the current page:
-
-```tsx
-<button aria-current={isActive ? 'page' : undefined}>
-  Home
-</button>
-```
-
-### ARIA Hidden
-
-Decorative elements are hidden from screen readers:
-
-```tsx
-<CheckCircle className="w-5 h-5" aria-hidden="true" />
-```
-
-### ARIA Describedby
-
-Form fields link to error and helper text:
-
-```tsx
-<input
-  aria-describedby={error ? 'field-error' : 'field-description'}
-  aria-invalid={!!error}
-/>
-```
-
-## Keyboard Navigation
-
-### Tab Order
-
-All interactive elements are reachable via keyboard in a logical order.
-
-### Keyboard Shortcuts
-
-- `Tab` - Navigate forward through interactive elements
-- `Shift + Tab` - Navigate backward
-- `Enter` / `Space` - Activate buttons and links
-- `Escape` - Close modals and menus
-- Arrow keys - Navigate within menus and select elements
-
-### Focus Trapping
-
-Modals and dialogs trap focus within themselves:
-
-- Focus moves to the modal when opened
-- Tab cycles through modal elements only
-- Escape closes the modal and returns focus
-- Focus returns to trigger element on close
-
-## Screen Reader Support
-
-### Testing Platforms
-
-Tested with:
-
-- NVDA (Windows)
-- JAWS (Windows)
-- VoiceOver (macOS, iOS)
-- TalkBack (Android)
-
-### Screen Reader Only Text
-
-Important context is provided for screen reader users:
-
-```tsx
-<span className="sr-only">Current page: </span>
-<span>Home</span>
-```
-
-### Live Regions
-
-Dynamic content updates are announced:
-
-```tsx
-<div role="status" aria-live="polite">
-  Invoice created successfully
-</div>
-```
-
-## Focus Management
-
-### Visual Focus Indicators
-
-All focusable elements have visible focus rings with proper contrast.
-
-### Focus Order
-
-Focus order follows the visual layout and reading order.
-
-### Modal Focus
-
-When modals open:
-1. Focus moves to the first focusable element
-2. Focus is trapped within the modal
-3. Clicking outside or pressing Escape closes the modal
-4. Focus returns to the trigger element
-
-### Auto-focus
-
-Auto-focus is used sparingly and only when it enhances UX:
-- First field in forms
-- Search inputs when search is activated
-- First focusable element in modals
-
-## Reduced Motion
-
-Respects user's motion preferences:
-
-```css
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
-## High Contrast Mode
-
-Supports high contrast mode preferences:
-
-```css
-@media (prefers-contrast: high) {
-  * {
-    border-width: 2px;
-  }
-}
-```
-
-## Form Accessibility
-
-### Labels
-
-All form fields have associated labels:
-
-```tsx
-<label htmlFor="email-input">Email Address</label>
-<input id="email-input" type="email" />
-```
-
-### Error Messages
-
-Errors are clearly associated with fields:
-
-```tsx
-<input 
-  id="email" 
-  aria-invalid={!!error}
-  aria-describedby="email-error"
-/>
-{error && (
-  <span id="email-error" role="alert">
-    {error}
-  </span>
-)}
-```
-
-### Required Fields
-
-Required fields are clearly marked:
-
-```tsx
-<label>
-  Email <span aria-label="required">*</span>
-</label>
-<input required aria-required="true" />
-```
-
-## Testing Tools
-
-### Recommended Tools
-
-- **axe DevTools** - Browser extension for accessibility testing
-- **WAVE** - Web accessibility evaluation tool
-- **Lighthouse** - Chrome DevTools accessibility audit
-- **Screen readers** - NVDA, JAWS, VoiceOver
-- **Keyboard only** - Navigate without a mouse
-
-### Manual Testing Checklist
-
-- [ ] All functionality available via keyboard
-- [ ] Focus indicators visible on all interactive elements
-- [ ] Skip link works correctly
-- [ ] Heading structure is logical
-- [ ] Images have alt text
-- [ ] Forms have labels
-- [ ] Error messages are accessible
-- [ ] Color is not the only means of conveying information
-- [ ] Text can be resized to 200% without loss of functionality
-- [ ] Content reflows at 320px viewport width
-
-## Component-Specific Accessibility
-
-### Modals/Dialogs
-
-- Uses `role="dialog"`
-- Has `aria-modal="true"`
-- Has `aria-labelledby` pointing to title
-- Has `aria-describedby` pointing to description
-- Traps focus within modal
-- Closes on Escape key
-- Returns focus to trigger on close
-
-### Menus
-
-- Uses proper ARIA menu patterns
-- Keyboard navigable with arrow keys
-- Has `aria-expanded` on trigger
-- Has `aria-controls` linking to menu
-- Has `aria-haspopup="true"` where appropriate
-
-### Tabs
-
-- Uses `role="tablist"`, `role="tab"`, `role="tabpanel"`
-- Has `aria-selected` on active tab
-- Has `aria-controls` linking tab to panel
-- Keyboard navigable with arrow keys
-- Tab panels have `aria-labelledby` linking to tab
-
-### Tables
-
-- Has proper `<thead>`, `<tbody>`, `<th>` structure
-- Headers have `scope` attribute
-- Complex tables have `<caption>`
-- Has `aria-label` or `aria-labelledby` for context
-
-## Image Accessibility
-
-### Decorative Images
-
-Decorative images are hidden from screen readers:
-
-```tsx
-<img src="decoration.svg" alt="" aria-hidden="true" />
-```
-
-### Informative Images
-
-Informative images have descriptive alt text:
-
-```tsx
-<img src="chart.png" alt="Revenue chart showing 20% growth" />
-```
-
-### Complex Images
-
-Complex images have extended descriptions:
-
-```tsx
-<figure>
-  <img src="complex-chart.png" alt="Quarterly sales data" />
-  <figcaption id="chart-desc">
-    Detailed description of the chart data...
-  </figcaption>
-</figure>
-```
-
-## Future Improvements
-
-### Planned Enhancements
-
-1. **Automated Testing** - Integrate axe-core into CI/CD pipeline
-2. **User Testing** - Conduct testing with users who rely on assistive technologies
-3. **ARIA Live Regions** - Add more dynamic content announcements
-4. **Custom Components** - Audit and improve custom component accessibility
-5. **Documentation** - Expand component-specific accessibility documentation
-6. **Training** - Provide accessibility training for development team
-
-### Known Issues
-
-Currently tracking accessibility issues in our issue tracker. See the "accessibility" label for current issues and roadmap.
-
-## Resources
-
-### Internal
-
-- [Accessibility Utilities](/utils/accessibility.ts) - Helper functions for generating IDs and ARIA attributes
-- [Global Styles](/styles/globals.css) - Accessibility CSS utilities
-
-### External
-
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [ARIA Authoring Practices](https://www.w3.org/WAI/ARIA/apg/)
-- [WebAIM](https://webaim.org/)
-- [A11y Project](https://www.a11yproject.com/)
-- [Inclusive Components](https://inclusive-components.design/)
-
-## Contact
-
-For accessibility concerns or suggestions, please contact:
-- Email: accessibility@billtup.com
-- Create an issue in our repository with the "accessibility" label
-
-## Version History
-
-- **v1.0** (Current) - Initial accessibility implementation
-  - Skip links
-  - ARIA landmarks
-  - Keyboard navigation
-  - Focus management
-  - Screen reader support
-  - Reduced motion support
-  - High contrast mode support
+Email support@billtup.com with the page, what you expected, what happened, and the browser and assistive technology you used.

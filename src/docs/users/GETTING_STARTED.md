@@ -1,387 +1,77 @@
 # Getting Started with BilltUp
 
-Welcome to BilltUp! This guide will help you get up and running in minutes.
+BilltUp helps service businesses send invoices and estimates and get paid. You use two things:
 
-## Step 1: Create Your Account (2 minutes)
+- **The BilltUp mobile app** (iPhone and Android) to create and send invoices and estimates, manage customers, and take payments.
+- **The website, billtup.com,** to sign up, manage your account and subscription, set up payments and branding, and see analytics.
 
-### Sign Up Process
-
-1. **Visit** [billtup.com](https://billtup.com)
-2. **Click** "Get Started" or "Sign Up"
-3. **Enter** your information:
-   - Full name
-   - Email address
-   - Business name
-   - Password (min. 8 characters)
+You create invoices in the mobile app. The website does not create invoices.
 
-4. **Select** your plan:
-   - **Basic**: $4.99/month (up to 25 invoices)
-   - **Premium**: $9.99/month (unlimited invoices)
+## 1. Create your account
 
-5. **Add** payment information:
-   - Card details (secured by Stripe - PCI DSS Level 1 compliant)
-   - Your card data never touches our servers - processed directly by Stripe
-   - Don't worry - you won't be charged during your 14-day trial!
+1. Go to [billtup.com/signup](https://billtup.com/signup).
+2. Enter your name, business name, email, and a password.
+3. Your 14-day free trial starts right away. You don't need a credit card. Every Premium feature is unlocked during the trial.
 
-6. **Agree** to Terms of Service
-7. **Click** "Start 14-Day Free Trial"
+Each email gets one free trial. If your email already had a trial, you'll need to choose a plan before you can create invoices.
 
-### ✅ You're In!
+## 2. Get the app
 
-You now have:
-- ✓ 14-day free trial activated
-- ✓ Full access to all Premium features
-- ✓ Secure payment method on file
-- ✓ Access to your dashboard
-
----
+Download BilltUp from the App Store or Google Play and sign in with the same email and password. The links are on the BilltUp home page and in the dashboard sidebar.
 
-## Step 2: Complete Your Business Profile (3 minutes)
-
-### Why This Matters
-Your business profile appears on all invoices. Make a great impression!
+## 3. Set up your business on the website
 
-### What to Add
-
-1. **Go to Dashboard** → **Settings** → **Business Profile**
-
-2. **Required Information**:
-   - Business name ✓ (already set)
-   - Email address
-   - Phone number
-   - Business address
+Sign in at [billtup.com/signin](https://billtup.com/signin) and open **Settings**.
 
-3. **Optional but Recommended**:
-   - **Business logo** (appears on invoices)
-     - Upload PNG or JPEG
-     - Recommended size: 500x500px
-     - Max file size: 2MB
-   
-   - **Tax settings**
-     - Enable tax collection if needed
-     - Set your tax rate (e.g., 8.5%)
-   
-   - **Bank information** (for payment instructions)
-     - Bank name
-     - Account holder name
-     - Account number (last 4 digits shown)
-     - Routing number
-
-4. **Click** "Save Profile"
+- **Business Profile:** your business name, contact details, and address. These appear on your invoices.
+- **Payment Settings:** connect Stripe or Square so customers can pay your invoices online. Then pick which one to use.
+- **Custom Branding** (Premium): your logo, logo shape, colors, and invoice template.
+- **Saved Items & Discounts:** line items and discounts you use often, so you can add them quickly.
+- **Email Notifications:** choose which emails you get.
 
-### 💡 Pro Tip
-Add your logo now - it makes your invoices look 10x more professional!
+## 4. Send your first invoice (in the app)
 
----
+1. In the app, add a customer.
+2. Create an invoice and add line items.
+3. Send it. Your customer gets a link to view and pay it online.
 
-## Step 3: Add Your First Customer (1 minute)
+Your customer doesn't need a BilltUp account. The payment link opens a secure checkout page from Stripe or Square. You can also send estimates for your customer to approve and documents for them to sign.
 
-### Quick Add
+## 5. Track your business
 
-1. **Go to Dashboard** → **Customers** tab
-2. **Click** "+ New Customer"
-3. **Enter** customer details:
-   - Customer name *
-   - Email address *
-   - Phone number (optional)
-   - Address (optional)
-   - Notes (optional)
+- **Overview** shows how many invoices you've used this billing cycle.
+- **Analytics** (Premium) shows sales, revenue trends, and top customers for the period you pick.
+- **Customer Analytics** (Premium, in Settings) shows lifetime value per customer.
 
-4. **Click** "Save Customer"
+## When your trial ends
 
-### Customer Information
+- If you subscribed during the trial, your plan starts automatically when the trial ends.
+- If you didn't, your account becomes **read-only**. Your invoices, estimates, and customers stay. You can see them, but you can't create or edit anything until you choose a plan.
 
-**Required fields** (marked with *):
-- Name
-- Email (for sending invoices)
+To choose a plan, sign in to the website and click **Choose a plan**, or go to **Settings → Account**.
 
-**Optional but helpful**:
-- Phone - for quick contact
-- Address - appears on invoices
-- Notes - internal reminders
+| Plan | Price | Includes |
+|------|-------|----------|
+| Basic | $4.99/month | Up to 10 invoices per month, up to 10 customers, Stripe and Square payments, estimates, payment links |
+| Premium | $9.99/month | Unlimited invoices and customers, plus analytics, Custom Branding, and invoice templates |
 
-### Example
-```
-Name: John Smith
-Email: john@example.com
-Phone: (555) 123-4567
-Address: 123 Main St, Anytown, CA 90210
-Notes: Prefers payment via card, monthly service
-```
+See [billtup.com/pricing](https://billtup.com/pricing) for the full list.
 
----
+## Manage your account
 
-## Step 4: Create Your First Invoice (3 minutes)
+In **Settings → Account** you can:
 
-### Invoice Creation
+- change your plan,
+- cancel (your plan stays active until the end of the billing period) or undo a cancellation,
+- apply a promo code,
+- get a password reset email,
+- delete your account.
 
-1. **Go to** **Invoices** tab
-2. **Click** "+ New Invoice"
+Deleting your account removes your data for good. You can also delete it from the app, or email support. See [billtup.com/delete-account](https://billtup.com/delete-account).
 
-3. **Select Customer**
-   - Choose from your customer list
-   - Or create new customer on the fly
+## Get help
 
-4. **Add Line Items**
-   - Click "+ Add Item"
-   - Enter:
-     - Service/product name
-     - Quantity
-     - Price per unit
-   - Add more items as needed
-
-5. **Set Invoice Details**
-   - Invoice number (auto-generated)
-   - Issue date (defaults to today)
-   - Due date (optional but recommended)
-
-6. **Add Notes** (optional)
-   - Payment terms
-   - Special instructions
-   - Thank you message
-
-7. **Review Total**
-   - Subtotal
-   - Tax (if enabled)
-   - **Total amount**
-
-8. **Click** "Create Invoice"
-
-### Example Invoice
-
-```
-Customer: John Smith
-Invoice #: INV-001
-Date: November 21, 2025
-Due: December 5, 2025
-
-Line Items:
-1. Auto Detail Service      1x  $150.00  = $150.00
-2. Interior Steam Clean     1x  $75.00   = $75.00
-3. Premium Wax Application  1x  $100.00  = $100.00
-
-Subtotal: $325.00
-Tax (8.5%): $27.63
-Total: $352.63
-
-Notes: Payment due within 14 days. Thank you for your business!
-```
-
----
-
-## Step 5: Send Your Invoice (1 minute)
-
-### Sending Options
-
-After creating an invoice, you can:
-
-1. **Email to Customer**
-   - Click "Send Invoice"
-   - Email automatically sent with PDF attached
-   - Includes payment link (if Stripe connected)
-
-2. **Download PDF**
-   - Click "Download PDF"
-   - Save to your computer
-   - Send however you prefer
-
-3. **Copy Link**
-   - Share unique invoice URL
-   - Customer can view and pay online
-
-### Email Preview
-
-Your customer receives:
-```
-Subject: Invoice #INV-001 from [Your Business]
-
-Hi John,
-
-Thank you for your business! Please find your invoice attached.
-
-Invoice #: INV-001
-Amount Due: $352.63
-Due Date: December 5, 2025
-
-[View Invoice Online] [Pay Now]
-
-Questions? Reply to this email or contact us at:
-[Your business contact information]
-
-Best regards,
-[Your Business Name]
-```
-
----
-
-## Step 6: Track Payment Status (Ongoing)
-
-### Invoice Statuses
-
-- **Pending** 📋 - Sent, awaiting payment
-- **Paid** ✅ - Payment received
-- **Overdue** ⚠️ - Past due date
-- **Partially Paid** 💰 - Partial payment received (Premium)
-
-### Dashboard at a Glance
-
-Your dashboard shows:
-- Total revenue (paid invoices)
-- Pending amount (unpaid invoices)
-- Number of customers
-- Recent activity
-
-### Notifications
-
-You'll receive emails when:
-- Customer views invoice
-- Payment is received
-- Invoice becomes overdue (Premium)
-
----
-
-## 🎉 You're All Set!
-
-You've now:
-- ✅ Created your account
-- ✅ Set up your business profile
-- ✅ Added your first customer
-- ✅ Created and sent your first invoice
-- ✅ Know how to track payments
-
----
-
-## Next Steps
-
-### Optimize Your Setup
-
-1. **Enable Online Payments**
-   - Go to Settings → Payment Settings
-   - Connect Stripe account
-   - Accept cards, Apple Pay, Google Pay
-
-2. **Customize Invoice Design**
-   - Add your logo
-   - Set brand colors (Premium)
-   - Customize templates (Premium)
-
-3. **Set Up Notifications**
-   - Email preferences
-   - Payment reminders
-   - Overdue alerts
-
-### Learn Advanced Features
-
-- [Customer Management](./CUSTOMERS.md) - Organize clients
-- [Analytics](./ANALYTICS.md) - Track performance
-- [Payment Processing](./PAYMENTS.md) - Accept online payments
-- [Business Profile](./BUSINESS_PROFILE.md) - Customize branding
-
----
-
-## Common First-Time Questions
-
-### "When will I be charged?"
-
-You have a 14-day free trial. Billing starts after the trial ends unless you cancel. You can cancel anytime.
-
-### "Can I change my plan later?"
-
-Yes! Upgrade or downgrade anytime from Settings → Account.
-
-### "What happens if I hit my invoice limit?"
-
-Basic plan allows 25 invoices/month. You can:
-- Upgrade to Premium (unlimited)
-- Wait for next billing cycle
-- Delete old invoices to make room
-
-### "Is my data safe?"
-
-Absolutely! We use:
-- Bank-level encryption (AES-256)
-- Secure payment processing (Stripe)
-- Regular backups
-- GDPR compliance
-
-### "Can I import existing customers?"
-
-Not yet, but we're working on CSV import. For now, add customers manually or use our API (developers only).
-
----
-
-## Getting Help
-
-### Resources
-
-- 📚 [User Guide](./README.md) - Complete documentation
-- ❓ [FAQ](./FAQ.md) - Common questions
-- 🔧 [Troubleshooting](./TROUBLESHOOTING.md) - Fix issues
-- 📹 Video tutorials (coming soon)
-
-### Support
-
-- **Email**: support@billtup.com
-- **Response time**: Within 24 hours
-- **Premium users**: Priority support (4 hours)
-
-### Tips for Better Support
-
-When contacting support, include:
-- Clear description of issue
-- Screenshots (if applicable)
-- What you've already tried
-- Your account email
-
----
-
-## Quick Reference Card
-
-### Most Common Actions
-
-| Task | Location | Shortcut |
-|------|----------|----------|
-| New Invoice | Invoices tab → "+ New Invoice" | Ctrl/Cmd + N |
-| New Customer | Customers tab → "+ New Customer" | - |
-| View Dashboard | Click "Overview" tab | - |
-| Download Invoice | Invoice details → "Download PDF" | - |
-| Send Invoice | Invoice details → "Send Invoice" | - |
-| Edit Profile | Settings → Business Profile | - |
-
----
-
-## 💡 Pro Tips for Success
-
-1. **Add your logo first** - Makes invoices look professional
-2. **Set due dates** - Helps customers know when to pay
-3. **Enable online payments** - Get paid 3x faster
-4. **Send promptly** - Invoice right after completing work
-5. **Track regularly** - Check dashboard weekly
-6. **Use notes** - Add payment terms or thank you messages
-7. **Keep customers updated** - Good contact info helps
-
----
-
-## Your 14-Day Trial Checklist
-
-- [ ] Complete business profile
-- [ ] Add business logo
-- [ ] Add first customer
-- [ ] Create first invoice
-- [ ] Send first invoice
-- [ ] Enable online payments (optional)
-- [ ] Customize invoice template (Premium)
-- [ ] Review analytics dashboard
-- [ ] Set up email notifications
-- [ ] Decide if you want to continue subscription
-
----
-
-## Ready to Get Started?
-
-[Go to Dashboard](/) | [Watch Tutorial Video](#) | [Contact Support](./SUPPORT.md)
-
----
-
-*Last Updated: February 2026*
-*Questions? Email support@billtup.com*
+- Help Center: [billtup.com/help](https://billtup.com/help)
+- Docs: [billtup.com/docs](https://billtup.com/docs)
+- FAQ: [billtup.com/faq](https://billtup.com/faq)
+- Email: support@billtup.com

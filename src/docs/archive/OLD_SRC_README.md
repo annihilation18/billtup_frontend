@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Old project README. Superseded by the root README.md and src/docs/README.md. Kept for history only; not maintained.
+
 # BilltUp - Modern Invoicing for Service Businesses
 
 A comprehensive invoicing platform with Stripe payment integration, customer management, and real-time analytics.

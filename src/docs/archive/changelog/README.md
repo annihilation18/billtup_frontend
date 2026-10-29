@@ -1,3 +1,5 @@
+> **Archived 2026-10-28:** Old changelog index. Website releases are now listed in the root CHANGELOG.md. Kept for history only; not maintained.
+
 # Changelog
 
 All notable changes to BilltUp will be documented in this section.
