@@ -4,6 +4,10 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- Search engines (app repo BACKLOG M.6): `robots.txt` and `sitemap.xml` (both used to return the homepage); a real title and description on every public page, a canonical address on billtup.com, and social-preview tags; account, payment, signature and estimate-approval pages kept out of search; dev and stg get "Disallow: /" so they never appear in Google.
+
+## 2026-10-29 (2)
+
 - Basic plan now includes 10 estimates a month (app repo BACKLOG N.26): pricing, FAQ, help, account settings, the subscribe dialog and Terms section 4 (last updated October 29, 2026) say so.
 - Basic plan limits (app repo BACKLOG N.26): creating an invoice, a customer, or an estimate (past the estimate limit, or with a new customer past the customer limit) shows "You've reached your monthly limit of 10 invoices…" with where to upgrade, instead of "Failed to create". The Invoices tab shows "You've created X of 10 invoices this billing period" from the real count (it counted all invoices ever, and its usage call went to a route that doesn't exist).
 
