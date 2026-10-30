@@ -4,6 +4,10 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+_Nothing yet._
+
+## 2026-10-29 (2)
+
 - Basic plan now includes 10 estimates a month (app repo BACKLOG N.26): pricing, FAQ, help, account settings, the subscribe dialog and Terms section 4 (last updated October 29, 2026) say so.
 - Basic plan limits (app repo BACKLOG N.26): creating an invoice, a customer, or an estimate (past the estimate limit, or with a new customer past the customer limit) shows "You've reached your monthly limit of 10 invoices…" with where to upgrade, instead of "Failed to create". The Invoices tab shows "You've created X of 10 invoices this billing period" from the real count (it counted all invoices ever, and its usage call went to a route that doesn't exist).
 
