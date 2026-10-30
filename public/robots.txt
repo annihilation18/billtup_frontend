@@ -1,0 +1,11 @@
+# billtup.com (production). dev and stg get "Disallow: /" from the deploy workflow.
+User-agent: *
+Disallow: /dashboard
+Disallow: /signin
+Disallow: /reset-password
+Disallow: /logo-export
+Disallow: /pay/
+Disallow: /sign/
+Disallow: /estimate/
+
+Sitemap: https://billtup.com/sitemap.xml

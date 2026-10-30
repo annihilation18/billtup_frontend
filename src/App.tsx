@@ -36,6 +36,7 @@ import { API_CONFIG } from './utils/config';
 import { setErrorUser, clearErrorUser } from './utils/errorReporter';
 import { sessionTimeout } from './utils/sessionTimeout';
 import { sectionToPath, pathToSection } from './utils/routes';
+import { applyPageMeta } from './utils/seo';
 import type { SectionType } from './utils/routes';
 import {
   AlertDialog,
@@ -85,6 +86,11 @@ export default function App() {
   const navigateTo = useCallback((section: SectionType) => {
     navigate(sectionToPath(section));
   }, [navigate]);
+
+  // Title, description and canonical address for search engines (utils/seo.ts)
+  useEffect(() => {
+    applyPageMeta(location.pathname);
+  }, [location.pathname]);
 
   // Check session on mount; auto-redirect to dashboard only from public pages
   useEffect(() => {
@@ -173,7 +179,6 @@ export default function App() {
       link.href = encodedSvg;
       document.head.appendChild(link);
 
-      document.title = 'BilltUp - Modern Invoicing for Service Businesses';
     };
 
     setFavicon();
