@@ -42,15 +42,31 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
+      # dev and stg must never appear in search results (app repo BACKLOG M.6)
+      - name: Keep test sites out of search
+        if: env.ENVIRONMENT != 'prod'
+        run: |
+          printf 'User-agent: *\nDisallow: /\n' > build/robots.txt
+          rm -f build/sitemap.xml
+
       - name: Sync to S3 (${{ env.ENVIRONMENT }})
         run: |
           BUCKET="billtup-frontend-${{ env.ENVIRONMENT }}"
           aws s3 sync build/ "s3://$BUCKET" \
             --delete \
             --cache-control "max-age=31536000, immutable" \
-            --exclude "index.html"
+            --exclude "index.html" \
+            --exclude "robots.txt" \
+            --exclude "sitemap.xml"
           aws s3 cp build/index.html "s3://$BUCKET/index.html" \
             --cache-control "no-cache, no-store, must-revalidate"
+          # Read by search engines: a short cache so changes reach them quickly
+          aws s3 cp build/robots.txt "s3://$BUCKET/robots.txt" --cache-control "max-age=3600"
+          if [ -f build/sitemap.xml ]; then
+            aws s3 cp build/sitemap.xml "s3://$BUCKET/sitemap.xml" --cache-control "max-age=3600"
+          else
+            aws s3 rm "s3://$BUCKET/sitemap.xml" || true
+          fi
 
       - name: Invalidate CloudFront
         run: |
