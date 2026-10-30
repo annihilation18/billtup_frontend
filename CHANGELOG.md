@@ -4,6 +4,7 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- Dashboard lists always show the latest data: requests to the API skip the browser cache. The API sends GET responses with a 60-second private cache time, so a list reloaded within a minute of a change (for example after marking an invoice paid) could show the old version. Found by the app repo's live test suite (TESTING.md).
 - Trade pages (app repo BACKLOG M.6): /invoice-app-for-plumbers, -landscapers, -mobile-detailers, -electricians and -small-business, each written for its trade (pain points, features, a typical job, line items, FAQ), with their own titles and descriptions, in the sitemap, and linked from the footer.
 
 ## 2026-10-29 (3)
