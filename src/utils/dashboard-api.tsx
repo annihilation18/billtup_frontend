@@ -103,6 +103,9 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   }
 
   const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
+    // The API marks GET responses "private, max-age=60"; without no-store the browser reused
+    // them, so a list reloaded within a minute of a change could show the old data
+    cache: 'no-store',
     ...options,
     headers: {
       'Content-Type': 'application/json',
