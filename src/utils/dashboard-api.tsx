@@ -9,6 +9,21 @@ export const SUBSCRIPTION_REQUIRED_EVENT = 'billtup:subscription-required';
 /** Window event that opens the Subscribe dialog (detail: optional plan) */
 export const OPEN_SUBSCRIBE_EVENT = 'billtup:open-subscribe';
 
+/** Error code the API returns (402) when a Basic plan limit is reached (app repo BACKLOG N.26). */
+export const PLAN_LIMIT = 'PLAN_LIMIT';
+
+/** A Basic plan limit was reached; the message says which, and to upgrade. Expected, not a bug. */
+export class PlanLimitError extends Error {
+  readonly planLimit = true;
+}
+
+/** Shows a plan limit message, with where to upgrade. */
+export function showPlanLimitToast(message: string) {
+  import('sonner@2.0.3').then(({ toast }) =>
+    toast.error(message, { description: 'Upgrade to Premium in Settings → Account.' }),
+  );
+}
+
 export function openSubscribe(plan?: 'basic' | 'premium') {
   window.dispatchEvent(new CustomEvent(OPEN_SUBSCRIBE_EVENT, { detail: plan }));
 }
@@ -106,6 +121,9 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
       if (body?.code === SUBSCRIPTION_REQUIRED) {
         window.dispatchEvent(new CustomEvent(SUBSCRIPTION_REQUIRED_EVENT, { detail: body.error }));
         throw new Error(body.error);
+      }
+      if (body?.code === PLAN_LIMIT) {
+        throw new PlanLimitError(body.error);
       }
     }
     // Only log errors for endpoints we expect to exist
@@ -917,12 +935,12 @@ export async function fetchTrialStatus(): Promise<{
 }
 
 // Billing Cycle Usage API
+/** Invoices created this billing period and the Basic plan's limit (from the subscription status). */
 export async function fetchBillingCycleUsage(): Promise<{ used: number; limit: number }> {
   try {
-    const result = await apiCall('/billing/usage');
-    return result;
+    const status = await apiCall('/subscription/status');
+    return { used: status?.invoicesThisPeriod ?? 0, limit: 10 };
   } catch (error) {
-    // Silently return default limits - endpoint doesn't exist yet
     return { used: 0, limit: 10 };
   }
 }

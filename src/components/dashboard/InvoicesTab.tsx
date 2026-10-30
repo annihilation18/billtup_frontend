@@ -293,7 +293,7 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
       {!isPremium && (
         <Card className="p-4 bg-amber-50 border-amber-200">
           <p className="text-sm text-amber-800">
-            <strong>Basic Plan:</strong> You have {invoices.length} of 10 invoices. Upgrade to Premium for unlimited invoices.
+            <strong>Basic Plan:</strong> You've created {billingUsage?.used ?? 0} of {billingUsage?.limit ?? 10} invoices this billing period. Upgrade to Premium for unlimited invoices.
           </p>
         </Card>
       )}

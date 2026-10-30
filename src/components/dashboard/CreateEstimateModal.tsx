@@ -17,7 +17,7 @@ import {
   Trash2,
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
-import { createEstimate, createCustomer, fetchCustomers, fetchEstimates } from '../../utils/dashboard-api';
+import { createEstimate, createCustomer, fetchCustomers, fetchEstimates, PlanLimitError, showPlanLimitToast } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
@@ -200,6 +200,11 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
       onClose();
       resetForm();
     } catch (error) {
+      // A new customer past the Basic limit: the form stays open to pick an existing customer
+      if (error instanceof PlanLimitError) {
+        showPlanLimitToast(error.message);
+        return;
+      }
       console.error('Error creating estimate:', error);
       toast.error('Failed to create estimate. Please try again.');
     } finally {
