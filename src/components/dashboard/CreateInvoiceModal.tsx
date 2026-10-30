@@ -18,7 +18,7 @@ import {
   X
 } from 'lucide-react@0.468.0';
 import { toast } from '../ui/sonner';
-import { createInvoice, fetchCustomers, fetchInvoices } from '../../utils/dashboard-api';
+import { createInvoice, fetchCustomers, fetchInvoices, PlanLimitError, showPlanLimitToast } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
 
 interface LineItem {
@@ -230,6 +230,10 @@ export function CreateInvoiceModal({ open = true, onClose, onCreated }: CreateIn
       onClose();
       resetForm();
     } catch (error) {
+      if (error instanceof PlanLimitError) {
+        showPlanLimitToast(error.message);
+        return;
+      }
       console.error('Error creating invoice:', error);
       toast.error('Failed to create invoice. Please try again.');
     } finally {

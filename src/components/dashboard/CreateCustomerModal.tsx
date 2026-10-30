@@ -5,7 +5,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { toast } from '../ui/sonner';
-import { createCustomer } from '../../utils/dashboard-api';
+import { createCustomer, PlanLimitError, showPlanLimitToast } from '../../utils/dashboard-api';
 
 interface CreateCustomerModalProps {
   open: boolean;
@@ -63,6 +63,10 @@ export function CreateCustomerModal({ open, onClose, onCreated }: CreateCustomer
         country: '',
       });
     } catch (error) {
+      if (error instanceof PlanLimitError) {
+        showPlanLimitToast(error.message);
+        return;
+      }
       console.error('Error creating customer:', error);
       toast.error('Failed to create customer. Please try again.');
     } finally {

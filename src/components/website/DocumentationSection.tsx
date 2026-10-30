@@ -51,7 +51,7 @@ export function DocumentationSection() {
 
 **Step 1: Create Your Account**
 Sign up for BilltUp using your business email. Start with a 14-day free trial. You'll be asked to choose a plan:
-- Basic ($4.99/month): Core invoicing features, up to 10 invoices/month
+- Basic ($4.99/month): Core invoicing features, up to 10 invoices and 10 estimates/month, 10 customers
 - Premium ($9.99/month): Unlimited invoices, advanced reporting, priority support
 
 **Step 2: Set Up Your Business Profile**

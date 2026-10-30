@@ -17,7 +17,7 @@ export function TermsSection() {
           </h1>
 
           <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Last updated: October 28, 2026
+            Last updated: October 29, 2026
           </p>
         </div>
 
@@ -108,6 +108,7 @@ export function TermsSection() {
                 <p className="font-semibold mb-2">Basic Plan: $4.99/month</p>
                 <ul className="list-disc pl-6 space-y-1 text-sm">
                   <li>Up to 10 invoices per billing period</li>
+                  <li>Up to 10 estimates per billing period</li>
                   <li>Up to 10 customers</li>
                   <li>Email support</li>
                 </ul>
@@ -116,7 +117,7 @@ export function TermsSection() {
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">Premium Plan: $9.99/month</p>
                 <ul className="list-disc pl-6 space-y-1 text-sm">
-                  <li>Unlimited invoices and customers</li>
+                  <li>Unlimited invoices, estimates and customers</li>
                   <li>Advanced customer management and reporting</li>
                   <li>Priority support</li>
                 </ul>

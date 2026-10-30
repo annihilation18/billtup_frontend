@@ -273,9 +273,9 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
       features: [
         'Up to 10 invoices per month',
         'Up to 10 customers',
+        'Up to 10 estimates per month',
         'Stripe & Square payment processing',
         'Automatic PDF receipts via email',
-        'Estimates & quotes',
         'Payment links',
         'Basic customer management',
         'Mobile & web access',
@@ -878,6 +878,10 @@ export function AccountSettingsModal({ open, onClose, userPlan, userProfile, onD
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
                 Limited to 10 invoices/month
+              </li>
+              <li className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
+                Limited to 10 estimates/month
               </li>
               <li className="flex items-center gap-2">
                 <div className="w-1.5 h-1.5 rounded-full bg-red-600" />
