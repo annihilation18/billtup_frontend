@@ -5,6 +5,8 @@
  * also listed in public/sitemap.xml: keep the two in step.
  */
 
+import { TRADES } from '../data/trades';
+
 export const SITE_URL = 'https://billtup.com';
 
 interface PageMeta {
@@ -64,6 +66,11 @@ const PAGES: Record<string, PageMeta> = {
   '/reset-password': { title: 'Reset Password | BilltUp', description: DEFAULT_DESCRIPTION, noindex: true },
   '/logo-export': { title: 'BilltUp', description: DEFAULT_DESCRIPTION, noindex: true },
 };
+
+// "Invoice app for <trade>" pages
+for (const trade of TRADES) {
+  PAGES[`/invoice-app-for-${trade.slug}`] = { title: trade.metaTitle, description: trade.metaDescription };
+}
 
 function setMeta(attr: 'name' | 'property', key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`);

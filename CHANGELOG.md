@@ -4,7 +4,7 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
-_Nothing yet._
+- Trade pages (app repo BACKLOG M.6): /invoice-app-for-plumbers, -landscapers, -mobile-detailers, -electricians and -small-business, each written for its trade (pain points, features, a typical job, line items, FAQ), with their own titles and descriptions, in the sitemap, and linked from the footer.
 
 ## 2026-10-29 (3)
 

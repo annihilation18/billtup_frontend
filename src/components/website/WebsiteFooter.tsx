@@ -1,6 +1,8 @@
 import { Mail } from 'lucide-react@0.468.0';
 import type { SectionType } from '../../App';
 import { BilltUpLogo } from '../BilltUpLogo';
+import { Link } from 'react-router-dom';
+import { TRADES } from '../../data/trades';
 
 interface WebsiteFooterProps {
   onNavigate: (section: SectionType) => void;
@@ -54,6 +56,14 @@ export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
                   Pricing
                 </button>
               </li>
+              {/* "Invoice app for <trade>" pages (app repo BACKLOG M.6) */}
+              {TRADES.map((trade) => (
+                <li key={trade.slug}>
+                  <Link to={`/invoice-app-for-${trade.slug}`} className="text-gray-400 hover:text-white transition-colors">
+                    For {trade.name.toLowerCase()}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </nav>
 

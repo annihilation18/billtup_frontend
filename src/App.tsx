@@ -37,6 +37,8 @@ import { setErrorUser, clearErrorUser } from './utils/errorReporter';
 import { sessionTimeout } from './utils/sessionTimeout';
 import { sectionToPath, pathToSection } from './utils/routes';
 import { applyPageMeta } from './utils/seo';
+import { TradePage } from './components/website/TradePage';
+import { TRADES } from './data/trades';
 import type { SectionType } from './utils/routes';
 import {
   AlertDialog,
@@ -376,6 +378,10 @@ export default function App() {
                   }
                 />
                 <Route path="/features" element={<FeaturesSection onNavigate={navigateTo} />} />
+                {/* "Invoice app for <trade>" pages (src/data/trades.ts, app repo BACKLOG M.6) */}
+                {TRADES.map((trade) => (
+                  <Route key={trade.slug} path={`/invoice-app-for-${trade.slug}`} element={<TradePage trade={trade} />} />
+                ))}
                 <Route path="/pricing" element={<PricingSection onNavigate={handleNavigateWithPlan} />} />
                 <Route path="/docs" element={<DocumentationSectionNew onNavigate={navigateTo} />} />
                 <Route path="/faq" element={<FAQSection onNavigate={navigateTo} />} />
