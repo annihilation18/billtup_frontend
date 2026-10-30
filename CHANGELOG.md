@@ -4,6 +4,10 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+_Nothing yet._
+
+## 2026-10-29 (3)
+
 - Search engines (app repo BACKLOG M.6): `robots.txt` and `sitemap.xml` (both used to return the homepage); a real title and description on every public page, a canonical address on billtup.com, and social-preview tags; account, payment, signature and estimate-approval pages kept out of search; dev and stg get "Disallow: /" so they never appear in Google.
 
 ## 2026-10-29 (2)
