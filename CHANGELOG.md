@@ -4,6 +4,11 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- Basic plan now includes 10 estimates a month (app repo BACKLOG N.26): pricing, FAQ, help, account settings, the subscribe dialog and Terms section 4 (last updated October 29, 2026) say so.
+- Basic plan limits (app repo BACKLOG N.26): creating an invoice, a customer, or an estimate (past the estimate limit, or with a new customer past the customer limit) shows "You've reached your monthly limit of 10 invoices…" with where to upgrade, instead of "Failed to create". The Invoices tab shows "You've created X of 10 invoices this billing period" from the real count (it counted all invoices ever, and its usage call went to a route that doesn't exist).
+
+## 2026-10-29
+
 - Home page: the Google Play and App Store buttons have side padding again, so "Google Play" and "Download on the" no longer touch the edge. The buttons used `px-5`, which the pre-built stylesheet (`src/index.css`) doesn't include; they now use `px-6`. They also get the dark see-through background they were designed with (`bg-black/30`, darker on hover), added by hand to the stylesheet.
 
 ## 2026-10-28 (2)

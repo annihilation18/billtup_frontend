@@ -21,7 +21,7 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
         'Up to 10 customers',
         'Stripe & Square payment processing',
         'Automatic PDF receipts via email',
-        'Estimates & quotes',
+        'Up to 10 estimates per month',
         'Payment links',
         'Overdue invoice tracking',
         'Line item autocomplete',

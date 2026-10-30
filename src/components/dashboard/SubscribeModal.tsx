@@ -13,7 +13,7 @@ const stripePromise = loadStripe(STRIPE_CONFIG.publishableKey);
 type Plan = 'basic' | 'premium';
 
 const PLANS: Record<Plan, { name: string; price: string; features: string[] }> = {
-  basic: { name: 'Basic', price: '4.99', features: ['10 invoices per month', '10 customers', 'Email & PDF invoicing'] },
+  basic: { name: 'Basic', price: '4.99', features: ['10 invoices per month', '10 estimates per month', '10 customers', 'Email & PDF invoicing'] },
   premium: { name: 'Premium', price: '9.99', features: ['Unlimited invoices & customers', 'Custom branding & templates', 'Analytics'] },
 };
 

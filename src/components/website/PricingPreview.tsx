@@ -56,6 +56,7 @@ export function PricingPreview({ onNavigate }: PricingPreviewProps) {
             <ul className="space-y-3 mb-6">
               {[
                 'Up to 10 invoices/month',
+                'Up to 10 estimates/month',
                 'Up to 10 customers',
                 'Stripe & Square payments',
                 'Email support',
