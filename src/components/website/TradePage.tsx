@@ -147,13 +147,16 @@ export function TradePage({ trade }: TradePageProps) {
           <p className="text-gray-600 mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
             Try every feature free for 14 days. Then $4.99 or $9.99 a month. <Link to="/pricing" className="text-[#14B8A6] hover:underline">See pricing</Link>
           </p>
-          <Link
-            to="/signup"
-            className="inline-flex items-center justify-center gap-2 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-xl h-14 px-8 text-lg transition-colors"
-          >
-            Start your free trial
-            <ArrowRight className="w-5 h-5" />
-          </Link>
+          {/* Wrapped: Card is a flex column, which would stretch the button full width */}
+          <div>
+            <Link
+              to="/signup"
+              className="inline-flex items-center justify-center gap-2 bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-xl h-14 px-8 text-lg transition-colors"
+            >
+              Start your free trial
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
         </Card>
 
         {/* Links to the other trade pages */}
