@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { formatDateOnly } from '../../utils/dates';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
 
@@ -22,6 +23,10 @@ interface SignData {
   date?: string;
   dueDate?: string;
   subtotal?: number;
+  discountType?: string;
+  discountValue?: number;
+  discountAmount?: number;
+  discountLabel?: string;
   tax?: number;
   notes?: string;
   lineItems?: LineItem[];
@@ -328,13 +333,13 @@ export function SignPage() {
                 {data.date && (
                   <div>
                     <p className="text-xs text-gray-500">Date</p>
-                    <p className="text-sm font-medium text-gray-700">{data.date}</p>
+                    <p className="text-sm font-medium text-gray-700">{formatDateOnly(data.date, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 )}
                 {data.dueDate && (
                   <div>
                     <p className="text-xs text-gray-500">Due Date</p>
-                    <p className="text-sm font-medium text-gray-700">{data.dueDate}</p>
+                    <p className="text-sm font-medium text-gray-700">{formatDateOnly(data.dueDate, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 )}
               </div>
@@ -378,6 +383,12 @@ export function SignPage() {
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-500">Subtotal</span>
                 <span className="text-gray-700">${data.subtotal.toFixed(2)}</span>
+              </div>
+            )}
+            {data.discountAmount != null && data.discountAmount > 0 && (
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-500">{data.discountLabel || 'Discount'}{data.discountType === 'percent' ? ` (${data.discountValue}%)` : ''}</span>
+                <span className="text-green-600">-${data.discountAmount.toFixed(2)}</span>
               </div>
             )}
             {data.tax != null && data.tax > 0 && (
