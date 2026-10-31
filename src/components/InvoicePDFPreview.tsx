@@ -3,6 +3,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { X } from "lucide-react";
 import { InvoiceData } from "./InvoiceBuilder";
+import { formatAmount } from "../utils/money";
 
 interface InvoicePDFPreviewProps {
   invoiceData: InvoiceData;
@@ -140,8 +141,8 @@ export function InvoicePDFPreview({
                           {item.notes && <div className="text-xs text-gray-500 mt-0.5">{item.notes}</div>}
                         </td>
                         <td className="p-3 text-sm text-center font-mono border-t">{item.quantity || 0}</td>
-                        <td className="p-3 text-sm text-right font-mono border-t">${(item.price || 0).toFixed(2)}</td>
-                        <td className="p-3 text-sm text-right font-mono border-t">${((item.quantity || 0) * (item.price || 0)).toFixed(2)}</td>
+                        <td className="p-3 text-sm text-right font-mono border-t">${formatAmount((item.price || 0))}</td>
+                        <td className="p-3 text-sm text-right font-mono border-t">${formatAmount(((item.quantity || 0) * (item.price || 0)))}</td>
                       </tr>
                     ))
                   ) : (
@@ -161,17 +162,17 @@ export function InvoicePDFPreview({
             <div className="w-64 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-600">Subtotal:</span>
-                <span className="font-mono">${invoiceData.subtotal.toFixed(2)}</span>
+                <span className="font-mono">${formatAmount(invoiceData.subtotal)}</span>
               </div>
               {invoiceData.tax > 0 && (
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-600">Tax:</span>
-                  <span className="font-mono">${invoiceData.tax.toFixed(2)}</span>
+                  <span className="font-mono">${formatAmount(invoiceData.tax)}</span>
                 </div>
               )}
               <div className="flex justify-between pt-2 border-t-2 border-[#1E3A8A]">
                 <span style={{ fontFamily: 'var(--font-poppins)' }} className="font-medium text-[#1E3A8A]">Total:</span>
-                <span style={{ fontFamily: 'var(--font-roboto-mono)' }} className="text-xl text-[#1E3A8A]">${invoiceData.total.toFixed(2)}</span>
+                <span style={{ fontFamily: 'var(--font-roboto-mono)' }} className="text-xl text-[#1E3A8A]">${formatAmount(invoiceData.total)}</span>
               </div>
             </div>
           </div>

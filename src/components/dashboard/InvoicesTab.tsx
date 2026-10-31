@@ -16,6 +16,7 @@ import { InvoiceViewModal } from './InvoiceViewModal';
 import { toast } from '../ui/sonner';
 import { formatDateOnly } from '../../utils/dates';
 import { fetchInvoices, fetchBillingCycleUsage } from '../../utils/dashboard-api';
+import { formatAmount } from "../../utils/money";
 
 interface InvoicesTabProps {
   userPlan: 'basic' | 'premium';
@@ -242,7 +243,7 @@ export function InvoicesTab({ userPlan }: InvoicesTabProps) {
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        ${(invoice.total || 0).toFixed(2)}
+                        ${formatAmount((invoice.total || 0))}
                       </span>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">

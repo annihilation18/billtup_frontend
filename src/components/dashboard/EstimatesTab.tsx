@@ -16,6 +16,7 @@ import {
 } from 'lucide-react@0.468.0';
 import { EstimateViewModal } from './EstimateViewModal';
 import { fetchEstimates } from '../../utils/dashboard-api';
+import { formatAmount } from "../../utils/money";
 
 interface EstimatesTabProps {
   userPlan: 'basic' | 'premium';
@@ -240,7 +241,7 @@ export function EstimatesTab({ userPlan }: EstimatesTabProps) {
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">
                       <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        ${(estimate.total || 0).toFixed(2)}
+                        ${formatAmount((estimate.total || 0))}
                       </span>
                     </td>
                     <td className="px-3 sm:px-6 py-4 whitespace-nowrap">

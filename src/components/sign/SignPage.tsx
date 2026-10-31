@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { formatDateOnly } from '../../utils/dates';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
+import { formatAmount } from "../../utils/money";
 
 interface LineItem {
   description: string;
@@ -368,8 +369,8 @@ export function SignPage() {
                         )}
                       </td>
                       <td className="px-3 py-3 text-gray-600 text-center">{item.quantity ?? ''}</td>
-                      <td className="px-3 py-3 text-gray-600 text-right">{item.rate != null ? `$${item.rate.toFixed(2)}` : ''}</td>
-                      <td className="px-6 py-3 text-gray-900 font-medium text-right">{item.amount != null ? `$${item.amount.toFixed(2)}` : ''}</td>
+                      <td className="px-3 py-3 text-gray-600 text-right">{item.rate != null ? `$${formatAmount(item.rate)}` : ''}</td>
+                      <td className="px-6 py-3 text-gray-900 font-medium text-right">{item.amount != null ? `$${formatAmount(item.amount)}` : ''}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -382,25 +383,25 @@ export function SignPage() {
             {data.subtotal != null && data.subtotal !== data.total && (
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-500">Subtotal</span>
-                <span className="text-gray-700">${data.subtotal.toFixed(2)}</span>
+                <span className="text-gray-700">${formatAmount(data.subtotal)}</span>
               </div>
             )}
             {data.discountAmount != null && data.discountAmount > 0 && (
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-500">{data.discountLabel || 'Discount'}{data.discountType === 'percent' ? ` (${data.discountValue}%)` : ''}</span>
-                <span className="text-green-600">-${data.discountAmount.toFixed(2)}</span>
+                <span className="text-green-600">-${formatAmount(data.discountAmount)}</span>
               </div>
             )}
             {data.tax != null && data.tax > 0 && (
               <div className="flex justify-between text-sm mb-2">
                 <span className="text-gray-500">Tax</span>
-                <span className="text-gray-700">${data.tax.toFixed(2)}</span>
+                <span className="text-gray-700">${formatAmount(data.tax)}</span>
               </div>
             )}
             {data.total != null && (
               <div className="flex justify-between text-base font-bold pt-2 border-t border-gray-100">
                 <span className="text-gray-900">Total</span>
-                <span style={{ color: brandColor }}>${data.total.toFixed(2)}</span>
+                <span style={{ color: brandColor }}>${formatAmount(data.total)}</span>
               </div>
             )}
           </div>

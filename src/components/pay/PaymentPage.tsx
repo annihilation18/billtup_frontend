@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
+import { formatAmount } from "../../utils/money";
 
 interface PaymentData {
   invoiceNumber: string;
@@ -229,13 +230,13 @@ export function PaymentPage() {
               {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Amount Due'}
             </p>
             <p className="text-4xl font-bold" style={{ color: brandColor }}>
-              ${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}
+              ${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}
             </p>
             {data.paymentType === 'deposit' && data.invoiceTotal && (
-              <p className="text-sm text-gray-400 mt-1">of ${data.invoiceTotal.toFixed(2)} total</p>
+              <p className="text-sm text-gray-400 mt-1">of ${formatAmount(data.invoiceTotal)} total</p>
             )}
             {data.paymentType === 'balance' && data.invoiceTotal && (
-              <p className="text-sm text-gray-400 mt-1">remaining balance of ${data.invoiceTotal.toFixed(2)} invoice</p>
+              <p className="text-sm text-gray-400 mt-1">remaining balance of ${formatAmount(data.invoiceTotal)} invoice</p>
             )}
           </div>
 
@@ -281,7 +282,7 @@ export function PaymentPage() {
                         </td>
                         <td className="py-2 text-center text-gray-500">{item.quantity}</td>
                         <td className="py-2 text-right font-medium text-gray-900">
-                          ${(item.quantity * item.price).toFixed(2)}
+                          ${formatAmount((item.quantity * item.price))}
                         </td>
                       </tr>
                     ))}
@@ -292,33 +293,33 @@ export function PaymentPage() {
                 <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-500">Subtotal</span>
-                    <span className="font-medium">${data.subtotal.toFixed(2)}</span>
+                    <span className="font-medium">${formatAmount(data.subtotal)}</span>
                   </div>
                   {data.discountAmount != null && data.discountAmount > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">
                         Discount{data.discountLabel ? ` (${data.discountLabel})` : data.discountType === 'percent' && data.discountValue ? ` (${data.discountValue}%)` : ''}
                       </span>
-                      <span className="font-medium text-green-600">-${data.discountAmount.toFixed(2)}</span>
+                      <span className="font-medium text-green-600">-${formatAmount(data.discountAmount)}</span>
                     </div>
                   )}
                   {data.tax > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Tax</span>
-                      <span className="font-medium">${data.tax.toFixed(2)}</span>
+                      <span className="font-medium">${formatAmount(data.tax)}</span>
                     </div>
                   )}
                   {data.fees && data.fees.processingFee > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Processing Fee</span>
-                      <span className="font-medium">${data.fees.processingFee.toFixed(2)}</span>
+                      <span className="font-medium">${formatAmount(data.fees.processingFee)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-2 border-t-2 border-gray-200">
                     <span className="text-gray-900">
                       {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Total Due'}
                     </span>
-                    <span style={{ color: brandColor }}>${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}</span>
+                    <span style={{ color: brandColor }}>${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}</span>
                   </div>
                 </div>
               </div>
@@ -344,10 +345,10 @@ export function PaymentPage() {
               </span>
             ) : (
               data.paymentType === 'deposit'
-                ? `Pay Deposit $${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}`
+                ? `Pay Deposit $${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}`
                 : data.paymentType === 'balance'
-                  ? `Pay Balance $${(data.fees?.totalCharge ?? data.chargeAmount ?? data.total).toFixed(2)}`
-                  : `Pay $${(data.fees?.totalCharge ?? data.total).toFixed(2)}`
+                  ? `Pay Balance $${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}`
+                  : `Pay $${formatAmount((data.fees?.totalCharge ?? data.total))}`
             )}
           </button>
         </div>

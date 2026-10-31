@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { formatDateOnly } from '../../utils/dates';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
+import { formatAmount } from "../../utils/money";
 
 interface EstimateData {
   estimateNumber: string;
@@ -314,10 +315,10 @@ export function EstimateApprovalPage() {
                   <div key={index} className="flex justify-between items-start pb-3 border-b border-gray-100 last:border-0 last:pb-0">
                     <div className="flex-1">
                       <p className="text-sm text-gray-900">{item.name}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ${item.price.toFixed(2)}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ${formatAmount(item.price)}</p>
                     </div>
                     <p className="text-sm font-mono text-gray-900 ml-4">
-                      ${(item.quantity * item.price).toFixed(2)}
+                      ${formatAmount((item.quantity * item.price))}
                     </p>
                   </div>
                 ))}
@@ -329,18 +330,18 @@ export function EstimateApprovalPage() {
               <div className="border-t border-gray-200 pt-4">
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="font-mono text-gray-700">${(data.subtotal || 0).toFixed(2)}</span>
+                  <span className="font-mono text-gray-700">${formatAmount((data.subtotal || 0))}</span>
                 </div>
                 {data.discountAmount != null && data.discountAmount > 0 && (
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-500">{data.discountLabel || 'Discount'}{data.discountType === 'percent' ? ` (${data.discountValue}%)` : ''}</span>
-                    <span className="font-mono text-green-600">-${data.discountAmount.toFixed(2)}</span>
+                    <span className="font-mono text-green-600">-${formatAmount(data.discountAmount)}</span>
                   </div>
                 )}
                 {data.tax > 0 && (
                   <div className="flex justify-between text-sm mb-2">
                     <span className="text-gray-500">Tax</span>
-                    <span className="font-mono text-gray-700">${data.tax.toFixed(2)}</span>
+                    <span className="font-mono text-gray-700">${formatAmount(data.tax)}</span>
                   </div>
                 )}
               </div>
@@ -351,7 +352,7 @@ export function EstimateApprovalPage() {
               <div className="flex justify-between items-center">
                 <span className="text-lg font-medium text-gray-900">Estimated Total</span>
                 <span className="text-2xl font-bold font-mono text-gray-900">
-                  ${(data?.total || 0).toFixed(2)}
+                  ${formatAmount((data?.total || 0))}
                 </span>
               </div>
             </div>
