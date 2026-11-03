@@ -19,6 +19,7 @@ import {
 } from 'lucide-react@0.468.0';
 import { fetchInvoices } from '../../utils/dashboard-api';
 import { InvoiceViewModal } from './InvoiceViewModal';
+import { formatAmount } from "../../utils/money";
 
 interface CustomerViewModalProps {
   customer: any;
@@ -146,7 +147,7 @@ export function CustomerViewModal({ customer, open, onClose }: CustomerViewModal
                 <span className="text-xs uppercase tracking-wide">Total Revenue</span>
               </div>
               <p className="text-2xl text-green-700" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                ${totalRevenue.toFixed(2)}
+                ${formatAmount(totalRevenue)}
               </p>
             </div>
 
@@ -156,7 +157,7 @@ export function CustomerViewModal({ customer, open, onClose }: CustomerViewModal
                 <span className="text-xs uppercase tracking-wide">Pending</span>
               </div>
               <p className="text-2xl text-amber-700" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                ${pendingAmount.toFixed(2)}
+                ${formatAmount(pendingAmount)}
               </p>
             </div>
           </div>
@@ -201,7 +202,7 @@ export function CustomerViewModal({ customer, open, onClose }: CustomerViewModal
                     </div>
                     <div className="text-right">
                       <p className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        ${(invoice.total || 0).toFixed(2)}
+                        ${formatAmount((invoice.total || 0))}
                       </p>
                     </div>
                   </div>

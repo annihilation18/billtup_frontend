@@ -20,6 +20,7 @@ import {
 import { toast } from '../ui/sonner';
 import { updateInvoice, fetchCustomers } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
+import { formatAmount } from "../../utils/money";
 
 interface LineItem {
   description: string;
@@ -373,7 +374,7 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
                                   <div className="font-medium truncate">{s.name}</div>
                                   {s.notes && <div className="text-xs text-gray-500 truncate">{s.notes}</div>}
                                 </div>
-                                {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${s.price.toFixed(2)}</span>}
+                                {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${formatAmount(s.price)}</span>}
                               </button>
                             ))}
                           </div>
@@ -404,7 +405,7 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600 w-20 text-right" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        ${item.amount.toFixed(2)}
+                        ${formatAmount(item.amount)}
                       </span>
                       <Button
                         type="button"
@@ -427,7 +428,7 @@ export function EditInvoiceModal({ invoice, onUpdate }: EditInvoiceModalProps) {
               <div className="flex items-center gap-4">
                 <span className="text-lg text-gray-700">Total:</span>
                 <span className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${calculateTotal().toFixed(2)}
+                  ${formatAmount(calculateTotal())}
                 </span>
               </div>
             </div>

@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '../ui/alert-dialog';
 import { savedLineItemsApi } from '../../utils/api';
 import { toast } from 'sonner@2.0.3';
+import { formatAmount } from "../../utils/money";
 
 interface SavedLineItem {
   id: string;
@@ -306,7 +307,7 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
                           <div className="font-medium text-sm">{item.name}</div>
                           {item.notes && <div className="text-xs text-gray-500 mt-0.5 whitespace-pre-line line-clamp-3">{item.notes}</div>}
                           <div className="flex items-center gap-3 mt-1 text-xs text-gray-400">
-                            {item.price > 0 && <span className="font-mono">${item.price.toFixed(2)}</span>}
+                            {item.price > 0 && <span className="font-mono">${formatAmount(item.price)}</span>}
                             {item.quantity > 1 && <span>Qty: {item.quantity}</span>}
                             <span>Used {item.usageCount || 0}x</span>
                           </div>
@@ -374,7 +375,7 @@ export function SavedItemsModal({ open, onClose }: SavedItemsModalProps) {
                         <div className="flex-1 min-w-0">
                           <div className="font-medium text-sm">{disc.label}</div>
                           <div className="text-xs text-gray-400 mt-0.5 font-mono">
-                            {disc.type === 'percent' ? `${disc.value}% off` : `$${disc.value.toFixed(2)} off`}
+                            {disc.type === 'percent' ? `${disc.value}% off` : `$${formatAmount(disc.value)} off`}
                           </div>
                         </div>
                         <div className="flex gap-1 shrink-0">

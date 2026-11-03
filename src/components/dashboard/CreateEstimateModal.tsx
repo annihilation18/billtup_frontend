@@ -19,6 +19,7 @@ import {
 import { toast } from '../ui/sonner';
 import { createEstimate, createCustomer, fetchCustomers, fetchEstimates, PlanLimitError, showPlanLimitToast } from '../../utils/dashboard-api';
 import { savedLineItemsApi } from '../../utils/api';
+import { formatAmount } from "../../utils/money";
 
 interface LineItem {
   description: string;
@@ -403,7 +404,7 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
                                 <div className="font-medium truncate">{s.name}</div>
                                 {s.notes && <div className="text-xs text-gray-500 truncate">{s.notes}</div>}
                               </div>
-                              {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${s.price.toFixed(2)}</span>}
+                              {s.price > 0 && <span className="text-xs font-mono text-gray-500 shrink-0">${formatAmount(s.price)}</span>}
                             </button>
                           ))}
                         </div>
@@ -429,7 +430,7 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
                     </div>
                     <div className="col-span-3 sm:col-span-2">
                       <Input
-                        value={`$${item.amount.toFixed(2)}`}
+                        value={`$${formatAmount(item.amount)}`}
                         disabled
                         className="border-gray-300 bg-white"
                       />
@@ -455,7 +456,7 @@ export function CreateEstimateModal({ open = true, onClose, onCreated }: CreateE
                 <div className="flex items-center gap-4">
                   <span className="text-gray-700">Estimated Total:</span>
                   <span className="text-xl text-[#1E3A8A]" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                    ${calculateTotal().toFixed(2)}
+                    ${formatAmount(calculateTotal())}
                   </span>
                 </div>
               </div>

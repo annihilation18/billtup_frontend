@@ -1,6 +1,7 @@
 import { Input } from "./ui/input";
 import { CheckCircle, Send, Home, Mail } from "lucide-react";
 import { toast } from "sonner@2.0.3";
+import { formatAmount } from "../utils/money";
 
 interface ReceiptScreenProps {
   onSendReceipt: (email: string) => Promise<void>;
@@ -52,7 +53,7 @@ export function ReceiptScreen({ onSendReceipt, onReturnToDashboard, total, custo
         <div>
           <h1 className="text-3xl mb-2">Payment Successful!</h1>
           <p className="text-muted-foreground">
-            Payment of <span className="font-mono">${total.toFixed(2)}</span> received
+            Payment of <span className="font-mono">${formatAmount(total)}</span> received
           </p>
         </div>
 
@@ -73,7 +74,7 @@ export function ReceiptScreen({ onSendReceipt, onReturnToDashboard, total, custo
             </div>
             <div className="flex justify-between border-t pt-3">
               <span>Amount Paid</span>
-              <span className="font-mono">${total.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(total)}</span>
             </div>
           </div>
         </div>

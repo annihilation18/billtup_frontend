@@ -103,6 +103,9 @@ async function apiCall(endpoint: string, options: RequestInit = {}) {
   }
 
   const response = await fetch(`${API_CONFIG.baseUrl}${endpoint}`, {
+    // The API marks GET responses "private, max-age=60"; without no-store the browser reused
+    // them, so a list reloaded within a minute of a change could show the old data
+    cache: 'no-store',
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -207,9 +210,22 @@ export async function fixInvoiceCustomerReferences() {
 }
 
 // Invoice APIs
+
+/**
+ * A pending invoice past its due date shows as overdue straight away; the server's
+ * nightly job stores it later (app repo BACKLOG N.88). Same rule as the app's
+ * src/utils/invoiceStatus.ts: due date (YYYY-MM-DD) before today, local time.
+ */
+export function withEffectiveStatus<T extends { status?: string; dueDate?: string | null }>(inv: T, now = new Date()): T {
+  if (!inv || inv.status !== 'pending' || !inv.dueDate) return inv;
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  return String(inv.dueDate).slice(0, 10) < today ? { ...inv, status: 'overdue' } : inv;
+}
+
 export async function fetchInvoices() {
   try {
-    return await apiCall('/invoices');
+    const invoices = await apiCall('/invoices');
+    return Array.isArray(invoices) ? invoices.map((inv: any) => withEffectiveStatus(inv)) : invoices;
   } catch (error) {
     console.error('Error fetching invoices:', error);
     return [];
@@ -218,7 +234,8 @@ export async function fetchInvoices() {
 
 export async function fetchInvoice(invoiceId: string) {
   try {
-    return await apiCall(`/invoices/${invoiceId}`);
+    const invoice = await apiCall(`/invoices/${invoiceId}`);
+    return invoice ? withEffectiveStatus(invoice) : invoice;
   } catch (error) {
     console.error('Error fetching invoice:', error);
     return null;
@@ -905,7 +922,8 @@ export async function fetchTrialStatus(): Promise<{
       return {
         isInTrial: subscription.isTrial || false,
         trialEndsAt: subscription.trialEndsAt || null,
-        daysRemaining: subscription.trialEndsAt
+        // The server's count, the same on every screen and in the app (app repo BACKLOG N.46)
+        daysRemaining: typeof subscription.daysRemaining === 'number' ? subscription.daysRemaining : subscription.trialEndsAt
           ? Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
           : 0,
       };

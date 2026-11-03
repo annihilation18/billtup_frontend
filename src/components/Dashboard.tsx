@@ -5,6 +5,7 @@ import { Badge } from "./ui/badge";
 import { Input } from "./ui/input";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Search, Plus, FileText, Users, Settings, Clock, CheckCircle2, DollarSign, Calendar, TrendingUp } from "lucide-react";
+import { formatAmount } from "../utils/money";
 
 export interface Invoice {
   id: string;
@@ -105,7 +106,7 @@ export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab
             </div>
             <p className="text-xs text-muted-foreground mb-1">{currentMonthName} Sales</p>
             <p className="text-2xl font-mono text-[#1E3A8A]">
-              ${salesStats.monthlyTotal.toFixed(2)}
+              ${formatAmount(salesStats.monthlyTotal)}
             </p>
           </Card>
 
@@ -118,7 +119,7 @@ export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab
             </div>
             <p className="text-xs text-muted-foreground mb-1">Year-to-Date</p>
             <p className="text-2xl font-mono text-[#14B8A6]">
-              ${salesStats.ytdTotal.toFixed(2)}
+              ${formatAmount(salesStats.ytdTotal)}
             </p>
           </Card>
 
@@ -131,7 +132,7 @@ export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab
             </div>
             <p className="text-xs text-muted-foreground mb-1">Pending Payment</p>
             <p className="text-2xl font-mono text-[#F59E0B]">
-              ${salesStats.pendingTotal.toFixed(2)}
+              ${formatAmount(salesStats.pendingTotal)}
             </p>
           </Card>
         </div>
@@ -231,18 +232,18 @@ export function Dashboard({ invoices, onCreateInvoice, onViewInvoice, currentTab
                   <p className="text-sm text-muted-foreground">{invoice.date}</p>
                   {(invoice.status === "refunded" || invoice.status === "partially_refunded") && invoice.refundedAmount && (
                     <p className="text-xs text-red-600 mt-1">
-                      Refunded: ${invoice.refundedAmount.toFixed(2)}
+                      Refunded: ${formatAmount(invoice.refundedAmount)}
                     </p>
                   )}
                 </div>
                 <div className="text-right">
-                  <p className="text-xl font-mono">${invoice.total.toFixed(2)}</p>
+                  <p className="text-xl font-mono">${formatAmount(invoice.total)}</p>
                   {invoice.status === "pending" && (
                     <p className="text-xs text-[#F59E0B] mt-1">Awaiting Payment</p>
                   )}
                   {(invoice.status === "refunded" || invoice.status === "partially_refunded") && invoice.refundedAmount && (
                     <p className="text-sm font-mono text-muted-foreground line-through mt-1">
-                      Net: ${(invoice.total - invoice.refundedAmount).toFixed(2)}
+                      Net: ${formatAmount((invoice.total - invoice.refundedAmount))}
                     </p>
                   )}
                 </div>
