@@ -4,6 +4,7 @@ import { Badge } from "./ui/badge";
 import { ArrowLeft, FileText, DollarSign } from "lucide-react";
 import { Invoice } from "./Dashboard";
 import { Customer } from "./CustomersScreen";
+import { formatAmount } from "../utils/money";
 
 interface CustomerInvoicesScreenProps {
   customer: Customer;
@@ -95,7 +96,7 @@ export function CustomerInvoicesScreen({
                 Total Paid
               </div>
               <div className="text-2xl text-primary-foreground">
-                ${totalPaid.toFixed(2)}
+                ${formatAmount(totalPaid)}
               </div>
             </Card>
             <Card className="bg-primary-foreground/10 border-primary-foreground/20 p-3">
@@ -103,7 +104,7 @@ export function CustomerInvoicesScreen({
                 Pending
               </div>
               <div className="text-2xl text-primary-foreground">
-                ${totalPending.toFixed(2)}
+                ${formatAmount(totalPending)}
               </div>
             </Card>
           </div>
@@ -156,7 +157,7 @@ export function CustomerInvoicesScreen({
                     </div>
                     {invoice.refundedAmount && invoice.refundedAmount > 0 && (
                       <p className="text-xs text-red-500 mt-1">
-                        -${invoice.refundedAmount.toFixed(2)} refunded
+                        -${formatAmount(invoice.refundedAmount)} refunded
                       </p>
                     )}
                   </div>

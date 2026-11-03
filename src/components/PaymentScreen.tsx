@@ -1,6 +1,7 @@
 import { CreditCard, Wallet, CheckCircle2, Receipt } from "lucide-react";
 import { paymentApi } from "../utils/api";
 import { toast } from "sonner@2.0.3";
+import { formatAmount } from "../utils/money";
 
 interface PaymentScreenProps {
   invoiceData: InvoiceData;
@@ -118,22 +119,22 @@ export function PaymentScreen({ invoiceData, onBack, onPaymentSuccess }: Payment
             {invoiceData.lineItems.map((item) => (
               <div key={item.id} className="flex justify-between text-sm">
                 <span className="text-muted-foreground">{item.name} (×{item.quantity})</span>
-                <span className="font-mono">${(item.quantity * item.price).toFixed(2)}</span>
+                <span className="font-mono">${formatAmount((item.quantity * item.price))}</span>
               </div>
             ))}
             <div className="flex justify-between text-sm pt-2 border-t">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-mono">${invoiceData.subtotal.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(invoiceData.subtotal)}</span>
             </div>
             {invoiceData.tax > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax</span>
-                <span className="font-mono">${invoiceData.tax.toFixed(2)}</span>
+                <span className="font-mono">${formatAmount(invoiceData.tax)}</span>
               </div>
             )}
             <div className="flex justify-between border-t pt-2">
               <span>Total</span>
-              <span className="font-mono">${invoiceData.total.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(invoiceData.total)}</span>
             </div>
           </div>
         </Card>
@@ -274,7 +275,7 @@ export function PaymentScreen({ invoiceData, onBack, onPaymentSuccess }: Payment
                 className="w-full bg-primary hover:bg-primary/90"
                 disabled={!cardNumber || !expiryDate || !cvv || !cardholderName}
               >
-                Pay ${invoiceData.total.toFixed(2)}
+                Pay ${formatAmount(invoiceData.total)}
               </Button>
               <Button
                 variant="ghost"

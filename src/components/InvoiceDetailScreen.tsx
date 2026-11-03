@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "./ui/dialog";
 import { ArrowLeft, FileText, Mail, DollarSign, AlertCircle, CheckCircle2, Clock, Trash2 } from "lucide-react";
+import { formatAmount } from "../utils/money";
 
 interface InvoiceDetailScreenProps {
   invoice: any;
@@ -51,7 +52,7 @@ export function InvoiceDetailScreen({
     }
 
     if (amount > maxRefundAmount) {
-      alert(`Refund amount cannot exceed $${maxRefundAmount.toFixed(2)}`);
+      alert(`Refund amount cannot exceed $${formatAmount(maxRefundAmount)}`);
       return;
     }
 
@@ -174,11 +175,11 @@ export function InvoiceDetailScreen({
                   <p className="font-medium">{item.name}</p>
                   {item.notes && <p className="text-xs text-muted-foreground mt-0.5">{item.notes}</p>}
                   <p className="text-sm text-muted-foreground">
-                    Qty: {item.quantity} × ${item.price.toFixed(2)}
+                    Qty: {item.quantity} × ${formatAmount(item.price)}
                   </p>
                 </div>
                 <p className="font-mono text-lg">
-                  ${(item.quantity * item.price).toFixed(2)}
+                  ${formatAmount((item.quantity * item.price))}
                 </p>
               </div>
             ))}
@@ -188,31 +189,31 @@ export function InvoiceDetailScreen({
           <div className="mt-6 pt-4 border-t space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal:</span>
-              <span className="font-mono">${invoice.subtotal.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(invoice.subtotal)}</span>
             </div>
             {invoice.tax > 0 && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax:</span>
-                <span className="font-mono">${invoice.tax.toFixed(2)}</span>
+                <span className="font-mono">${formatAmount(invoice.tax)}</span>
               </div>
             )}
             {(isRefunded || isPartiallyRefunded) && invoice.refundedAmount > 0 && (
               <div className="flex justify-between text-sm text-red-600">
                 <span>Refunded:</span>
-                <span className="font-mono">-${invoice.refundedAmount.toFixed(2)}</span>
+                <span className="font-mono">-${formatAmount(invoice.refundedAmount)}</span>
               </div>
             )}
             <div className="flex justify-between pt-2 border-t-2 border-primary">
               <span className="text-lg text-primary">Total:</span>
               <span className="font-mono text-2xl text-primary">
-                ${invoice.total.toFixed(2)}
+                ${formatAmount(invoice.total)}
               </span>
             </div>
             {(isRefunded || isPartiallyRefunded) && invoice.refundedAmount > 0 && (
               <div className="flex justify-between font-medium">
                 <span>Net Amount:</span>
                 <span className="font-mono text-lg">
-                  ${(invoice.total - invoice.refundedAmount).toFixed(2)}
+                  ${formatAmount((invoice.total - invoice.refundedAmount))}
                 </span>
               </div>
             )}
@@ -270,7 +271,7 @@ export function InvoiceDetailScreen({
                     {isRefunded ? "Full Refund Issued" : "Partial Refund Issued"}
                   </p>
                   <p className="text-sm text-red-700 mt-1">
-                    Refunded Amount: ${invoice.refundedAmount.toFixed(2)}
+                    Refunded Amount: ${formatAmount(invoice.refundedAmount)}
                   </p>
                   {invoice.refundDate && (
                     <p className="text-xs text-red-600 mt-1">
@@ -307,7 +308,7 @@ export function InvoiceDetailScreen({
             <div className="space-y-2">
               <Label>Invoice Total</Label>
               <div className="font-mono text-2xl text-primary">
-                ${invoice.total.toFixed(2)}
+                ${formatAmount(invoice.total)}
               </div>
             </div>
 
@@ -315,7 +316,7 @@ export function InvoiceDetailScreen({
               <div className="space-y-2">
                 <Label>Already Refunded</Label>
                 <div className="font-mono text-lg text-red-600">
-                  -${invoice.refundedAmount.toFixed(2)}
+                  -${formatAmount(invoice.refundedAmount)}
                 </div>
               </div>
             )}
@@ -336,7 +337,7 @@ export function InvoiceDetailScreen({
                 />
               </div>
               <p className="text-xs text-muted-foreground">
-                Maximum refundable: ${maxRefundAmount.toFixed(2)}
+                Maximum refundable: ${formatAmount(maxRefundAmount)}
               </p>
             </div>
 

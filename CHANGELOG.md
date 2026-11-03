@@ -4,6 +4,14 @@ Website releases to production (billtup.com), by the date they reached `main`. O
 
 ## Unreleased
 
+- Amounts show thousands separators ($12,015.76) on the dashboard, payment, estimate and sign pages: one formatter, `src/utils/money.ts` (app repo BACKLOG N.66).
+- Customer estimate and signature pages add up: the estimate page now shows subtotal, discount and tax before the total (it showed only the items and the total), and the sign page shows the discount line; dates show as "Oct 30, 2026" on the right day (the estimate page showed them a day early, the sign page as "2026-10-31"). App repo BACKLOG N.73, found by the email tests (TESTING.md EST-05, EML-02).
+- Invoice due dates show the right day: dates stored as "2026-11-29" were read as midnight UTC, which displayed the day before in US time zones (InvoicesTab). Found by the app repo's live test suite.
+- Dashboard lists always show the latest data: requests to the API skip the browser cache. The API sends GET responses with a 60-second private cache time, so a list reloaded within a minute of a change (for example after marking an invoice paid) could show the old version. Found by the app repo's live test suite (TESTING.md).
+- Trade pages (app repo BACKLOG M.6): /invoice-app-for-plumbers, -landscapers, -mobile-detailers, -electricians and -small-business, each written for its trade (pain points, features, a typical job, line items, FAQ), with their own titles and descriptions, in the sitemap, and linked from the footer.
+
+## 2026-10-29 (3)
+
 - Search engines (app repo BACKLOG M.6): `robots.txt` and `sitemap.xml` (both used to return the homepage); a real title and description on every public page, a canonical address on billtup.com, and social-preview tags; account, payment, signature and estimate-approval pages kept out of search; dev and stg get "Disallow: /" so they never appear in Google.
 
 ## 2026-10-29 (2)

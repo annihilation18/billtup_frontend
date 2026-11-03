@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import { toast } from '../ui/sonner';
 import { updateInvoice, createPaymentIntent, updatePaymentIntent, createSquarePayment } from '../../utils/dashboard-api';
 import { STRIPE_CONFIG } from '../../utils/config';
+import { formatAmount } from "../../utils/money";
 
 const stripePromise = loadStripe(STRIPE_CONFIG.publishableKey);
 
@@ -135,24 +136,24 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <p className="text-sm text-gray-600 mb-1">Amount to charge</p>
         <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-          ${invoiceTotal.toFixed(2)}
+          ${formatAmount(invoiceTotal)}
         </p>
         <div className={`flex justify-between text-xs mt-2 ${selectedMethodType !== 'us_bank_account' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
           <span>Card / Wallet (3.5% + $0.50)</span>
-          <span>${cardFee.toFixed(2)}</span>
+          <span>${formatAmount(cardFee)}</span>
         </div>
         <div className={`flex justify-between text-xs mt-1 ${selectedMethodType === 'us_bank_account' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
           <span>Bank Transfer (ACH)</span>
-          <span>${achFee.toFixed(2)}</span>
+          <span>${formatAmount(achFee)}</span>
         </div>
         <div className="flex justify-between text-sm font-medium text-gray-700 mt-2 pt-1 border-t border-gray-200">
           <span>Total</span>
-          <span>{updatingFee ? '...' : `$${totalCharge.toFixed(2)}`}</span>
+          <span>{updatingFee ? '...' : `$${formatAmount(totalCharge)}`}</span>
         </div>
       </div>
 
       <p className="text-xs text-gray-500">
-        Your customer will be charged ${totalCharge.toFixed(2)}. The full invoice amount (${invoiceTotal.toFixed(2)}) will be deposited to your Stripe account.
+        Your customer will be charged ${formatAmount(totalCharge)}. The full invoice amount (${formatAmount(invoiceTotal)}) will be deposited to your Stripe account.
       </p>
 
       <div className="space-y-2">
@@ -180,7 +181,7 @@ function StripePaymentForm({ invoice, paymentIntentId, onSuccess, onCancel, onBa
           {isProcessing ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
           ) : (
-            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${totalCharge.toFixed(2)}</>
+            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${formatAmount(totalCharge)}</>
           )}
         </Button>
       </div>
@@ -487,7 +488,7 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
       <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
         <p className="text-sm text-gray-600 mb-1">Amount to charge</p>
         <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-          ${(invoice.total || 0).toFixed(2)}
+          ${formatAmount((invoice.total || 0))}
         </p>
         {(() => {
           const invTotal = invoice.total || 0;
@@ -498,17 +499,17 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
             <>
               <div className={`flex justify-between text-xs mt-2 ${selectedMethod !== 'ach' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
                 <span>Card / Wallet (3.5% + $0.50)</span>
-                <span>${cardFee.toFixed(2)}</span>
+                <span>${formatAmount(cardFee)}</span>
               </div>
               {achReady && (
                 <div className={`flex justify-between text-xs mt-1 ${selectedMethod === 'ach' ? 'text-gray-700 font-medium' : 'text-gray-400'}`}>
                   <span>Bank Transfer (ACH)</span>
-                  <span>${achFee.toFixed(2)}</span>
+                  <span>${formatAmount(achFee)}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm font-medium text-gray-700 mt-2 pt-1 border-t border-gray-200">
                 <span>Total</span>
-                <span>${(invTotal + currentFee).toFixed(2)}</span>
+                <span>${formatAmount((invTotal + currentFee))}</span>
               </div>
             </>
           );
@@ -521,7 +522,7 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
         const platformFee = (invTotal * 0.006) + 0.20;
         return (
           <p className="text-xs text-gray-500">
-            Your customer will be charged ${(invTotal + currentFee).toFixed(2)}. Square's processing fee will be deducted from your account. BilltUp's platform fee (${platformFee.toFixed(2)}) is collected separately.
+            Your customer will be charged ${formatAmount((invTotal + currentFee))}. Square's processing fee will be deducted from your account. BilltUp's platform fee (${formatAmount(platformFee)}) is collected separately.
           </p>
         );
       })()}
@@ -624,7 +625,7 @@ function SquarePaymentForm({ invoice, applicationId, locationId, onSuccess, onCa
           {isProcessing ? (
             <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...</>
           ) : (
-            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${((invoice.total || 0) + calculateSquareFee(invoice.total || 0, selectedMethod).fee).toFixed(2)}</>
+            <><CheckCircle2 className="w-4 h-4 mr-2" />Process ${formatAmount(((invoice.total || 0) + calculateSquareFee(invoice.total || 0, selectedMethod).fee))}</>
           )}
         </Button>
       </div>
@@ -712,7 +713,7 @@ export function TakePaymentModal({
               <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p className="text-sm text-gray-600 mb-1">Amount to charge</p>
                 <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${(invoice.total || 0).toFixed(2)}
+                  ${formatAmount((invoice.total || 0))}
                 </p>
               </div>
 

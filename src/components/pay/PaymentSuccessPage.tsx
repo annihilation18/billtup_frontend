@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
+import { formatAmount } from "../../utils/money";
 
 export function PaymentSuccessPage() {
   const { token } = useParams<{ token: string }>();
@@ -71,7 +72,7 @@ export function PaymentSuccessPage() {
             <div className="flex justify-between">
               <span className="text-gray-500">Amount Paid</span>
               <span className="font-bold" style={{ color: accentColor }}>
-                ${(data.fees?.totalCharge ?? data.total).toFixed(2)}
+                ${formatAmount((data.fees?.totalCharge ?? data.total))}
               </span>
             </div>
             <div className="flex justify-between">

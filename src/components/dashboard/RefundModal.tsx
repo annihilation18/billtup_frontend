@@ -6,6 +6,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
 import { processRefund, processSquareRefund } from '../../utils/dashboard-api';
+import { formatAmount } from "../../utils/money";
 
 interface RefundModalProps {
   invoice: any;
@@ -30,7 +31,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
 
     if (refundType === 'partial') {
       if (!customAmount || refundAmount <= 0 || refundAmount > maxRefundable) {
-        toast.error(`Please enter a valid refund amount (max $${maxRefundable.toFixed(2)})`);
+        toast.error(`Please enter a valid refund amount (max $${formatAmount(maxRefundable)})`);
         return;
       }
     }
@@ -47,7 +48,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
       await processRefund(invoice.id, refundAmount);
 
       const label = refundType === 'full' ? 'Full' : 'Partial';
-      toast.success(`${label} refund of $${refundAmount.toFixed(2)} processed successfully!`);
+      toast.success(`${label} refund of $${formatAmount(refundAmount)} processed successfully!`);
       setOpen(false);
       if (onUpdate) {
         onUpdate();
@@ -94,11 +95,11 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
           <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
             <p className="text-sm text-gray-600 mb-1">Original Payment</p>
             <p className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-              ${totalAmount.toFixed(2)}
+              ${formatAmount(totalAmount)}
             </p>
             {alreadyRefunded > 0 && (
               <p className="text-sm text-orange-600 mt-1">
-                Already refunded: ${alreadyRefunded.toFixed(2)} — Remaining: ${maxRefundable.toFixed(2)}
+                Already refunded: ${formatAmount(alreadyRefunded)} — Remaining: ${formatAmount(maxRefundable)}
               </p>
             )}
           </div>
@@ -118,7 +119,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
               >
                 <p className="text-sm text-gray-900">Full Refund</p>
                 <p className="text-xs text-gray-600 mt-1" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${maxRefundable.toFixed(2)}
+                  ${formatAmount(maxRefundable)}
                 </p>
               </button>
 
@@ -159,7 +160,7 @@ export function RefundModal({ invoice, onUpdate }: RefundModalProps) {
                 />
               </div>
               <p className="text-xs text-gray-500">
-                Maximum: ${maxRefundable.toFixed(2)}
+                Maximum: ${formatAmount(maxRefundable)}
               </p>
             </div>
           )}

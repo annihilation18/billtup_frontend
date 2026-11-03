@@ -7,6 +7,7 @@ import { Card } from "./ui/card";
 import { Switch } from "./ui/switch";
 import { Textarea } from "./ui/textarea";
 import { ArrowLeft, Plus, Trash2, FileText, CreditCard } from "lucide-react";
+import { formatAmount } from "../utils/money";
 
 interface LineItem {
   id: string;
@@ -362,7 +363,7 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
                                   <div className="font-medium truncate">{s.name}</div>
                                   {s.notes && <div className="text-xs text-muted-foreground truncate">{s.notes}</div>}
                                 </div>
-                                {s.price > 0 && <span className="text-xs font-mono text-muted-foreground shrink-0">${s.price.toFixed(2)}</span>}
+                                {s.price > 0 && <span className="text-xs font-mono text-muted-foreground shrink-0">${formatAmount(s.price)}</span>}
                               </button>
                             ))}
                           </div>
@@ -396,7 +397,7 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
                         <div className="space-y-1">
                           <Label className="text-xs text-muted-foreground">Total</Label>
                           <div className="flex items-center justify-center h-10 px-3 bg-muted rounded-lg font-mono text-sm">
-                            ${(item.quantity * item.price).toFixed(2)}
+                            ${formatAmount((item.quantity * item.price))}
                           </div>
                         </div>
                       </div>
@@ -455,17 +456,17 @@ export function InvoiceBuilder({ onBack, onPreviewPDF, onProceedToPayment, onSav
           <div className="space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Subtotal</span>
-              <span className="font-mono">${subtotal.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(subtotal)}</span>
             </div>
             {chargeTax && (
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Tax ({defaultTaxRate}%)</span>
-                <span className="font-mono">${tax.toFixed(2)}</span>
+                <span className="font-mono">${formatAmount(tax)}</span>
               </div>
             )}
             <div className="flex justify-between border-t pt-2">
               <span>Total</span>
-              <span className="font-mono">${total.toFixed(2)}</span>
+              <span className="font-mono">${formatAmount(total)}</span>
             </div>
           </div>
         </Card>

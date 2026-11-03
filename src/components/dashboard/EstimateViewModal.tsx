@@ -7,6 +7,7 @@ import {
   ArrowRightLeft,
 } from 'lucide-react@0.468.0';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
+import { formatAmount } from "../../utils/money";
 
 interface EstimateViewModalProps {
   estimate: any;
@@ -148,12 +149,12 @@ export function EstimateViewModal({ estimate, open = true, onClose }: EstimateVi
                               <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                             )}
                             {item.rate && (
-                              <p className="text-xs text-gray-500">Rate: ${item.rate.toFixed(2)}</p>
+                              <p className="text-xs text-gray-500">Rate: ${formatAmount(item.rate)}</p>
                             )}
                           </div>
                         </div>
                         <p className="text-sm text-gray-900 ml-4" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                          ${(item.amount || 0).toFixed(2)}
+                          ${formatAmount((item.amount || 0))}
                         </p>
                       </div>
                     ))}
@@ -162,7 +163,7 @@ export function EstimateViewModal({ estimate, open = true, onClose }: EstimateVi
                   <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-300">
                     <span className="text-sm text-gray-600">Subtotal</span>
                     <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                      ${estimateItems.reduce((sum: number, item: any) => sum + (item.amount || 0), 0).toFixed(2)}
+                      ${formatAmount(estimateItems.reduce((sum: number, item: any) => sum + (item.amount || 0), 0))}
                     </span>
                   </div>
                 </div>
@@ -173,7 +174,7 @@ export function EstimateViewModal({ estimate, open = true, onClose }: EstimateVi
             <div className="flex justify-between items-center pt-4 border-t-2 border-gray-300">
               <span className="text-lg text-gray-900">Estimated Total</span>
               <span className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                ${(estimate.total || 0).toFixed(2)}
+                ${formatAmount((estimate.total || 0))}
               </span>
             </div>
 

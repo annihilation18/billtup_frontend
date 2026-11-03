@@ -10,6 +10,7 @@ import { Card } from '../ui/card';
 import { Crown, TrendingUp, Users, DollarSign, Activity, Loader2 } from 'lucide-react@0.468.0';
 import { useState, useEffect } from 'react';
 import { fetchCustomers, fetchInvoices, fetchTopCustomers } from '../../utils/dashboard-api';
+import { formatAmount } from "../../utils/money";
 
 interface CustomerAnalyticsModalProps {
   open: boolean;
@@ -136,7 +137,7 @@ export function CustomerAnalyticsModal({ open, onClose, userPlan }: CustomerAnal
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-2xl text-gray-900 whitespace-nowrap" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : `$${analytics.avgLifetimeValue.toFixed(2)}`}
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : `$${formatAmount(analytics.avgLifetimeValue)}`}
                   </p>
                   <p className="text-xs text-gray-600 whitespace-nowrap">Avg. Lifetime Value</p>
                 </div>
@@ -187,7 +188,7 @@ export function CustomerAnalyticsModal({ open, onClose, userPlan }: CustomerAnal
                       </div>
                     </div>
                     <p className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                      ${customer.totalRevenue.toFixed(2)}
+                      ${formatAmount(customer.totalRevenue)}
                     </p>
                   </div>
                 ))

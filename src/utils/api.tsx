@@ -22,6 +22,9 @@ async function apiRequest(endpoint: string, options: RequestInit = {}) {
     const token = await getAccessToken();
 
     const response = await fetch(`${BASE_URL}${endpoint}`, {
+      // The API marks GET responses "private, max-age=60"; without no-store the browser could
+      // show data from before the latest change
+      cache: 'no-store',
       ...options,
       headers: {
         'Content-Type': 'application/json',

@@ -6,6 +6,7 @@ import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { toast } from '../ui/sonner';
 import { fetchBusinessProfile, getInvoicePhotos } from '../../utils/dashboard-api';
+import { formatAmount } from "../../utils/money";
 
 interface InvoiceViewModalProps {
   invoice: any;
@@ -174,12 +175,12 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
                             <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
                           )}
                           {item.rate && (
-                            <p className="text-xs text-gray-500">Rate: ${item.rate.toFixed(2)}</p>
+                            <p className="text-xs text-gray-500">Rate: ${formatAmount(item.rate)}</p>
                           )}
                         </div>
                       </div>
                       <p className="text-sm text-gray-900 ml-4" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                        ${(item.amount || item.price || (item.quantity * item.rate) || 0).toFixed(2)}
+                        ${formatAmount((item.amount || item.price || (item.quantity * item.rate) || 0))}
                       </p>
                     </div>
                   ))}
@@ -189,7 +190,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
                 <div className="flex justify-between items-center pt-3 mt-3 border-t border-gray-300">
                   <span className="text-sm text-gray-600">Subtotal</span>
                   <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                    ${invoiceItems.reduce((sum: number, item: any) => sum + (item.amount || 0), 0).toFixed(2)}
+                    ${formatAmount(invoiceItems.reduce((sum: number, item: any) => sum + (item.amount || 0), 0))}
                   </span>
                 </div>
               </div>
@@ -200,7 +201,7 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
           <div className="flex justify-between items-center pt-4 border-t-2 border-gray-300">
             <span className="text-lg text-gray-900">Total</span>
             <span className="text-2xl text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-              ${(invoice.total || 0).toFixed(2)}
+              ${formatAmount((invoice.total || 0))}
             </span>
           </div>
 
