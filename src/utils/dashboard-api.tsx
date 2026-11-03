@@ -922,7 +922,8 @@ export async function fetchTrialStatus(): Promise<{
       return {
         isInTrial: subscription.isTrial || false,
         trialEndsAt: subscription.trialEndsAt || null,
-        daysRemaining: subscription.trialEndsAt
+        // The server's count, the same on every screen and in the app (app repo BACKLOG N.46)
+        daysRemaining: typeof subscription.daysRemaining === 'number' ? subscription.daysRemaining : subscription.trialEndsAt
           ? Math.max(0, Math.ceil((new Date(subscription.trialEndsAt).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
           : 0,
       };
