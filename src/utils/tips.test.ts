@@ -45,3 +45,21 @@ describe('sumTips', () => {
     expect(sumTips([{ tipAmount: 1.1 }, { tipAmount: 2.2 }, {}, { tipAmount: 'x' }, { tipAmount: -3 }])).toBe(3.3);
   });
 });
+
+describe('feesWithTip matches the server', () => {
+  // A copy of the server's calculateFees (app repo lambda/src/utils/fees.ts): checkout charges this
+  const serverFee = (amount: number) => {
+    const platformFee = (amount * 0.6) / 100 + 0.2;
+    const totalCharge = (amount + platformFee + 0.3) / (1 - 2.9 / 100);
+    return Math.round((totalCharge - amount) * 100) / 100;
+  };
+  it('for every amount from $0.01 to $2,000, with and without a tip', () => {
+    const mismatches: number[] = [];
+    for (let cents = 1; cents <= 200000; cents++) {
+      const amount = cents / 100;
+      if (feesWithTip(amount, 0).processingFee !== serverFee(amount)) mismatches.push(amount);
+    }
+    expect(mismatches).toEqual([]);
+    expect(feesWithTip(87.35, 13.1).processingFee).toBe(serverFee(87.35 + 13.1));
+  });
+});

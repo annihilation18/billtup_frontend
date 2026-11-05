@@ -35,9 +35,11 @@ export function round2(n: number): number {
  * fee = round2(total - base); the customer pays base + fee.
  */
 export function feesWithTip(chargeAmount: number, tip: number, rates: FeeRates = DEFAULT_FEE_RATES) {
+  // The same steps, in the same order, as the server's calculateFees (app repo
+  // lambda/src/utils/fees.ts), so the rounding always agrees with what checkout charges
   const base = chargeAmount + tip;
-  const total = (base * (1 + rates.platformPercent / 100) + rates.platformFixed + rates.processorFixed)
-    / (1 - rates.processorPercent / 100);
+  const platformFee = (base * rates.platformPercent) / 100 + rates.platformFixed;
+  const total = (base + platformFee + rates.processorFixed) / (1 - rates.processorPercent / 100);
   const processingFee = round2(total - base);
   return { processingFee, totalCharge: round2(base + processingFee) };
 }
