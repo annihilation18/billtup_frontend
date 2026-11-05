@@ -4,11 +4,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
-import { Switch } from '../ui/switch';
 import { toast } from '../ui/sonner';
-import { fetchBusinessProfile, getInvoicePhotos, updateBusinessProfile } from '../../utils/dashboard-api';
+import { fetchBusinessProfile, getInvoicePhotos } from '../../utils/dashboard-api';
 import { formatAmount } from "../../utils/money";
-import { recordedTip } from '../../utils/tips';
 
 interface InvoiceViewModalProps {
   invoice: any;
@@ -24,27 +22,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
   const [photos, setPhotos] = useState<Array<{ id: string; url: string; filename: string; uploadedAt: string }>>([]);
   const [isLoadingPhotos, setIsLoadingPhotos] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
-  // "Allow tip" (BACKLOG P2.0): starts from the business's last choice, shared with the app
-  const [allowTip, setAllowTip] = useState(false);
-
-  // Load the remembered "Allow tip" choice when the modal opens
-  useEffect(() => {
-    if (!open) return;
-    let cancelled = false;
-    fetchBusinessProfile()
-      .then((business) => {
-        if (!cancelled) setAllowTip(business?.defaultAllowTip ?? false);
-      })
-      .catch(() => { /* keep off */ });
-    return () => { cancelled = true; };
-  }, [open]);
-
-  const handleAllowTipChange = (checked: boolean) => {
-    setAllowTip(checked);
-    // Remember it for next time (website and app); a failed save doesn't block sending
-    updateBusinessProfile({ defaultAllowTip: checked })
-      .catch((error) => console.error('Error saving tip preference:', error));
-  };
 
   // Load photos when modal opens
   useEffect(() => {
@@ -82,7 +59,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
             invoiceData: invoice,
             customerEmail,
             businessData,
-            ...(tipSwitchShown ? { allowTip } : {}),
           }),
         }
       );
@@ -103,16 +79,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
   };
 
   if (!invoice) return null;
-
-  // The email has a Pay Now button only for invoices still owed; tips go with that
-  const tipSwitchShown = invoice.status !== 'paid' && invoice.status !== 'refunded';
-  const tipAmount = recordedTip(invoice.tipAmount);
-  const paymentsWithTips: Array<{ amount?: number; tipAmount: number; date?: string; paidAt?: string; createdAt?: string }> =
-    Array.isArray(invoice.payments)
-      ? invoice.payments
-          .map((p: any) => ({ ...p, tipAmount: recordedTip(p?.tipAmount) }))
-          .filter((p: any) => p.tipAmount > 0)
-      : [];
 
   // Ensure lineItems array exists and map to display format
   const invoiceItems = invoice.lineItems?.map((item: any) => ({
@@ -239,32 +205,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
             </span>
           </div>
 
-          {/* Tip from the customer: paid on top, not part of the invoice total */}
-          {tipAmount > 0 && (
-            <div className="space-y-1" data-testid="invoice-tip">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Tip</span>
-                <span className="text-sm text-gray-900" style={{ fontFamily: 'Roboto Mono, monospace' }}>
-                  ${formatAmount(tipAmount)}
-                </span>
-              </div>
-              <p className="text-xs text-gray-400">Added by the customer when paying; not part of the invoice total.</p>
-              {paymentsWithTips.length > 1 && (
-                <ul className="text-xs text-gray-500 space-y-1">
-                  {paymentsWithTips.map((p, i) => {
-                    const when = p.paidAt || p.date || p.createdAt;
-                    return (
-                      <li key={i} className="flex justify-between">
-                        <span>Payment{when ? ` ${new Date(when).toLocaleDateString()}` : ` ${i + 1}`}</span>
-                        <span>Tip ${formatAmount(p.tipAmount)}</span>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          )}
-
           {/* Photos Section */}
           <div className="border-t border-gray-200 pt-4">
             <h4 className="text-sm text-gray-500 uppercase tracking-wide mb-3">Photos</h4>
@@ -331,22 +271,6 @@ export function InvoiceViewModal({ invoice, open = true, onClose }: InvoiceViewM
                 className="border-gray-300"
               />
             </div>
-            {tipSwitchShown && (
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <Label htmlFor="allowTip">Allow tip</Label>
-                  <p className="text-xs text-gray-500 mt-1">
-                    Customer can add an optional tip when paying online.
-                  </p>
-                </div>
-                <Switch
-                  id="allowTip"
-                  checked={allowTip}
-                  onCheckedChange={handleAllowTipChange}
-                  disabled={isSending}
-                />
-              </div>
-            )}
             <Button
               onClick={handleSendEmail}
               disabled={isSending || !customerEmail}
