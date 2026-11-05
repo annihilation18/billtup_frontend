@@ -204,6 +204,7 @@ const guideSections: GuideSection[] = [
           "Paid invoices cannot be edited (only refunded or deleted)",
           "PDF invoices include your business logo and information",
           "Email sending requires internet connection",
+          "Turn on 'Allow tip' when sending to let the customer add an optional tip when paying online. The tip goes to you in full and is shown separately, not in the invoice total",
         ],
       },
     ],

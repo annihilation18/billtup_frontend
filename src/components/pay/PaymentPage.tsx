@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { API_CONFIG } from '../../utils/config';
 import { formatAmount } from "../../utils/money";
+import { DEFAULT_FEE_RATES, TIP_PERCENTS, feesWithTip, parseCustomTip, tipFromPercent, type FeeRates } from '../../utils/tips';
 
 interface PaymentData {
   invoiceNumber: string;
@@ -29,7 +30,14 @@ interface PaymentData {
   paymentType?: 'deposit' | 'balance' | 'full';
   invoiceTotal?: number;
   chargeAmount?: number;
+  /** The business allows an optional tip on this payment (never for deposits). */
+  allowTip?: boolean;
+  /** Rates for working out the processing fee again when a tip is added. */
+  feeRates?: FeeRates;
 }
+
+/** No tip, a percentage of the amount due, or a custom dollar amount. */
+type TipChoice = null | number | 'custom';
 
 type PageState = 'loading' | 'ready' | 'paid' | 'expired' | 'not_found' | 'error' | 'redirecting' | 'deposit_already_paid';
 
@@ -38,6 +46,10 @@ export function PaymentPage() {
   const [state, setState] = useState<PageState>('loading');
   const [data, setData] = useState<PaymentData | null>(null);
   const [error, setError] = useState('');
+  // Tips are low-pressure: hidden behind "Add a tip", nothing pre-selected
+  const [showTipOptions, setShowTipOptions] = useState(false);
+  const [tipChoice, setTipChoice] = useState<TipChoice>(null);
+  const [customTip, setCustomTip] = useState('');
 
   useEffect(() => {
     if (!token) {
@@ -75,13 +87,15 @@ export function PaymentPage() {
 
   const handlePay = async () => {
     if (!token || !data) return;
+    if (customTipInvalid) return;
+    setError('');
     setState('redirecting');
 
     try {
       const res = await fetch(`${API_CONFIG.baseUrl}/pay/${token}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
+        body: JSON.stringify(tipAmount > 0 ? { tipAmount } : {}),
       });
 
       const json = await res.json();
@@ -108,6 +122,26 @@ export function PaymentPage() {
 
   const brandColor = data?.brandColor || '#1E3A8A';
   const accentColor = data?.accentColor || '#14B8A6';
+
+  // Tip (optional): a percentage of, or custom amount up to, the amount being paid
+  const chargeAmount = data?.chargeAmount ?? data?.total ?? 0;
+  const tipsOffered = data?.allowTip === true && data?.paymentType !== 'deposit';
+  const customTipResult = tipChoice === 'custom' ? parseCustomTip(customTip, chargeAmount) : null;
+  const customTipInvalid = tipsOffered && customTipResult !== null && !customTipResult.ok;
+  const tipAmount = !tipsOffered || tipChoice === null
+    ? 0
+    : tipChoice === 'custom'
+      ? (customTipResult?.ok ? customTipResult.tip : 0)
+      : tipFromPercent(chargeAmount, tipChoice);
+  const tipFees = tipAmount > 0 ? feesWithTip(chargeAmount, tipAmount, data?.feeRates ?? DEFAULT_FEE_RATES) : null;
+  const processingFee = tipFees ? tipFees.processingFee : data?.fees?.processingFee;
+  const amountDue = tipFees ? tipFees.totalCharge : (data?.fees?.totalCharge ?? data?.chargeAmount ?? data?.total ?? 0);
+
+  const removeTip = () => {
+    setTipChoice(null);
+    setCustomTip('');
+    setShowTipOptions(false);
+  };
 
   // Loading state
   if (state === 'loading') {
@@ -230,7 +264,7 @@ export function PaymentPage() {
               {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Amount Due'}
             </p>
             <p className="text-4xl font-bold" style={{ color: brandColor }}>
-              ${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}
+              ${formatAmount(amountDue)}
             </p>
             {data.paymentType === 'deposit' && data.invoiceTotal && (
               <p className="text-sm text-gray-400 mt-1">of ${formatAmount(data.invoiceTotal)} total</p>
@@ -309,17 +343,23 @@ export function PaymentPage() {
                       <span className="font-medium">${formatAmount(data.tax)}</span>
                     </div>
                   )}
-                  {data.fees && data.fees.processingFee > 0 && (
+                  {tipAmount > 0 && (
+                    <div className="flex justify-between text-sm" data-testid="tip-line">
+                      <span className="text-gray-500">Tip</span>
+                      <span className="font-medium">${formatAmount(tipAmount)}</span>
+                    </div>
+                  )}
+                  {processingFee != null && processingFee > 0 && (
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-500">Processing Fee</span>
-                      <span className="font-medium">${formatAmount(data.fees.processingFee)}</span>
+                      <span className="font-medium">${formatAmount(processingFee)}</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm font-bold pt-2 border-t-2 border-gray-200">
                     <span className="text-gray-900">
                       {data.paymentType === 'deposit' ? 'Deposit Due' : data.paymentType === 'balance' ? 'Balance Due' : 'Total Due'}
                     </span>
-                    <span style={{ color: brandColor }}>${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}</span>
+                    <span style={{ color: brandColor }}>${formatAmount(amountDue)}</span>
                   </div>
                 </div>
               </div>
@@ -329,9 +369,12 @@ export function PaymentPage() {
 
         {/* Pay Button */}
         <div className="bg-white border-x border-gray-200 px-6 pb-6">
+          {error && state === 'ready' && (
+            <p role="alert" className="text-sm text-red-600 text-center mb-3">{error}</p>
+          )}
           <button
             onClick={handlePay}
-            disabled={state === 'redirecting'}
+            disabled={state === 'redirecting' || customTipInvalid}
             className="w-full text-white font-bold py-4 px-8 rounded-lg text-lg transition-all hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed"
             style={{ background: `linear-gradient(135deg, ${brandColor}, ${accentColor})` }}
           >
@@ -345,12 +388,87 @@ export function PaymentPage() {
               </span>
             ) : (
               data.paymentType === 'deposit'
-                ? `Pay Deposit $${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}`
+                ? `Pay Deposit $${formatAmount(amountDue)}`
                 : data.paymentType === 'balance'
-                  ? `Pay Balance $${formatAmount((data.fees?.totalCharge ?? data.chargeAmount ?? data.total))}`
-                  : `Pay $${formatAmount((data.fees?.totalCharge ?? data.total))}`
+                  ? `Pay Balance $${formatAmount(amountDue)}`
+                  : `Pay $${formatAmount(amountDue)}`
             )}
           </button>
+
+          {/* Optional tip: a quiet secondary button; the choices appear only when asked for */}
+          {tipsOffered && state === 'ready' && !showTipOptions && (
+            <div className="mt-3 text-center">
+              <button
+                type="button"
+                onClick={() => setShowTipOptions(true)}
+                className="text-sm text-gray-500 underline underline-offset-2 hover:text-gray-700"
+              >
+                Add a tip
+              </button>
+            </div>
+          )}
+          {tipsOffered && showTipOptions && (
+            <div className="mt-4 rounded-lg border border-gray-200 p-4" role="group" aria-label="Tip (optional)">
+              <p className="text-sm text-gray-600 mb-3">Tip (optional)</p>
+              <div className="grid grid-cols-4 gap-2">
+                {TIP_PERCENTS.map((pct) => {
+                  const selected = tipChoice === pct;
+                  return (
+                    <button
+                      key={pct}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => setTipChoice(pct)}
+                      disabled={state === 'redirecting'}
+                      className={`rounded-md border px-2 py-2 text-sm transition-colors ${selected ? 'border-gray-800 bg-gray-100 text-gray-900' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
+                    >
+                      <span className="block font-medium">{pct}%</span>
+                      <span className="block text-xs text-gray-500">${formatAmount(tipFromPercent(chargeAmount, pct))}</span>
+                    </button>
+                  );
+                })}
+                <button
+                  type="button"
+                  aria-pressed={tipChoice === 'custom'}
+                  onClick={() => setTipChoice('custom')}
+                  disabled={state === 'redirecting'}
+                  className={`rounded-md border px-2 py-2 text-sm transition-colors ${tipChoice === 'custom' ? 'border-gray-800 bg-gray-100 text-gray-900' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
+                >
+                  <span className="block font-medium">Custom</span>
+                </button>
+              </div>
+              {tipChoice === 'custom' && (
+                <div className="mt-3">
+                  <div className="flex items-center rounded-md border border-gray-300 px-3 focus-within:border-[#1E3A8A]">
+                    <span className="text-gray-500 text-sm">$</span>
+                    <input
+                      type="text"
+                      inputMode="decimal"
+                      aria-label="Custom tip amount"
+                      placeholder="0.00"
+                      value={customTip}
+                      onChange={(e) => setCustomTip(e.target.value)}
+                      disabled={state === 'redirecting'}
+                      className="w-full py-2 ml-2 text-sm outline-none"
+                    />
+                  </div>
+                  {customTipResult && !customTipResult.ok && (
+                    <p className="text-xs text-red-600 mt-1">{customTipResult.error}</p>
+                  )}
+                </div>
+              )}
+              <div className="mt-3 text-center">
+                <button
+                  type="button"
+                  onClick={removeTip}
+                  disabled={state === 'redirecting'}
+                  className="text-sm text-gray-500 underline underline-offset-2 hover:text-gray-700"
+                >
+                  No tip
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
