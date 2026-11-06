@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
+import { formatAmount } from '../../utils/money';
 import {
   TrendingUp,
   DollarSign,
@@ -41,6 +42,8 @@ interface AnalyticsTabProps {
 
 interface SalesStats {
   totalRevenue: number;
+  /** Customer tips in the period, not included in totalRevenue */
+  totalTips?: number;
   totalInvoices: number;
   totalCustomers: number;
   pendingAmount: number;
@@ -270,6 +273,11 @@ export function AnalyticsTab({ userPlan }: AnalyticsTabProps) {
                 ? 'No change from last month'
                 : `${stats?.revenueChange || '0%'} from last month`
               }
+            </p>
+          )}
+          {!loading && (stats?.totalTips ?? 0) > 0 && (
+            <p className="text-xs text-gray-500 mt-1" data-testid="analytics-tips">
+              Tips ${formatAmount(stats?.totalTips ?? 0)} (not in revenue)
             </p>
           )}
         </Card>
