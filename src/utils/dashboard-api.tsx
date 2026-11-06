@@ -1,6 +1,7 @@
 import { getIdToken } from './auth/cognito';
 import { API_CONFIG } from './config';
 import { captureError } from './errorReporter';
+import { sumTips } from './tips';
 
 /** Error code the API returns (HTTP 402) when a read-only account (trial ended) tries to change data */
 export const SUBSCRIPTION_REQUIRED = 'SUBSCRIPTION_REQUIRED';
@@ -428,6 +429,8 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month', cust
 
     const totalRevenue = paidInvoices.reduce((sum: number, inv: any) => sum + invoiceNetRevenue(inv), 0);
     const pendingAmount = pendingInvoices.reduce((sum: number, inv: any) => sum + inv.total, 0);
+    // Customer tips (BACKLOG P2.0) are kept out of revenue and shown on their own
+    const totalTips = sumTips(paidInvoices);
 
     // Get comparison period label
     const comparisonLabel = period === 'year' ? 'last year' :
@@ -450,6 +453,7 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month', cust
 
     return {
       totalRevenue,
+      totalTips,
       totalInvoices: periodInvoices.length,
       totalCustomers: activeCustomers,
       pendingAmount,
@@ -467,6 +471,7 @@ export async function fetchSalesStats(period: TimePeriod = 'current_month', cust
     console.error('Error calculating sales stats:', error);
     return {
       totalRevenue: 0,
+      totalTips: 0,
       totalInvoices: 0,
       totalCustomers: 0,
       pendingAmount: 0,
