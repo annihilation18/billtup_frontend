@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { DashboardSection } from './components/dashboard/DashboardSection';
 import { WebsiteHeader } from './components/website/WebsiteHeader';
-import { HeroSection, PaymentMethodsStrip } from './components/website/HeroSection';
+import { HeroSection } from './components/website/HeroSection';
 import { HowItWorks } from './components/website/HowItWorks';
+import { StorySections } from './components/website/StorySections';
+import { MobileAppSection } from './components/website/MobileAppSection';
 import { FeaturesSection } from './components/website/FeaturesSection';
 import { FeatureHighlights } from './components/website/FeatureHighlights';
 import { PricingSection } from './components/website/PricingSection';
@@ -306,21 +308,25 @@ export default function App() {
         path="/reset-password"
         element={
           <>
-            <ResetPassword onBackToSignIn={() => navigate('/signin')} />
+            <div className="bt-theme bt-public">
+              <ResetPassword onBackToSignIn={() => navigate('/signin')} />
+            </div>
             <Toaster />
           </>
         }
       />
 
       {/* Public payment pages — no header/footer, branded by business */}
-      <Route path="/pay/:token" element={<><PaymentPage /><Toaster /></>} />
-      <Route path="/pay/:token/success" element={<><PaymentSuccessPage /><Toaster /></>} />
+      {/* bt-customer: site fonts and button styles only (billtup-theme.css); the business's own
+          brand colours and the payment logic are untouched */}
+      <Route path="/pay/:token" element={<div className="bt-theme bt-customer"><PaymentPage /><Toaster /></div>} />
+      <Route path="/pay/:token/success" element={<div className="bt-theme bt-customer"><PaymentSuccessPage /><Toaster /></div>} />
 
       {/* Public estimate approval page — no header/footer, branded by business */}
-      <Route path="/estimate/:token" element={<><EstimateApprovalPage /><Toaster /></>} />
+      <Route path="/estimate/:token" element={<div className="bt-theme bt-customer"><EstimateApprovalPage /><Toaster /></div>} />
 
       {/* Public signature collection page — no header/footer, branded by business */}
-      <Route path="/sign/:token" element={<><SignPage /><Toaster /></>} />
+      <Route path="/sign/:token" element={<div className="bt-theme bt-customer"><SignPage /><Toaster /></div>} />
 
       {/* OAuth callback routes — auth-guarded, process code/state then redirect to dashboard */}
       <Route
@@ -345,7 +351,10 @@ export default function App() {
         path="/dashboard/*"
         element={
           <AuthGuard isAuthenticated={isAuthenticated} authChecked={authChecked}>
-            <DashboardSection userPlan={userPlan} onSignOut={handleSignOut} onPlanChange={handlePlanChange} />
+            {/* bt-app: colours, fonts and buttons only (billtup-theme.css), no layout changes */}
+            <div className="bt-theme bt-app">
+              <DashboardSection userPlan={userPlan} onSignOut={handleSignOut} onPlanChange={handlePlanChange} />
+            </div>
           </AuthGuard>
         }
       />
@@ -354,7 +363,7 @@ export default function App() {
       <Route
         path="/*"
         element={
-          <div className="min-h-screen bg-white">
+          <div className="min-h-screen bg-white bt-theme bt-public">
             <a
               href="#main-content"
               className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-white focus:text-black focus:rounded-md focus:shadow-lg focus:ring-2 focus:ring-ring"
@@ -369,13 +378,13 @@ export default function App() {
                 <Route
                   path="/"
                   element={
-                    // Home page: C2 design (app repo BACKLOG P4.1). The store badges are in the
-                    // hero, so MobileAppSection is no longer shown here.
-                    <div className="c2-home">
+                    // Home page: C3 design (app repo BACKLOG P4.1)
+                    <div className="bt-home">
                       <HeroSection onGetStarted={() => navigate('/signup')} />
-                      <PaymentMethodsStrip />
                       <HowItWorks />
                       <FeatureHighlights onNavigate={handleNavigateWithPlan} />
+                      <StorySections />
+                      <MobileAppSection />
                       <PricingPreview onNavigate={handleNavigateWithPlan} />
                       <HomeCtaBand onGetStarted={() => navigate('/signup')} />
                     </div>

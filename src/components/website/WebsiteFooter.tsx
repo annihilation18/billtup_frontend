@@ -4,13 +4,12 @@ import { BilltUpLogo } from '../BilltUpLogo';
 import { Link } from 'react-router-dom';
 import { TRADES } from '../../data/trades';
 import { Wordmark } from './WebsiteHeader';
-import '../../styles/c2-site.css';
 
 interface WebsiteFooterProps {
   onNavigate: (section: SectionType) => void;
 }
 
-/** Site footer, light C2 style (app repo BACKLOG P4.1) */
+/** Site footer: the original layout and links in the C3 navy theme (app repo BACKLOG P4.1) */
 export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
   const currentYear = new Date().getFullYear();
   const item = (section: SectionType, label: string) => (
@@ -20,20 +19,20 @@ export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
   );
 
   return (
-    <footer className="c2 c2-footer" role="contentinfo">
-      <div className="c2-wrap">
-        <div className="c2-foot-grid">
+    <footer className="bt bt-footer" role="contentinfo">
+      <div className="bt-wrap">
+        <div className="bt-fgrid">
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <BilltUpLogo size={40} />
-              <Wordmark light />
+              <Wordmark dark />
               <span className="sr-only">BilltUp</span>
             </div>
-            <p className="c2-foot-about">
-              Invoices, estimates and payments for service businesses, on iPhone, Android and the web.
+            <p className="bt-blurb">
+              The modern invoicing solution for service businesses. Get paid faster with professional invoices and instant payment processing.
             </p>
-            <a href="mailto:support@billtup.com" className="c2-mail">
-              <Mail className="c2-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
+            <a href="mailto:support@billtup.com" className="bt-mail">
+              <Mail className="bt-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
               support@billtup.com
             </a>
           </div>
@@ -73,8 +72,12 @@ export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
           </nav>
         </div>
 
-        <div className="c2-foot-bottom">
+        <div className="bt-bar">
           <p>© {currentYear} BilltUp. All rights reserved.</p>
+          <a href="mailto:support@billtup.com" className="bt-mail" style={{ marginTop: 0 }}>
+            <Mail className="bt-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
+            support@billtup.com
+          </a>
         </div>
       </div>
     </footer>
