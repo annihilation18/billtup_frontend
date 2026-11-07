@@ -1,0 +1,150 @@
+/*
+ * BilltUp C3 theme for the pages built before the redesign (app repo BACKLOG P4.1).
+ * Those pages use the pre-built Tailwind classes in src/index.css with the old navy / teal /
+ * amber colours written into the class names, so instead of editing ~50 files this file
+ * re-points those classes inside a theme scope. Unlayered CSS beats Tailwind's @layer
+ * utilities, so no !important is needed except against inline styles (fonts).
+ *
+ * Scopes (set in src/App.tsx):
+ *   .bt-theme.bt-public    every public page: full theme (colours, fonts, headings, eyebrow pills,
+ *                          cards, buttons, hover effects)
+ *   .bt-theme.bt-app       signed-in dashboard: colours, fonts and buttons only, no layout
+ *   .bt-theme.bt-customer  pay / estimate / sign pages: fonts and button feel only; their colours
+ *                          come from the business's own branding and are left alone
+ * The real logo (BilltUpLogo, class bt-logo) keeps its navy / teal / amber ring.
+ */
+
+/* ===== 1. Fonts (all scopes): Inter everywhere, tabular numbers; Poppins only on h1/h2 ===== */
+.bt-theme { font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+/* the base stylesheet sets every h1-h6 in Poppins; smaller headings use Inter (zero specificity, so components can still opt in) */
+:where(.bt-theme) :where(h3, h4, h5, h6) { font-family: Inter, system-ui, sans-serif; }
+.bt-theme :is([style*="Roboto Mono"], [style*="--font-roboto-mono"]) { font-family: Inter, system-ui, sans-serif !important; font-variant-numeric: tabular-nums; }
+.bt-theme :is([style*="Poppins"], [style*="--font-poppins"]):not(h1):not(h2) { font-family: Inter, system-ui, sans-serif !important; }
+.bt-theme :is(h3, h4)[style*="Poppins"], .bt-theme :is(h3, h4)[style*="--font-poppins"] { font-weight: 600; letter-spacing: -0.01em; }
+.bt-theme :is(h1, h2):is([style*="Poppins"], [style*="--font-poppins"]) { font-family: Poppins, sans-serif !important; }
+
+/* ===== 2. Focus ring on everything clickable (all scopes) ===== */
+.bt-theme :is(a, button, [role="button"], [role="tab"], summary):focus-visible { outline: 3px solid var(--bt-ring); outline-offset: 2px; }
+
+/* ===== 3. Colours: amber accent becomes sky / blue (public + dashboard) ===== */
+:is(.bt-public, .bt-app) .text-\[\#F59E0B\] { color: var(--bt-sky); }
+:is(.bt-public, .bt-app) .bg-\[\#F59E0B\] { background-color: var(--bt-sky); }
+:is(.bt-public, .bt-app) .bg-\[\#F59E0B\]\/5 { background-color: rgba(14,165,233,.05); }
+:is(.bt-public, .bt-app) .bg-\[\#F59E0B\]\/10 { background-color: rgba(14,165,233,.10); }
+:is(.bt-public, .bt-app) .border-\[\#F59E0B\] { border-color: var(--bt-sky); }
+:is(.bt-public, .bt-app) .border-\[\#F59E0B\]\/20 { border-color: rgba(37,99,235,.2); }
+:is(.bt-public, .bt-app) .border-\[\#F59E0B\]\/30 { border-color: rgba(37,99,235,.3); }
+:is(.bt-public, .bt-app) .border-l-\[\#F59E0B\] { border-left-color: var(--bt-sky); }
+:is(.bt-public, .bt-app) .hover\:bg-\[\#F59E0B\]\/90:hover { background-color: rgba(14,165,233,.9); }
+:is(.bt-public, .bt-app) .hover\:border-\[\#F59E0B\]:hover { border-color: var(--bt-hover-border); }
+:is(.bt-public, .bt-app) .hover\:border-\[\#F59E0B\]\/50:hover { border-color: var(--bt-hover-border); }
+:is(.bt-public, .bt-app) :not(.bt-logo).from-\[\#F59E0B\] { --tw-gradient-from: #0EA5E9; }
+:is(.bt-public, .bt-app) .from-\[\#F59E0B\]\/5 { --tw-gradient-from: rgba(14,165,233,.05); }
+:is(.bt-public, .bt-app) .from-\[\#F59E0B\]\/10 { --tw-gradient-from: rgba(14,165,233,.10); }
+:is(.bt-public, .bt-app) :not(.bt-logo).to-\[\#F59E0B\] { --tw-gradient-to: #2563EB; }
+:is(.bt-public, .bt-app) .to-\[\#F59E0B\]\/5 { --tw-gradient-to: rgba(14,165,233,.05); }
+:is(.bt-public, .bt-app) .to-\[\#F59E0B\]\/10 { --tw-gradient-to: rgba(14,165,233,.10); }
+:is(.bt-public, .bt-app) .to-\[\#D97706\] { --tw-gradient-to: #2563EB; }
+:is(.bt-public, .bt-app) .to-\[\#FCD34D\] { --tw-gradient-to: #7DD3FC; }
+:is(.bt-public, .bt-app) .hover\:from-\[\#F59E0B\]\/10:hover { --tw-gradient-from: rgba(14,165,233,.10); }
+:is(.bt-public, .bt-app) .hover\:to-\[\#F59E0B\]\/10:hover { --tw-gradient-to: rgba(14,165,233,.10); }
+
+/* Premium gradient (was amber -> navy) and brand gradients become the C3 blues */
+:is(.bt-public, .bt-app) .bg-gradient-to-r.from-\[\#F59E0B\].to-\[\#1E3A8A\],
+:is(.bt-public, .bt-app) .bg-gradient-to-br.from-\[\#F59E0B\].to-\[\#1E3A8A\] { background-image: var(--bt-grad-btn); }
+:is(.bt-public, .bt-app) .bg-gradient-to-r.from-\[\#F59E0B\].to-\[\#1E3A8A\].bg-clip-text { background-image: var(--bt-grad-acc); }
+
+/* ===== 4. Buttons (public + dashboard): gradient primary, light-blue outline hover, 1px lift ===== */
+:is(.bt-public, .bt-app) :is(button, a).bg-\[\#1E3A8A\],
+:is(.bt-public, .bt-app) button.bg-blue-600:is(:not([class*="bg-white"]):not([class*="bg-transparent"]):not([class*="bg-["]):not([class*="bg-gradient"]):not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-gray"]):not([class*="bg-black"])),
+:is(.bt-public, .bt-app) :is(button, a).bg-gradient-to-r.from-\[\#F59E0B\].to-\[\#1E3A8A\] {
+  background-color: #1E3A8A; background-image: var(--bt-grad-btn); color: #fff; box-shadow: 0 8px 20px rgba(37,99,235,.25);
+}
+:is(.bt-public, .bt-app) :is(button, a).bg-\[\#1E3A8A\]:hover:not(:disabled),
+:is(.bt-public, .bt-app) button.bg-blue-600:is(:not([class*="bg-white"]):not([class*="bg-transparent"]):not([class*="bg-["]):not([class*="bg-gradient"]):not([class*="bg-red"]):not([class*="bg-green"]):not([class*="bg-gray"]):not([class*="bg-black"])):hover:not(:disabled),
+:is(.bt-public, .bt-app) :is(button, a).bg-gradient-to-r.from-\[\#F59E0B\].to-\[\#1E3A8A\]:hover:not(:disabled) {
+  background-color: #1E3A8A; filter: brightness(1.08) saturate(1.05); box-shadow: 0 12px 26px rgba(37,99,235,.34); opacity: 1;
+}
+:is(.bt-public, .bt-app) :is(button, a).bg-\[\#14B8A6\]:hover:not(:disabled) { filter: brightness(1.05); box-shadow: 0 10px 22px rgba(20,184,166,.28); }
+:is(.bt-public, .bt-app) button:is(.border-gray-300, .border-gray-200, .border-\[\#1E3A8A\]):hover:not(:disabled),
+:is(.bt-public, .bt-app) a:is(.border-gray-300, .border-\[\#1E3A8A\]):hover {
+  border-color: var(--bt-hover-border); background-color: var(--bt-hover-bg); color: var(--bt-navy);
+}
+:is(.bt-public, .bt-app) button.bg-white:not([role="tab"]):hover:not(:disabled):not(.border-gray-300):not(.border-gray-200) { background-color: #F0F6FF; }
+/* lift */
+.bt-theme :is(button, a):is(.bg-\[\#1E3A8A\], .bg-blue-600, .bg-\[\#14B8A6\], .bg-gradient-to-r, .border-gray-300, .border-\[\#1E3A8A\], .rounded-xl.h-12, .rounded-xl.h-14, .rounded-lg.h-10) {
+  transition: transform .18s ease, box-shadow .18s ease, filter .18s ease, background-color .18s ease, color .18s ease, border-color .18s ease;
+}
+.bt-theme :is(button, a):is(.bg-\[\#1E3A8A\], .bg-blue-600, .bg-\[\#14B8A6\], .bg-gradient-to-r, .border-gray-300, .border-\[\#1E3A8A\], .rounded-xl.h-12, .rounded-xl.h-14, .rounded-lg.h-10):hover:not(:disabled) { transform: translateY(-1px); }
+.bt-theme :is(button, a):active:not(:disabled) { transform: translateY(0); }
+/* customer pages: lift + focus only, colours stay the business's */
+.bt-customer button:not(:disabled) { transition: transform .18s ease, box-shadow .18s ease, filter .18s ease; }
+.bt-customer button[style*="linear-gradient"]:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.05); box-shadow: 0 10px 22px rgba(2,6,23,.18); }
+
+/* ===== 5. Public pages only: the C3 look ===== */
+.bt-public { color: var(--bt-ink); }
+
+/* Big headings: Poppins 400, two-line with a blue accent (accent spans in the old markup) */
+.bt-public :is(h1, h2):is([style*="Poppins"], [style*="--font-poppins"]) { font-weight: 400; letter-spacing: -0.01em; line-height: 1.12; }
+.bt-public :is(h1, h2).text-gray-900 { color: var(--bt-ink); }
+.bt-public :is(h1, h2) :is(span.text-\[\#1E3A8A\], span.text-\[\#14B8A6\], .bt-acc) {
+  background: var(--bt-grad-acc); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.bt-public :is(h1, h2) span.text-\[\#F59E0B\], .bt-public .text-white :is(h1, h2) .bt-acc {
+  background: var(--bt-grad-acc-light); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+/* Eyebrow pills (the "inline-flex rounded-full px-4 py-2" chips above headings) */
+.bt-public .inline-flex.items-center.rounded-full.px-4.py-2:not(.bg-white\/20) {
+  background: var(--bt-tint); color: var(--bt-navy); border: 0; padding: 6px 13px; font-weight: 600; gap: 8px;
+}
+.bt-public .inline-flex.items-center.rounded-full.px-4.py-2:not(.bg-white\/20) :is(span, svg) { color: var(--bt-navy); background: none; -webkit-text-fill-color: currentColor; font-size: 13px; }
+.bt-public .inline-flex.items-center.rounded-full.px-4.py-2:not(.bg-white\/20) svg { width: 14px; height: 14px; }
+.bt-public .inline-flex.items-center.rounded-full.px-4.py-2.bg-white\/20 {
+  background: rgba(255,255,255,.14); color: #E0F2FE; border: 1px solid rgba(255,255,255,.18); padding: 6px 13px; font-weight: 600;
+}
+.bt-public .inline-flex.items-center.rounded-full.px-4.py-2.bg-white\/20 svg { color: #E0F2FE; }
+
+/* Big navy panels (brand 3-colour or navy->teal) get the C3 blue gradient with dots */
+.bt-public :not(.bt-logo).bg-gradient-to-br.from-\[\#1E3A8A\].via-\[\#14B8A6\].to-\[\#F59E0B\],
+.bt-public .bg-gradient-to-br.from-\[\#1E3A8A\].to-\[\#14B8A6\]:not(.w-8):not(.w-10):not(.w-12):not(.w-14):not(.w-16):not(.w-20) {
+  background-image: radial-gradient(rgba(255,255,255,.12) 1.2px, transparent 1.2px), var(--bt-grad-card);
+  background-size: 22px 22px, auto, auto; border: 0;
+}
+/* small icon tiles keep a gradient, now blue */
+.bt-public :is(.w-8, .w-10, .w-12, .w-14, .w-16, .w-20).bg-gradient-to-br:not(.bt-logo) { background-image: var(--bt-grad-btn); }
+.bt-public .text-\[\#14B8A6\] { color: #0F766E; }
+.bt-public h3 .text-\[\#14B8A6\], .bt-public svg.text-\[\#14B8A6\] { color: var(--bt-teal); }
+
+/* Cards: thin border, 16px radius, gentle rise on hover */
+.bt-public [data-slot="card"] { border-radius: 16px; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.bt-public [data-slot="card"]:is(.border-2) { border-width: 1px; }
+.bt-public [data-slot="card"]:is(.border-gray-100, .border-gray-200, .border-2) { border-color: var(--bt-line); }
+.bt-public [data-slot="card"][class*="hover:shadow"]:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,58,138,.10); border-color: #C9D7F2; }
+
+/* Section backgrounds: soft blue-grey instead of grey / cyan tints */
+.bt-public .bg-gray-50 { background-color: var(--bt-soft); }
+.bt-public .bg-gradient-to-br.from-gray-50.to-white { background-image: linear-gradient(180deg, var(--bt-soft), #fff); }
+.bt-public .bg-gradient-to-br.from-blue-50.to-cyan-50 { background-image: linear-gradient(135deg, #EFF5FF, #ECFEFF); }
+.bt-public .bg-gradient-to-br.from-gray-50.to-blue-50 { background-image: linear-gradient(180deg, var(--bt-soft), #EEF3FC); }
+
+/* Plain text links */
+.bt-public a.text-\[\#14B8A6\], .bt-public button.text-\[\#14B8A6\], .bt-public a.text-\[\#1E3A8A\] { color: var(--bt-blue); transition: color .18s ease; }
+.bt-public a.text-\[\#14B8A6\]:hover, .bt-public button.text-\[\#14B8A6\]:hover, .bt-public a.text-\[\#1E3A8A\]:hover { color: var(--bt-navy); }
+
+/* Form fields: blue focus */
+.bt-public :is(input, textarea, select):focus-visible { border-color: #93B4F0; box-shadow: 0 0 0 3px rgba(37,99,235,.18); outline: none; }
+
+/* ===== 6. Reduced motion: colour changes only ===== */
+@media (prefers-reduced-motion: reduce) {
+  .bt-theme :is(button, a):hover, .bt-public [data-slot="card"]:hover { transform: none !important; }
+}
+
+/* ===== 7. Form fields (public + dashboard): the base --input token was transparent, so text
+   fields and checkboxes had no visible edge (e.g. the sign-up terms checkbox) ===== */
+:is(.bt-public, .bt-app) { --input: #CBD5E1; --ring: #2563EB; --primary: #1E3A8A; }
+:is(.bt-public, .bt-app) button[role="checkbox"]:not([data-state="checked"]) { border-color: #94A3B8; }
+
+/* ===== 8. Email addresses are always mailto links: same hover as other links + focus ring (section 2) ===== */
+.bt-theme a[href^="mailto:"] { transition: color .18s ease; text-underline-offset: 2px; }
+:is(.bt-public, .bt-app) a[href^="mailto:"]:not(.bt-mail):hover { color: var(--bt-navy); text-decoration: underline; }

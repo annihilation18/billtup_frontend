@@ -7,6 +7,15 @@ interface FAQSectionProps {
   onNavigate?: (section: string) => void;
 }
 
+/** Show any email address in an answer as a mailto link */
+function withEmailLinks(text: string) {
+  return text.split(/([\w.+-]+@billtup\.com)/).map((part, i) =>
+    /@billtup\.com$/.test(part)
+      ? <a key={i} href={`mailto:${part}`} className="text-[#1E3A8A] hover:underline">{part}</a>
+      : part
+  );
+}
+
 export function FAQSection({ onNavigate }: FAQSectionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
@@ -196,7 +205,7 @@ export function FAQSection({ onNavigate }: FAQSectionProps) {
                               className="mt-3 text-gray-700 leading-relaxed"
                               style={{ fontFamily: 'Inter, sans-serif' }}
                             >
-                              {faq.answer}
+                              {withEmailLinks(faq.answer)}
                             </p>
                           )}
                         </div>

@@ -18,7 +18,7 @@ export function ChangelogSection() {
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Product Updates
+            Product <span className="bt-acc">Updates</span>
           </h1>
           
           <p className="text-xl text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>

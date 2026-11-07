@@ -92,7 +92,7 @@ export function SignInSection({ onNavigateToSignUp, onSignIn }: SignInSectionPro
             <BilltUpLogo size={80} />
           </div>
           <h1 className="text-3xl lg:text-4xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Welcome Back
+            Welcome <span className="bt-acc">Back</span>
           </h1>
           <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
             Sign in to access your account

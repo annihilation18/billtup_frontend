@@ -20,7 +20,9 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Making Invoicing Simple for Everyone
+            Making Invoicing
+            <br />
+            <span className="bt-acc">Simple for Everyone</span>
           </h1>
           
           <p className="text-xl text-gray-600 max-w-3xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
