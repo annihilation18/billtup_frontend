@@ -84,23 +84,23 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
             <Card className="p-8 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] text-white">
               <Lightbulb className="w-16 h-16 mb-6" />
               <h3 className="text-2xl mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                Designed with Real Users
+                Designed for Real Work
               </h3>
               <p className="text-white/90 text-lg mb-6" style={{ fontFamily: 'Inter, sans-serif' }}>
-                We didn't just build what we thought people needed—we talked to hundreds of service professionals to understand their daily challenges and pain points.
+                BilltUp is built around how service businesses actually work: on the road, between jobs, and usually from a phone. We keep improving it based on what our customers tell us.
               </p>
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                  <span>200+ user interviews conducted</span>
+                  <span>Made for invoicing on the job</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                  <span>Every feature tested with real businesses</span>
+                  <span>Works on iPhone, Android and the web</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                  <span>Continuous updates based on feedback</span>
+                  <span>Regular updates based on customer feedback</span>
                 </div>
               </div>
             </Card>
