@@ -140,7 +140,7 @@ export default function ResetPassword({ onBackToSignIn }: ResetPasswordProps) {
             </div>
           </div>
           <h1 className="text-3xl text-gray-900 mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Reset Your Password
+            Reset Your <span className="bt-acc">Password</span>
           </h1>
           <p className="text-gray-600">
             Enter your new password below

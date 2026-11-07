@@ -18,7 +18,7 @@ export function HelpCenterSection({ onNavigate }: HelpCenterSectionProps) {
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            How Can We Help?
+            How Can We <span className="bt-acc">Help?</span>
           </h1>
           
           <p className="text-xl text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>

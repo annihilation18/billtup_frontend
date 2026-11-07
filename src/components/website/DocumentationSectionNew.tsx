@@ -365,7 +365,7 @@ export function DocumentationSectionNew({ onNavigate }: DocumentationSectionNewP
             <FileText className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl sm:text-4xl text-gray-900 mb-2" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            User Guide
+            User <span className="bt-acc">Guide</span>
           </h1>
           <p className="text-gray-600 max-w-xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
             Step-by-step instructions to help you get the most out of BilltUp

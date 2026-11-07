@@ -69,9 +69,11 @@ export function PricingSection({ onNavigate }: PricingSectionProps) {
             <span className="text-sm text-[#14B8A6]">Simple Pricing</span>
           </div>
           
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Pricing That Makes Sense
-          </h2>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+            Pricing That
+            <br />
+            <span className="bt-acc">Makes Sense</span>
+          </h1>
           
           <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-8" style={{ fontFamily: 'Inter, sans-serif' }}>
             Choose the plan that fits your business needs.
