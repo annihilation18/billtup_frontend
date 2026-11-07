@@ -10,7 +10,7 @@ export function IntegrationsSection() {
         </div>
         
         <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-          Integrations
+          <span className="bt-acc">Integrations</span>
         </h1>
         
         <p className="text-xl text-gray-600 mb-8" style={{ fontFamily: 'Inter, sans-serif' }}>

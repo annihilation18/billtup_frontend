@@ -449,7 +449,7 @@ Professional emails include:
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            How to Use BilltUp
+            How to Use <span className="bt-acc">BilltUp</span>
           </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8" style={{ fontFamily: 'Inter, sans-serif' }}>

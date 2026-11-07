@@ -129,11 +129,11 @@ export function FeaturesSection({ onNavigate }: FeaturesSectionProps) {
             <span className="text-sm text-[#1E3A8A]">Everything you need</span>
           </div>
           
-          <h2 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
+          <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Powerful Features for
             <br />
             <span className="text-[#1E3A8A]">Service Businesses</span>
-          </h2>
+          </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
             Built specifically for auto detailers, remodelers, photographers, and other service professionals

@@ -13,6 +13,10 @@ interface TradePageProps {
  */
 export function TradePage({ trade }: TradePageProps) {
   const others = TRADES.filter((t) => t.slug !== trade.slug);
+  // Two-line heading with an accent second line (C3): "The invoice app" / "for plumbers"
+  const forAt = trade.headline.lastIndexOf(" for ");
+  const headlineLead = forAt > 0 ? trade.headline.slice(0, forAt) : trade.headline;
+  const headlineAccent = forAt > 0 ? trade.headline.slice(forAt + 1) : "";
 
   return (
     <section className="py-20 bg-white min-h-screen">
@@ -24,7 +28,8 @@ export function TradePage({ trade }: TradePageProps) {
             <span className="text-sm text-[#1E3A8A]">BilltUp for {trade.name}</span>
           </div>
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            {trade.headline}
+            {headlineLead}
+            {headlineAccent && <><br /><span className="bt-acc">{headlineAccent}</span></>}
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8" style={{ fontFamily: 'Inter, sans-serif' }}>
             {trade.intro}
