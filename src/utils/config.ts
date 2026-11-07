@@ -33,7 +33,10 @@ export const APP_CONFIG = {
 export const PRICING_CONFIG = {
   basic: {
     monthly: 4.99,
-    invoiceLimit: 25
+    // Monthly limits the API enforces on Basic (app repo BACKLOG N.26); was 25 invoices
+    invoiceLimit: 10,
+    estimateLimit: 10,
+    customerLimit: 10
   },
   premium: {
     monthly: 9.99,
