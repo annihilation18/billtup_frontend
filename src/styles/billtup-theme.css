@@ -16,6 +16,8 @@
 
 /* ===== 1. Fonts (all scopes): Inter everywhere, tabular numbers; Poppins only on h1/h2 ===== */
 .bt-theme { font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; font-variant-numeric: tabular-nums; }
+/* the base stylesheet sets every h1-h6 in Poppins; smaller headings use Inter (zero specificity, so components can still opt in) */
+:where(.bt-theme) :where(h3, h4, h5, h6) { font-family: Inter, system-ui, sans-serif; }
 .bt-theme :is([style*="Roboto Mono"], [style*="--font-roboto-mono"]) { font-family: Inter, system-ui, sans-serif !important; font-variant-numeric: tabular-nums; }
 .bt-theme :is([style*="Poppins"], [style*="--font-poppins"]):not(h1):not(h2) { font-family: Inter, system-ui, sans-serif !important; }
 .bt-theme :is(h3, h4)[style*="Poppins"], .bt-theme :is(h3, h4)[style*="--font-poppins"] { font-weight: 600; letter-spacing: -0.01em; }

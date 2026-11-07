@@ -37,6 +37,9 @@
 .bt { font-family: Inter, system-ui, -apple-system, 'Segoe UI', sans-serif; color: var(--bt-ink); font-variant-numeric: tabular-nums; -webkit-font-smoothing: antialiased; }
 .bt *, .bt *::before, .bt *::after { box-sizing: border-box; }
 .bt h1, .bt h2, .bt h3, .bt h4, .bt p { margin: 0; }
+/* the base stylesheet puts every heading in Poppins; here only .bt-ph and the story headings are */
+.bt :is(h1, h2, h3, h4) { font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+.bt :is(h1, h2, h3, h4).bt-ph { font-family: Poppins, sans-serif; }
 .bt a { color: inherit; text-decoration: none; }
 .bt button { font-family: inherit; cursor: pointer; }
 .bt-home { background: #fff; overflow-x: hidden; }
