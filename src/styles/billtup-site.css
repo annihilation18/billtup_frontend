@@ -162,7 +162,7 @@
 .bt-feat { border: 1px solid var(--bt-line); border-radius: 16px; padding: 24px; background: #fff; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
 .bt-feat:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(30,58,138,.10); border-color: #C9D7F2; }
 .bt-feat-ic { margin-bottom: 16px; width: 46px; height: 46px; border-radius: 13px; background: var(--bt-grad-btn); color: #fff; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(37,99,235,.22); }
-.bt-feat h3 { font-size: 18px; font-weight: 700; margin-top: 16px; display: inline; -webkit-box-decoration-break: clone; box-decoration-break: clone; background: linear-gradient(transparent 60%, rgba(20,184,166,.25) 60%, rgba(14,165,233,.25) 92%, transparent 92%); padding: 0 3px; }
+.bt-feat h3 { font-size: 18px; font-weight: 700; margin-top: 16px; display: block; }
 .bt-feat p { font-size: 15px; color: var(--bt-muted2); margin-top: 8px; line-height: 1.55; }
 .bt-trades { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin: 28px 0 0; padding: 0; list-style: none; }
 .bt-trade { display: inline-block; padding: 9px 15px; border-radius: 999px; border: 1px solid var(--bt-line); background: #fff; font-weight: 600; font-size: 15px; color: var(--bt-navy);
