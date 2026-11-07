@@ -1,141 +1,210 @@
-import { Menu, X } from 'lucide-react@0.468.0';
-import { Button } from '../ui/button';
-import { useState } from 'react';
+import { ChevronDown, Menu, X } from 'lucide-react@0.468.0';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import type { SectionType } from '../../App';
 import { BilltUpLogo } from '../BilltUpLogo';
+import { TRADES } from '../../data/trades';
+import '../../styles/c2-site.css';
 
 interface WebsiteHeaderProps {
   currentSection: string;
   onNavigate: (section: SectionType) => void;
 }
 
-export function WebsiteHeader({ currentSection, onNavigate }: WebsiteHeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+/** "Billt" + gradient "Up". `light` is for white backgrounds (navy "Billt", teal "Up"). */
+export function Wordmark({ light = false }: { light?: boolean }) {
+  return (
+    <span className={`c2-word${light ? ' on-light' : ''}`} aria-hidden="true">
+      Billt<span>Up</span>
+    </span>
+  );
+}
 
-  const navItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'features', label: 'Features' },
-    { id: 'pricing', label: 'Pricing' },
-    { id: 'docs', label: 'Documentation' },
-    { id: 'faq', label: 'FAQ' },
-  ];
+const NAV_ITEMS: { id: SectionType; label: string }[] = [
+  { id: 'features', label: 'Features' },
+  { id: 'pricing', label: 'Pricing' },
+  { id: 'docs', label: 'Docs' },
+  { id: 'help', label: 'Help' },
+  { id: 'faq', label: 'FAQ' },
+];
+
+/**
+ * Site header (C2, app repo BACKLOG P4.1). On the home page it sits transparent over the navy
+ * hero with white text and turns solid navy once the page scrolls; on every other page it is
+ * a white sticky bar.
+ */
+export function WebsiteHeader({ currentSection, onNavigate }: WebsiteHeaderProps) {
+  const location = useLocation();
+  // pathToSection() maps unknown paths (e.g. trade pages) to 'home', so check the path itself
+  const isHome = location.pathname === '/';
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [tradesOpen, setTradesOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const tradesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isHome) return;
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [isHome]);
+
+  // Close menus on navigation
+  useEffect(() => {
+    setMobileMenuOpen(false);
+    setTradesOpen(false);
+  }, [location.pathname]);
+
+  // Close the trades dropdown on outside click or Escape
+  useEffect(() => {
+    if (!tradesOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (tradesRef.current && !tradesRef.current.contains(e.target as Node)) setTradesOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setTradesOpen(false); };
+    document.addEventListener('mousedown', onDown);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDown);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [tradesOpen]);
+
+  const go = (section: SectionType) => {
+    onNavigate(section);
+    setMobileMenuOpen(false);
+  };
+
+  const tradeActive = location.pathname.startsWith('/invoice-app-for-');
+  const headerClass = [
+    'c2 c2-header',
+    isHome ? 'is-dark' : 'is-light',
+    scrolled ? 'is-scrolled' : '',
+    mobileMenuOpen ? 'is-open' : '',
+  ].join(' ');
 
   return (
-    <header className="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm" role="banner">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <button
-            onClick={() => onNavigate('home')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-            aria-label="BilltUp home"
-          >
+    <header className={headerClass} role="banner">
+      <div className="c2-wrap">
+        <div className="c2-nav">
+          <button onClick={() => go('home')} className="c2-brand" aria-label="BilltUp home">
             <BilltUpLogo size={40} />
-            <span className="text-2xl text-[#1E3A8A]" style={{ fontFamily: 'Poppins, sans-serif' }} aria-hidden="true">
-              BilltUp
-            </span>
+            <Wordmark light={!isHome} />
           </button>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
-            {navItems.map((item) => (
+          {/* Desktop navigation */}
+          <nav className="c2-links" aria-label="Main navigation">
+            {NAV_ITEMS.slice(0, 2).map((item) => (
               <button
                 key={item.id}
-                onClick={() => onNavigate(item.id as any)}
-                className={`transition-colors ${
-                  currentSection === item.id
-                    ? 'text-[#1E3A8A]'
-                    : 'text-gray-600 hover:text-[#1E3A8A]'
-                }`}
-                style={{ fontFamily: 'Inter, sans-serif' }}
-                aria-current={currentSection === item.id ? 'page' : undefined}
+                onClick={() => go(item.id)}
+                className="c2-link"
+                aria-current={currentSection === item.id && !isHome ? 'page' : undefined}
+              >
+                {item.label}
+              </button>
+            ))}
+            <div className="c2-dd" ref={tradesRef}>
+              <button
+                className="c2-link"
+                onClick={() => setTradesOpen((v) => !v)}
+                aria-expanded={tradesOpen}
+                aria-controls="trades-menu"
+                aria-current={tradeActive ? 'page' : undefined}
+              >
+                Trades
+                <ChevronDown className="c2-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
+              </button>
+              {tradesOpen && (
+                <div id="trades-menu" className="c2-dd-panel">
+                  {TRADES.map((trade) => (
+                    <Link key={trade.slug} to={`/invoice-app-for-${trade.slug}`}>
+                      For {trade.name.toLowerCase()}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+            {NAV_ITEMS.slice(2).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => go(item.id)}
+                className="c2-link"
+                aria-current={currentSection === item.id && !isHome ? 'page' : undefined}
               >
                 {item.label}
               </button>
             ))}
           </nav>
 
-          {/* CTA Button */}
-          <div className="hidden md:flex items-center gap-3">
-            <Button
-              onClick={() => onNavigate('signin')}
-              variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg"
-              aria-label="Sign in to your account"
+          <div className="c2-actions">
+            <button onClick={() => go('signin')} className="c2-signin" aria-label="Sign in to your account">
+              Sign in
+            </button>
+            <button
+              onClick={() => go('signup')}
+              className="c2-btn c2-btn-sm c2-btn-teal"
+              aria-label="Start your free trial of BilltUp"
             >
-              Sign In
-            </Button>
-            <Button
-              onClick={() => onNavigate('signup')}
-              className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg"
-              aria-label="Get started with BilltUp for free"
-            >
-              Get Started Free
-            </Button>
+              Start free trial
+            </button>
           </div>
 
-          {/* Mobile Menu Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-gray-600 hover:text-[#1E3A8A]"
+            className="c2-menu-btn"
             aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-menu"
           >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileMenuOpen ? <X className="c2-ic" style={{ width: 24, height: 24 }} /> : <Menu className="c2-ic" style={{ width: 24, height: 24 }} />}
           </button>
         </div>
 
-        {/* Mobile Menu */}
         {mobileMenuOpen && (
-          <div 
-            id="mobile-menu" 
-            className="md:hidden py-4 border-t border-gray-200"
-            role="navigation"
-            aria-label="Mobile navigation"
-          >
-            <nav className="flex flex-col gap-4">
-              {navItems.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    onNavigate(item.id as any);
-                    setMobileMenuOpen(false);
-                  }}
-                  className={`text-left py-2 px-4 rounded-lg transition-colors ${
-                    currentSection === item.id
-                      ? 'bg-[#1E3A8A]/10 text-[#1E3A8A]'
-                      : 'text-gray-600 hover:bg-gray-50'
-                  }`}
-                  style={{ fontFamily: 'Inter, sans-serif' }}
-                  aria-current={currentSection === item.id ? 'page' : undefined}
-                >
-                  {item.label}
-                </button>
-              ))}
-              <Button
-                onClick={() => {
-                  onNavigate('signin');
-                  setMobileMenuOpen(false);
-                }}
-                variant="outline"
-                className="border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg w-full"
-                aria-label="Sign in to your account"
+          <nav id="mobile-menu" className="c2-mobile" aria-label="Mobile navigation">
+            {NAV_ITEMS.slice(0, 2).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => go(item.id)}
+                className="c2-mlink"
+                aria-current={currentSection === item.id && !isHome ? 'page' : undefined}
               >
-                Sign In
-              </Button>
-              <Button
-                onClick={() => {
-                  onNavigate('signup');
-                  setMobileMenuOpen(false);
-                }}
-                className="bg-[#1E3A8A] hover:bg-[#1E3A8A]/90 text-white rounded-lg w-full"
-                aria-label="Get started with BilltUp for free"
+                {item.label}
+              </button>
+            ))}
+            <div className="c2-mhead">Trades</div>
+            {TRADES.map((trade) => (
+              <Link
+                key={trade.slug}
+                to={`/invoice-app-for-${trade.slug}`}
+                className="c2-mlink c2-msub"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-current={location.pathname === `/invoice-app-for-${trade.slug}` ? 'page' : undefined}
               >
-                Get Started Free
-              </Button>
-            </nav>
-          </div>
+                For {trade.name.toLowerCase()}
+              </Link>
+            ))}
+            {NAV_ITEMS.slice(2).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => go(item.id)}
+                className="c2-mlink"
+                aria-current={currentSection === item.id && !isHome ? 'page' : undefined}
+              >
+                {item.label}
+              </button>
+            ))}
+            <div className="c2-mobile-ctas">
+              <button onClick={() => go('signin')} className="c2-btn c2-btn-line c2-btn-block" aria-label="Sign in to your account">
+                Sign in
+              </button>
+              <button onClick={() => go('signup')} className="c2-btn c2-btn-teal c2-btn-block" aria-label="Start your free trial of BilltUp">
+                Start free trial
+              </button>
+            </div>
+          </nav>
         )}
       </div>
     </header>
