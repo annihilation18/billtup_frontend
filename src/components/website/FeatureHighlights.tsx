@@ -1,113 +1,55 @@
-import {
-  FileText,
-  CreditCard,
-  Users,
-  Mail,
-  Shield,
-  Smartphone,
-  Clock,
-  DollarSign,
-  Zap,
-  ArrowRight
-} from 'lucide-react@0.468.0';
-import { Card } from '../ui/card';
-import { Button } from '../ui/button';
+import { ArrowRight, ClipboardList, CreditCard, FileText, Shield, Smartphone, Users, Wrench } from 'lucide-react@0.468.0';
+import { Link } from 'react-router-dom';
+import { TRADES } from '../../data/trades';
+import '../../styles/c2-site.css';
 
 interface FeatureHighlightsProps {
   onNavigate?: (section: string) => void;
 }
 
+const HIGHLIGHTS = [
+  { icon: FileText, title: 'Create invoices in seconds', text: 'Branded invoices with automatic totals, tax and discounts, from 15 templates.' },
+  { icon: CreditCard, title: 'Optional payment processing', text: 'Connect Stripe or Square to take cards and get paid instantly, or keep it simple with invoice-only.' },
+  { icon: ClipboardList, title: 'Estimates that turn into invoices', text: 'Customers approve or decline by email; approved estimates become invoices in one tap.' },
+  { icon: Users, title: 'Customers in one place', text: 'Contact details and payment history for every customer, on your phone and the web.' },
+  { icon: Smartphone, title: 'Work from anywhere', text: 'Native apps for iPhone and Android, plus a web dashboard. Works offline and syncs later.' },
+  { icon: Shield, title: 'Bank-level security', text: 'Payments are handled by Stripe and Square; your data is encrypted.' },
+];
+
+/** Home page: features on a tinted band, plus links to the trade pages (C2, app repo BACKLOG P4.1) */
 export function FeatureHighlights({ onNavigate }: FeatureHighlightsProps) {
-  const highlights = [
-    {
-      icon: FileText,
-      title: 'Create Invoices in Seconds',
-      description: 'Professional, branded invoices with automatic calculations and customizable templates.',
-      color: 'from-[#1E3A8A] to-[#14B8A6]'
-    },
-    {
-      icon: CreditCard,
-      title: 'Optional Payment Processing',
-      description: 'Connect Stripe or Square to accept cards and get paid instantly, or keep it simple with invoice-only mode.',
-      color: 'from-[#14B8A6] to-[#F59E0B]'
-    },
-    {
-      icon: Smartphone,
-      title: 'Work From Anywhere',
-      description: 'Native mobile apps for iOS and Android, plus web dashboard access for complete flexibility.',
-      color: 'from-[#F59E0B] to-[#1E3A8A]'
-    },
-    {
-      icon: Users,
-      title: 'Smart Customer Management',
-      description: 'Track payment history, contact info, and customer relationships all in one place.',
-      color: 'from-[#14B8A6] to-[#1E3A8A]'
-    },
-    {
-      icon: FileText,
-      title: 'Estimates & Quotes',
-      description: 'Send professional estimates to customers. They approve or decline via email, and approved estimates convert to invoices instantly.',
-      color: 'from-[#F59E0B] to-[#14B8A6]'
-    },
-    {
-      icon: Shield,
-      title: 'Bank-Level Security',
-      description: 'PCI DSS compliant with end-to-end encryption. Your data and payments are always protected.',
-      color: 'from-[#1E3A8A] to-[#F59E0B]'
-    }
-  ];
-
   return (
-    <section className="py-20 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-[#14B8A6]/10 rounded-full px-4 py-2 mb-4">
-            <Zap className="w-4 h-4 text-[#14B8A6]" />
-            <span className="text-sm text-[#14B8A6]">Why BilltUp?</span>
-          </div>
-          
-          <h2 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Everything You Need to
-            <br />
-            <span className="text-[#1E3A8A]">Invoice & Get Paid</span>
-          </h2>
-          
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>
-            Built for service professionals who need powerful invoicing without the complexity
-          </p>
-        </div>
+    <section className="c2 c2-blk c2-band" aria-labelledby="features-heading">
+      <div className="c2-wrap">
+        <h2 id="features-heading" className="c2-h2">Everything you need to invoice and get paid</h2>
 
-        {/* Features Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-          {highlights.map((feature, index) => (
-            <Card key={index} className="p-6 hover:shadow-lg transition-all duration-300 border-2 border-gray-100 hover:border-[#14B8A6]/30">
-              <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${feature.color} flex items-center justify-center mb-4`}>
-                <feature.icon className="w-6 h-6 text-white" />
-              </div>
-              
-              <h3 className="text-lg mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-                {feature.title}
-              </h3>
-              
-              <p className="text-sm text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
-                {feature.description}
-              </p>
-            </Card>
+        <div className="c2-grid3">
+          {HIGHLIGHTS.map((f) => (
+            <div key={f.title} className="c2-feat">
+              <div className="c2-feat-ic" aria-hidden="true"><f.icon className="c2-ic" /></div>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </div>
           ))}
         </div>
 
-        {/* CTA to Full Features */}
-        <div className="text-center">
-          <Button
-            onClick={() => onNavigate?.('features')}
-            variant="outline"
-            size="lg"
-            className="border-2 border-[#1E3A8A] text-[#1E3A8A] hover:bg-[#1E3A8A] hover:text-white rounded-xl h-12 px-8 group"
-          >
-            Explore All Features
-            <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Button>
+        <p className="c2-trades-label" id="trades-heading">Built for your trade</p>
+        <ul className="c2-trades" aria-labelledby="trades-heading">
+          {TRADES.map((trade) => (
+            <li key={trade.slug}>
+              <Link to={`/invoice-app-for-${trade.slug}`} className="c2-trade" aria-label={`Invoice app for ${trade.name.toLowerCase()}`}>
+                <Wrench className="c2-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
+                {trade.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+
+        <div className="c2-more">
+          <button onClick={() => onNavigate?.('features')} className="c2-textlink">
+            Explore all features
+            <ArrowRight className="c2-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
+          </button>
         </div>
       </div>
     </section>

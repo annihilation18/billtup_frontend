@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { DashboardSection } from './components/dashboard/DashboardSection';
 import { WebsiteHeader } from './components/website/WebsiteHeader';
-import { HeroSection } from './components/website/HeroSection';
+import { HeroSection, PaymentMethodsStrip } from './components/website/HeroSection';
+import { HowItWorks } from './components/website/HowItWorks';
 import { FeaturesSection } from './components/website/FeaturesSection';
 import { FeatureHighlights } from './components/website/FeatureHighlights';
 import { PricingSection } from './components/website/PricingSection';
-import { PricingPreview } from './components/website/PricingPreview';
+import { PricingPreview, HomeCtaBand } from './components/website/PricingPreview';
 import { WebsiteFooter } from './components/website/WebsiteFooter';
 import { DocumentationSectionNew } from './components/website/DocumentationSectionNew';
 import { FAQSection } from './components/website/FAQSection';
@@ -22,7 +23,6 @@ import { DeleteAccountSection } from './components/website/DeleteAccountSection'
 import { RoadmapSection } from './components/website/RoadmapSection';
 import { ChangelogSection } from './components/website/ChangelogSection';
 import { HelpCenterSection } from './components/website/HelpCenterSection';
-import { MobileAppSection } from './components/website/MobileAppSection';
 import { BilltUpLogoExport } from './components/BilltUpLogoExport';
 import ResetPassword from './reset-password';
 import { OAuthCallbackPage } from './components/dashboard/OAuthCallbackPage';
@@ -369,12 +369,16 @@ export default function App() {
                 <Route
                   path="/"
                   element={
-                    <>
+                    // Home page: C2 design (app repo BACKLOG P4.1). The store badges are in the
+                    // hero, so MobileAppSection is no longer shown here.
+                    <div className="c2-home">
                       <HeroSection onGetStarted={() => navigate('/signup')} />
+                      <PaymentMethodsStrip />
+                      <HowItWorks />
                       <FeatureHighlights onNavigate={handleNavigateWithPlan} />
-                      <MobileAppSection />
                       <PricingPreview onNavigate={handleNavigateWithPlan} />
-                    </>
+                      <HomeCtaBand onGetStarted={() => navigate('/signup')} />
+                    </div>
                   }
                 />
                 <Route path="/features" element={<FeaturesSection onNavigate={navigateTo} />} />
