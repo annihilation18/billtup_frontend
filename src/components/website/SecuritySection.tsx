@@ -19,7 +19,9 @@ export function SecuritySection() {
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Your Data is Safe with Us
+            Your Data is
+            <br />
+            <span className="bt-acc">Safe with Us</span>
           </h1>
           
           <p className="text-xl text-gray-600 max-w-2xl mx-auto" style={{ fontFamily: 'Inter, sans-serif' }}>

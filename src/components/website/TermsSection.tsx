@@ -13,7 +13,7 @@ export function TermsSection() {
           </div>
 
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            Terms of Service
+            Terms of <span className="bt-acc">Service</span>
           </h1>
 
           <p className="text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>

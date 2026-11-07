@@ -20,7 +20,9 @@ export function RoadmapSection() {
           </div>
           
           <h1 className="text-4xl lg:text-5xl mb-4 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
-            What's Next for BilltUp
+            What's Next
+            <br />
+            <span className="bt-acc">for BilltUp</span>
           </h1>
           
           <p className="text-xl text-gray-600" style={{ fontFamily: 'Inter, sans-serif' }}>
