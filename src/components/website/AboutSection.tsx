@@ -62,7 +62,7 @@ export function AboutSection({ onNavigate }: AboutSectionProps) {
           <div className="text-center mb-12">
             <Badge className="mb-4 bg-[#1E3A8A]">Our Story</Badge>
             <h2 className="text-3xl lg:text-4xl text-gray-900 mb-4" style={{ fontFamily: 'Poppins, sans-serif' }}>
-              Built by Service Professionals, for Service Professionals
+              Built for Service Professionals
             </h2>
           </div>
 
