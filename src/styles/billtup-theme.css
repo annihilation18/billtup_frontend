@@ -144,3 +144,7 @@
    fields and checkboxes had no visible edge (e.g. the sign-up terms checkbox) ===== */
 :is(.bt-public, .bt-app) { --input: #CBD5E1; --ring: #2563EB; --primary: #1E3A8A; }
 :is(.bt-public, .bt-app) button[role="checkbox"]:not([data-state="checked"]) { border-color: #94A3B8; }
+
+/* ===== 8. Email addresses are always mailto links: same hover as other links + focus ring (section 2) ===== */
+.bt-theme a[href^="mailto:"] { transition: color .18s ease; text-underline-offset: 2px; }
+:is(.bt-public, .bt-app) a[href^="mailto:"]:not(.bt-mail):hover { color: var(--bt-navy); text-decoration: underline; }

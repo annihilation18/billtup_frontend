@@ -427,7 +427,7 @@ export function TermsSection() {
               <ul className="list-disc pl-6 space-y-2">
                 <li>Cancels any card subscription immediately, without a refund for the rest of the current period</li>
                 <li>Disconnects your Stripe or Square account from BilltUp</li>
-                <li>Permanently deletes your business profile, customers, invoices, estimates, saved items, photos and documents. Deleted data cannot be recovered, so if you need a copy of your data, ask us for one at privacy@billtup.com before deleting</li>
+                <li>Permanently deletes your business profile, customers, invoices, estimates, saved items, photos and documents. Deleted data cannot be recovered, so if you need a copy of your data, ask us for one at <a href="mailto:privacy@billtup.com" className="text-[#1E3A8A] hover:underline">privacy@billtup.com</a> before deleting</li>
                 <li>Does not cancel an App Store subscription; cancel it with Apple as described in Section 4.2</li>
               </ul>
               <p>
@@ -546,8 +546,8 @@ export function TermsSection() {
               </p>
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="font-semibold mb-2">Omniforge Technologies LLC (DBA BilltUp)</p>
-                <p>Email: legal@billtup.com</p>
-                <p>Email (General Support): support@billtup.com</p>
+                <p>Email: <a href="mailto:legal@billtup.com" className="text-[#1E3A8A] hover:underline">legal@billtup.com</a></p>
+                <p>Email (General Support): <a href="mailto:support@billtup.com" className="text-[#1E3A8A] hover:underline">support@billtup.com</a></p>
               </div>
             </div>
           </section>
