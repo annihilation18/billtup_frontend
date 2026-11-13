@@ -76,7 +76,7 @@ export function WebsiteHeader({ currentSection, onNavigate }: WebsiteHeaderProps
       <div className="bt-wrap">
         <div className="bt-nav">
           <button onClick={() => go('home')} className="bt-brand" aria-label="BilltUp home">
-            <BilltUpLogo size={40} />
+            <BilltUpLogo size={40} tone="color" />
             <Wordmark />
           </button>
 

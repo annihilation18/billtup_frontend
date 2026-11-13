@@ -16,7 +16,7 @@ export function SettingsMockup() {
       {/* Top App Bar */}
       <div className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="flex items-center gap-3">
-          <BilltUpLogo size={40} />
+          <BilltUpLogo size={40} tone="light" />
           <h1 className="text-2xl">Settings</h1>
         </div>
       </div>
@@ -77,7 +77,7 @@ export function SettingsMockup() {
         {/* Business Profile Preview */}
         <Card className="p-4 space-y-3">
           <div className="flex items-center gap-3">
-            <BilltUpLogo size={64} />
+            <BilltUpLogo size={64} tone="color" />
             <div className="flex-1">
               <p className="font-medium">My Design Business</p>
               <p className="text-sm text-muted-foreground">
