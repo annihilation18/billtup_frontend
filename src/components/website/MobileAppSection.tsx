@@ -36,7 +36,7 @@ export function MobileAppSection() {
           <div className="bt-dl-art" aria-hidden="true">
             <div className="bt-tilt">
               <div className="bt-tilt-in">
-                <BilltUpLogo size={72} />
+                <BilltUpLogo size={72} tone="color" />
                 <div style={{ fontWeight: 800, fontSize: 20, color: '#1E3A8A' }}>Billt<span style={{ color: '#14B8A6' }}>Up</span></div>
                 <div style={{ color: '#64748B', fontSize: 14 }}>Invoice on the go</div>
                 <span className="bt-btn bt-btn-sm bt-btn-blue" style={{ marginTop: 8, pointerEvents: 'none' }}>Download now</span>

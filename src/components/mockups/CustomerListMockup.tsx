@@ -19,7 +19,7 @@ export function CustomerListMockup() {
       {/* Top App Bar */}
       <div className="bg-[#1E3A8A] text-white p-4 shadow-md rounded-b-3xl">
         <div className="flex items-center gap-3">
-          <BilltUpLogo size={40} />
+          <BilltUpLogo size={40} tone="light" />
           <h1 className="text-xl" style={{ fontFamily: 'var(--font-poppins)', fontWeight: 500 }}>
             Customers
           </h1>

@@ -19,7 +19,7 @@ export function DashboardMockup() {
       {/* Top App Bar */}
       <div className="bg-primary text-primary-foreground p-4 shadow-md">
         <div className="flex items-center gap-3">
-          <BilltUpLogo size={40} />
+          <BilltUpLogo size={40} tone="light" />
           <h1 className="text-2xl">Invoices</h1>
         </div>
       </div>

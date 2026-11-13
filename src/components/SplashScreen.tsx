@@ -17,7 +17,7 @@ export function SplashScreen({ onGetStarted, businessLogo, businessName }: Splas
           </div>
         ) : (
           <div className="mb-4">
-            <BilltUpLogo size={120} />
+            <BilltUpLogo size={120} tone="light" />
           </div>
         )}
         <h1 className="text-4xl md:text-5xl mb-3">{businessName || "BilltUp"}</h1>

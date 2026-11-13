@@ -89,7 +89,7 @@ export function SignInSection({ onNavigateToSignUp, onSignIn }: SignInSectionPro
         {/* Logo & Title */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <BilltUpLogo size={80} />
+            <BilltUpLogo size={80} tone="color" />
           </div>
           <h1 className="text-3xl lg:text-4xl mb-2 text-gray-900" style={{ fontFamily: 'Poppins, sans-serif' }}>
             Welcome <span className="bt-acc">Back</span>

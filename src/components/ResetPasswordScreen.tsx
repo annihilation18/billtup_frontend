@@ -135,7 +135,7 @@ export function ResetPasswordScreen({ resetToken, onSuccess, onCancel }: ResetPa
       <Card className="w-full max-w-md p-8 shadow-2xl">
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
-            <BilltUpLogo size={64} />
+            <BilltUpLogo size={64} tone="color" />
           </div>
           <h1 className="text-3xl mb-2">Create New Password</h1>
           <p className="text-muted-foreground">

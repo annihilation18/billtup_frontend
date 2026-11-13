@@ -13,7 +13,7 @@ export function SplashScreenMockup() {
       {/* Logo and Title */}
       <div className="flex-1 flex flex-col items-center justify-center">
         <div className="mb-8">
-          <BilltUpLogo size={96} />
+          <BilltUpLogo size={96} tone="light" />
         </div>
 
         <h1

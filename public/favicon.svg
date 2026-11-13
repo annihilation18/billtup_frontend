@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="32" height="32">
+  <title>BilltUp</title>
+  <!-- Favicon: app icon tile (brand/app-icon-2026-11.svg) with rounded corners and a slightly larger mark for 16-32 px -->
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0A1A6E"/>
+      <stop offset="1" stop-color="#0B5FC0"/>
+    </linearGradient>
+  </defs>
+  <rect width="1024" height="1024" rx="224" fill="url(#tile)"/>
+  <svg x="132" y="132" width="760" height="760" viewBox="144 121 761 761">
+    <defs>
+    <!-- Page frame and lines: navy to royal blue, left to right -->
+    <linearGradient id="m-frame" gradientUnits="userSpaceOnUse" x1="206" y1="0" x2="731" y2="0">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#BFDBFE"/>
+    </linearGradient>
+    <!-- Rising line and arrow: navy to blue to teal, toward the arrow tip -->
+    <linearGradient id="m-arrow" gradientUnits="userSpaceOnUse" x1="230" y1="620" x2="842" y2="140">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="0.25" stop-color="#BAE6FD"/>
+      <stop offset="0.5" stop-color="#93DDFB"/>
+      <stop offset="0.75" stop-color="#7DD3FC"/>
+      <stop offset="1" stop-color="#5EEAD4"/>
+    </linearGradient>
+    <linearGradient id="m-fade-ramp" gradientUnits="userSpaceOnUse" x1="260" y1="560" x2="420" y2="400">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff" stop-opacity="1"/>
+    </linearGradient>
+    <mask id="m-fade" maskUnits="userSpaceOnUse" x="144" y="121" width="761" height="761">
+      <rect x="144" y="121" width="761" height="761" fill="url(#m-fade-ramp)"/>
+    </mask>
+  </defs>
+  <g fill="url(#m-frame)">
+    <!-- Upper left side and top edge of the page -->
+    <path d="M206 494 L206 262 A95 95 0 0 1 301 167 L628 167 L560 190 Q522 203 510 231 L301 231 A30 30 0 0 0 271 261 L271 424 Z"/>
+    <!-- Right side, bottom and lower left side of the page -->
+    <path d="M731 397 L731 772 A90 90 0 0 1 641 862 L206 862 L206 620 L271 620 L271 801 L639 801 A30 30 0 0 0 669 771 L669 461 Z"/>
+    <!-- Text lines -->
+    <path d="M360 557 L610 557 L610 617 L330 617 L330 587 A30 30 0 0 1 360 557 Z"/>
+    <path d="M330 673 L610 673 L610 702 A30 30 0 0 1 580 732 L330 732 Z"/>
+  </g>
+  <!-- Zigzag line rising into the arrow: frame colours at the lower left, fading into the arrow gradient -->
+  <path fill="url(#m-frame)" d="M206 640 L206 610 Q206 554.6 256.5 500 L412.4 331.5 L514.2 431.4 L628 308 L555 236 L843 141 L795 437 L731 378 L731 295 L518.3 526 L415.4 424.4 L271 580.5 L271 640 Z"/>
+  <path fill="url(#m-arrow)" mask="url(#m-fade)" d="M206 640 L206 610 Q206 554.6 256.5 500 L412.4 331.5 L514.2 431.4 L628 308 L555 236 L843 141 L795 437 L731 378 L731 295 L518.3 526 L415.4 424.4 L271 580.5 L271 640 Z"/>
+  </svg>
+</svg>
