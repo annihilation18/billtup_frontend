@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BilltUpLogo } from './components/BilltUpLogo';
 import {
   ChevronDown,
   ChevronUp,
@@ -389,9 +390,7 @@ function BilltUpUserGuide() {
       <div className="bg-white/10 backdrop-blur-sm border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 bg-gradient-to-br from-[#1E3A8A] to-[#14B8A6] rounded-2xl flex items-center justify-center">
-              <FileText className="w-8 h-8 text-white" />
-            </div>
+            <BilltUpLogo size={56} tone="light" />
             <div>
               <h1 className="text-white text-3xl">
                 BilltUp Visual User Guide

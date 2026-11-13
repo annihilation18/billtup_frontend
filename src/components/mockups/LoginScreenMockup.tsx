@@ -9,9 +9,7 @@ export function LoginScreenMockup() {
       <div className="w-full max-w-[360px] bg-white rounded-3xl shadow-2xl p-8 flex flex-col">
         {/* Logo */}
         <div className="flex justify-center mb-4">
-          <div className="w-16 h-16 bg-gradient-to-br from-white to-gray-50 rounded-2xl border-2 border-gray-200 flex items-center justify-center">
-            <BilltUpLogo size={40} />
-          </div>
+          <BilltUpLogo size={64} tone="color" />
         </div>
 
         {/* Title */}

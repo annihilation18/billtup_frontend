@@ -7,7 +7,6 @@ import {
   Percent,
   Lock,
   Shield,
-  FileText,
 } from "lucide-react@0.468.0";
 import { BilltUpLogo } from "../BilltUpLogo";
 
@@ -18,9 +17,7 @@ export function OnboardingMockup() {
       <div className="w-full max-w-[360px] bg-white rounded-3xl shadow-2xl p-6 flex flex-col my-4">
         {/* Logo */}
         <div className="flex justify-center mb-3">
-          <div className="w-14 h-14 bg-white rounded-2xl border-2 border-[#14B8A6] flex items-center justify-center">
-            <FileText className="w-7 h-7 text-[#14B8A6]" />
-          </div>
+          <BilltUpLogo size={56} tone="color" />
         </div>
 
         {/* Title */}

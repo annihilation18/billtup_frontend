@@ -11,7 +11,8 @@
  *   .bt-theme.bt-app       signed-in dashboard: colours, fonts and buttons only, no layout
  *   .bt-theme.bt-customer  pay / estimate / sign pages: fonts and button feel only; their colours
  *                          come from the business's own branding and are left alone
- * The real logo (BilltUpLogo, class bt-logo) keeps its navy / teal / amber ring.
+ * The logo (BilltUpLogo) is an inline SVG (class bt-logo-mark) with its own colours; none of the
+ * class re-pointing below touches it. Its light version on dark backgrounds is set in billtup-site.css.
  */
 
 /* ===== 1. Fonts (all scopes): Inter everywhere, tabular numbers; Poppins only on h1/h2 ===== */
@@ -38,10 +39,10 @@
 :is(.bt-public, .bt-app) .hover\:bg-\[\#F59E0B\]\/90:hover { background-color: rgba(14,165,233,.9); }
 :is(.bt-public, .bt-app) .hover\:border-\[\#F59E0B\]:hover { border-color: var(--bt-hover-border); }
 :is(.bt-public, .bt-app) .hover\:border-\[\#F59E0B\]\/50:hover { border-color: var(--bt-hover-border); }
-:is(.bt-public, .bt-app) :not(.bt-logo).from-\[\#F59E0B\] { --tw-gradient-from: #0EA5E9; }
+:is(.bt-public, .bt-app) .from-\[\#F59E0B\] { --tw-gradient-from: #0EA5E9; }
 :is(.bt-public, .bt-app) .from-\[\#F59E0B\]\/5 { --tw-gradient-from: rgba(14,165,233,.05); }
 :is(.bt-public, .bt-app) .from-\[\#F59E0B\]\/10 { --tw-gradient-from: rgba(14,165,233,.10); }
-:is(.bt-public, .bt-app) :not(.bt-logo).to-\[\#F59E0B\] { --tw-gradient-to: #2563EB; }
+:is(.bt-public, .bt-app) .to-\[\#F59E0B\] { --tw-gradient-to: #2563EB; }
 :is(.bt-public, .bt-app) .to-\[\#F59E0B\]\/5 { --tw-gradient-to: rgba(14,165,233,.05); }
 :is(.bt-public, .bt-app) .to-\[\#F59E0B\]\/10 { --tw-gradient-to: rgba(14,165,233,.10); }
 :is(.bt-public, .bt-app) .to-\[\#D97706\] { --tw-gradient-to: #2563EB; }
@@ -106,13 +107,13 @@
 .bt-public .inline-flex.items-center.rounded-full.px-4.py-2.bg-white\/20 svg { color: #E0F2FE; }
 
 /* Big navy panels (brand 3-colour or navy->teal) get the C3 blue gradient with dots */
-.bt-public :not(.bt-logo).bg-gradient-to-br.from-\[\#1E3A8A\].via-\[\#14B8A6\].to-\[\#F59E0B\],
+.bt-public .bg-gradient-to-br.from-\[\#1E3A8A\].via-\[\#14B8A6\].to-\[\#F59E0B\],
 .bt-public .bg-gradient-to-br.from-\[\#1E3A8A\].to-\[\#14B8A6\]:not(.w-8):not(.w-10):not(.w-12):not(.w-14):not(.w-16):not(.w-20) {
   background-image: radial-gradient(rgba(255,255,255,.12) 1.2px, transparent 1.2px), var(--bt-grad-card);
   background-size: 22px 22px, auto, auto; border: 0;
 }
 /* small icon tiles keep a gradient, now blue */
-.bt-public :is(.w-8, .w-10, .w-12, .w-14, .w-16, .w-20).bg-gradient-to-br:not(.bt-logo) { background-image: var(--bt-grad-btn); }
+.bt-public :is(.w-8, .w-10, .w-12, .w-14, .w-16, .w-20).bg-gradient-to-br { background-image: var(--bt-grad-btn); }
 .bt-public .text-\[\#14B8A6\] { color: #0F766E; }
 .bt-public h3 .text-\[\#14B8A6\], .bt-public svg.text-\[\#14B8A6\] { color: var(--bt-teal); }
 

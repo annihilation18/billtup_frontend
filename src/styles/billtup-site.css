@@ -296,3 +296,8 @@
   .bt-footer li > :is(a, button):hover { transform: none !important; }
   .bt-link::after { transition: none; }
 }
+
+/* BilltUp logo mark on dark backgrounds: <BilltUpLogo> without a "tone" prop reads its gradient
+   colours from these variables, so inside the footer or any .bt-on-dark container it switches to the
+   light version (brand/logo-mark-2026-11-light.svg). Pass tone="color" / tone="light" to force one. */
+:is(.bt-footer, .bt-on-dark) .bt-logo-mark { --btl-f0: #FFFFFF; --btl-f1: #BFDBFE; --btl-a0: #FFFFFF; --btl-a1: #BAE6FD; --btl-a2: #93DDFB; --btl-a3: #7DD3FC; --btl-a4: #5EEAD4; }
