@@ -226,6 +226,9 @@
 .bt-blurb { margin-top: 14px !important; line-height: 1.6; max-width: 360px; color: #B9C6E4; }
 .bt-mail { margin-top: 14px; display: inline-flex; gap: 8px; align-items: center; color: #B9C6E4 !important; transition: color var(--bt-ease); }
 .bt-mail:hover { color: #fff !important; }
+.bt-footer ul.bt-social { flex-direction: row; gap: 10px; margin-top: 16px; }
+.bt-footer .bt-social li > a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 99px; border: 1px solid rgba(255,255,255,.22); color: #B9C6E4 !important; transition: color var(--bt-ease), background var(--bt-ease); }
+.bt-footer .bt-social li > a:hover { color: #fff !important; background: rgba(255,255,255,.10); transform: none; }
 .bt-bar { border-top: 1px solid rgba(255,255,255,.14); margin-top: 40px; padding-top: 22px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; color: #B9C6E4; font-size: 14px; }
 
 /* ---------- responsive ---------- */
