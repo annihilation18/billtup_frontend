@@ -1,9 +1,14 @@
-import { Mail } from 'lucide-react@0.468.0';
+import { Facebook, Instagram, Mail } from 'lucide-react@0.468.0';
 import type { SectionType } from '../../App';
 import { BilltUpLogo } from '../BilltUpLogo';
 import { Link } from 'react-router-dom';
 import { TRADES } from '../../data/trades';
 import { Wordmark } from './WebsiteHeader';
+
+const SOCIAL_LINKS = [
+  { label: 'Instagram', href: 'https://www.instagram.com/billtupapp/', Icon: Instagram },
+  { label: 'Facebook', href: 'https://www.facebook.com/profile.php?id=61596780094647', Icon: Facebook },
+];
 
 interface WebsiteFooterProps {
   onNavigate: (section: SectionType) => void;
@@ -35,6 +40,16 @@ export function WebsiteFooter({ onNavigate }: WebsiteFooterProps) {
               <Mail className="bt-ic" style={{ width: 16, height: 16 }} aria-hidden="true" />
               support@billtup.com
             </a>
+            {/* Social accounts (app repo BACKLOG M.7) */}
+            <ul className="bt-social" aria-label="BilltUp on social media">
+              {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                <li key={label}>
+                  <a href={href} target="_blank" rel="noopener noreferrer" aria-label={`BilltUp on ${label}`}>
+                    <Icon className="bt-ic" style={{ width: 20, height: 20 }} aria-hidden="true" />
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <nav aria-labelledby="footer-product-heading">
